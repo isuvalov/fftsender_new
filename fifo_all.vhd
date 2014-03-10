@@ -9,18 +9,23 @@ entity fifo_all is
 		 clk_core: in std_logic;
 		 clk_mac: in std_logic;
 
+		 i_direct: in std_logic;
+		 i_direct_ce: in std_logic;
 		 i_data: in std_logic_vector(15 downto 0);
 		 i_data_ce: in std_logic;
 		 i_data_exp: in std_logic_vector(5 downto 0);
 		 i_data_exp_ce: in std_logic;
 
-		 rd_data: in std_logic;
-		 rd_exp: in std_logic;
+		 fifo_empty: out std_logic;
+		 rd_data: in std_logic;    --# by clk_mac
+		 rd_exp: in std_logic;     --# by clk_mac
+		 rd_direct: in std_logic;  --# by clk_mac
 		 read_count: out std_logic_vector(8 downto 0);
 
+		 o_direct: out std_logic;
 		 o_data: out std_logic_vector(3 downto 0);
 		 o_data_ce: out std_logic;
-		 o_data_exp: out std_logic_vector(3 downto 0);
+		 o_data_exp: out std_logic_vector(7 downto 0);
 		 o_data_exp_ce: out std_logic
 	     );
 end fifo_all;
@@ -28,7 +33,7 @@ end fifo_all;
 
 architecture fifo_all of fifo_all is
 
-
+signal i_direct_reg,directE:std_logic_vector(7 downto 0);
 signal full,empty,wr,wre,full_exp,empty_exp:std_logic;
 signal exponent_outE:std_logic_vector(7 downto 0);
 
@@ -50,6 +55,7 @@ fifo16x4_inst : fifo16x4 PORT MAP (
 		wrfull	 => full
 	);
 
+fifo_empty<=empty;
 
 exponent_outE<=EXT(i_data_exp,exponent_outE'Length);
 fifo8x4_inst: entity work.aFifo
@@ -72,6 +78,29 @@ fifo8x4_inst: entity work.aFifo
 		Clear_in =>reset
 		);
 
+
+fifo8x4b_inst: entity work.aFifo
+	generic map(
+		DATA_WIDTH =>8,
+		ADDR_WIDTH =>5
+		)
+	port map(
+		-- Reading port.
+		Data_out    =>directE,
+		Empty_out   =>open,
+		ReadEn_in   =>rd_direct,
+		RClk        =>clk_mac,
+		-- Writing port.
+		Data_in     =>i_direct_reg,
+		Full_out    =>open,
+		WriteEn_in  =>i_direct_ce,
+		WClk        =>clk_core,
+		
+		Clear_in =>reset
+		);
+
+i_direct_reg<=EXT("0"&i_direct,8);
+o_direct<=directE(0);
 
 process(clk_core) is                                                                      
   begin                                                                                         
