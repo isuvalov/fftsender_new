@@ -14,9 +14,11 @@ entity send_udp is
 		 clk_core: in std_logic;
 		 clk_mac: in std_logic;
 
+		 PayloadIsZERO: in std_logic; --# if it '1' make zero all data in MAC frame
+
 		 rd_data: out std_logic;
 		 fifo_empty: in std_logic;
-		 read_count: out std_logic_vector(8 downto 0);
+		 read_count: in std_logic_vector(8 downto 0);
 
 		 rd_direct: out std_logic;
 		 i_direct: in std_logic;
@@ -104,7 +106,7 @@ begin
   return R;
 end function;
 
-type Tstm_read is (STARTING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
+type Tstm_read is (STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
 DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8);
 signal stm_read:Tstm_read;
 
@@ -118,6 +120,7 @@ signal s_dv : std_logic;
 signal read_cnt: std_logic_vector(15 downto 0);
 signal sig_dir:std_logic_vector(3 downto 0);
 signal exp_fifosE:std_logic_vector(7 downto 0);
+signal delay_cnt:std_logic_vector(4 downto 0);
 
 begin
 
@@ -284,8 +287,8 @@ begin
 				s_data_out<=x"0";				
 				crc32<=nextCRC32_D4(x"0",crc32);					
 			else																
-				s_data_out<=q_sig;
-				crc32<=nextCRC32_D4(fliplr(q_sig),crc32);
+				s_data_out<=i_data;--q_sig;
+				crc32<=nextCRC32_D4(fliplr(i_data),crc32); --q_sig
 			end if;															
 
 			--if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1-2*2+1) then  --#Petrov rem
@@ -383,5 +386,5 @@ process(clk_core) is
 end process;
 
 
-end fifo_all;
+end send_udp;
 

@@ -9,9 +9,9 @@ entity make_abs is
 		 clk_core: in std_logic; --# must be quickly than clk_signal
 		 pre_shift: in std_logic_vector(5 downto 0);
 
-		 i_dataout_re: in std_logic_vector(11 downto 0);
-		 i_dataout_im: in std_logic_vector(11 downto 0);
-		 i_dataout_ce: in std_logic;
+		 i_data_re: in std_logic_vector(11 downto 0);
+		 i_data_im: in std_logic_vector(11 downto 0);
+		 i_data_ce: in std_logic;
 		 i_data_exp: in std_logic_vector(5 downto 0);
 		 i_data_exp_ce: in std_logic;
 
@@ -27,8 +27,9 @@ architecture make_abs of make_abs is
 
 constant SQRT_LATENCY:natural:=16+2; --# +2 becouse  _w1 and _w2
 
-signal SQ_dataout_re,SQ_dataout_im:std_logic_vector(dataout_re'Length*2-1 downto 0);
-signal fft_plus_shift,fft_plus:std_logic_vector(dataout_re'Length*2 downto 0);
+signal SQ_dataout_re,SQ_dataout_im:std_logic_vector(i_data_re'Length*2-1 downto 0);
+signal tosqrt:std_logic_vector(31 downto 0);
+signal fft_plus_shift,fft_plus:std_logic_vector(i_data_re'Length*2 downto 0);
 signal dataout_ce_1w,dataout_ce_2w:std_logic;
 
 signal s_dataout:std_logic_vector(15 downto 0);
@@ -45,18 +46,18 @@ process(clk_core) is
     if rising_edge(clk_core) then                                                                   
 
 		exp_ce_W<=exp_ce_W(exp_ce_W'Length-2 downto 0)&i_data_exp_ce;
-		data_ce_W<=data_ce_W(data_ce_W'Length-2 downto 0)&i_dataout_ce;
+		data_ce_W<=data_ce_W(data_ce_W'Length-2 downto 0)&i_data_ce;
 		exp_data_W(0)<=i_data_exp;
 		for i in 0 to SQRT_LATENCY-2 loop
 			exp_data_W(i+1)<=exp_data_W(i);
 		end loop;
 		
 
-		SQ_dataout_re<=signed(i_dataout_re)*signed(i_dataout_re); --# w1
-		SQ_dataout_im<=signed(i_dataout_im)*signed(i_dataout_im);
+		SQ_dataout_re<=signed(i_data_re)*signed(i_data_re); --# w1
+		SQ_dataout_im<=signed(i_data_im)*signed(i_data_im);
 		fft_plus<=EXT(SQ_dataout_re,fft_plus'Length)+EXT(SQ_dataout_im,fft_plus'Length); --# w2
 
-		dataout_ce_1w<=i_dataout_ce;
+		dataout_ce_1w<=i_data_ce;
 		dataout_ce_2w<=dataout_ce_1w;
 
 
@@ -95,11 +96,11 @@ process(clk_core) is
 	end if;
 end process;
 
-tosqrt<=EXT(fft_plus_shift,tosqrt'Length);
+tosqrt<=EXT(fft_plus_shift,32);
 
 sqrt32to16_inst: entity work.sqrt32to16  --# w3
 port map(
-	clk =>clk_signal,
+	clk =>clk_core,
 	ce=>dataout_ce_2w,
 	A =>tosqrt,  -- A: Radicand 
     Q =>s_dataout    -- Q: Root 
@@ -107,7 +108,7 @@ port map(
 
 o_dataout_ce<=data_ce_W(SQRT_LATENCY-1);
 o_data_exp_ce<=exp_ce_W(SQRT_LATENCY-1);
-o_data_exp<=exp_data_W(SQRT_LATENCY-1)
+o_data_exp<=exp_data_W(SQRT_LATENCY-1);
 
 end make_abs;
 
