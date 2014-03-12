@@ -3,6 +3,9 @@ quit -sim
 vlib work
 vmap work work
 
+vcom FromTextFile.vhd
+vcom ToTextFile.vhd 
+
 vcom -novopt -work work fft_lib/fft_pack.vhd                  
 vcom -novopt -work work fft_lib/twid_rom.vhd                  
 vcom -novopt -work work fft_lib/asj_fft_1dp_ram.vhd           

@@ -11,7 +11,6 @@ entity send_udp is
 	);
 	 port(
 		 reset: in std_logic;
-		 clk_core: in std_logic;
 		 clk_mac: in std_logic;
 
 		 PayloadIsZERO: in std_logic; --# if it '1' make zero all data in MAC frame
@@ -376,13 +375,6 @@ begin
 	end if; --# reset	
 
  end if;
-end process;
-
-
-process(clk_core) is                                                                      
-  begin                                                                                         
-    if rising_edge(clk_core) then
-    end if;
 end process;
 
 

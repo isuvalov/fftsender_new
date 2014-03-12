@@ -10,6 +10,7 @@ entity top_sender is
 		 clk_core: in std_logic; --# must be quickly than clk_signal
 		 clk_mac: in std_logic;
 
+		 PayloadIsZERO: in std_logic;
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -30,7 +31,7 @@ end top_sender;
 architecture top_sender of top_sender is
 
 constant CUT_LEN:integer:=1024; 	--# How many samples transfer to MAC
-
+constant DEBUG:integer:=1;
 
 signal fft_dataout_re: std_logic_vector(11 downto 0);
 signal fft_dataout_im: std_logic_vector(11 downto 0);
@@ -47,7 +48,12 @@ signal direction_1w,direction_2w,direction_3w:std_logic;
 signal signal_start_1w,signal_start_2w,signal_start_3w:std_logic;
 
 signal sig_direct: std_logic;
-signal sig_direct_ce: std_logic;
+signal sig_direct_ce,fifo_empty: std_logic;
+signal read_count: std_logic_vector(8 downto 0);
+
+signal rd_exp,rd_data,rd_direct,direct,fifo_data_ce,fifo_data_exp_ce:std_logic;
+signal fifo_data : std_logic_vector(3 downto 0);
+signal fifo_data_exp : std_logic_vector(7 downto 0);
 
 
 begin
@@ -122,22 +128,48 @@ fifo_all_i: entity work.fifo_all
 
 		 i_direct =>sig_direct,
 		 i_direct_ce =>sig_direct_ce,
-		 i_data: in std_logic_vector(15 downto 0);
-		 i_data_ce: in std_logic;
-		 i_data_exp: in std_logic_vector(5 downto 0);
-		 i_data_exp_ce: in std_logic;
+		 i_data =>abs_data,
+		 i_data_ce =>abs_data_ce,
+		 i_data_exp =>abs_data_exp,
+		 i_data_exp_ce =>abs_data_exp_ce,
 
-		 fifo_empty: out std_logic;
-		 rd_data: in std_logic;    --# by clk_mac
-		 rd_exp: in std_logic;     --# by clk_mac
-		 rd_direct: in std_logic;  --# by clk_mac
-		 read_count: out std_logic_vector(8 downto 0);
+		 fifo_empty =>fifo_empty,
+		 rd_data =>rd_data,    --# by clk_mac
+		 rd_exp =>rd_exp,     --# by clk_mac
+		 rd_direct =>rd_direct,  --# by clk_mac
+		 read_count =>read_count,
 
-		 o_direct: out std_logic;
-		 o_data: out std_logic_vector(3 downto 0);
-		 o_data_ce: out std_logic;
-		 o_data_exp: out std_logic_vector(7 downto 0);
-		 o_data_exp_ce: out std_logic
+		 o_direct =>direct,
+		 o_data =>fifo_data,
+		 o_data_ce =>fifo_data_ce,
+		 o_data_exp =>fifo_data_exp,
+		 o_data_exp_ce =>fifo_data_exp_ce
+	     );
+
+
+send_udp_i: entity work.send_udp
+	generic map(
+		DEBUG=>DEBUG
+	)
+	 port map(
+		 reset=>reset,
+		 clk_mac=>clk_mac,
+
+		 PayloadIsZERO=>PayloadIsZERO, --# if it '1' make zero all data in MAC frame
+
+		 rd_data =>rd_data,
+		 fifo_empty =>fifo_empty,
+		 read_count =>read_count,
+
+		 rd_direct =>rd_direct,
+		 i_direct =>direct,
+
+		 i_data =>fifo_data,
+		 i_data_ce =>fifo_data_ce,
+
+		 rd_exp =>rd_exp,
+		 i_data_exp =>fifo_data_exp,
+		 i_data_exp_ce =>fifo_data_exp_ce
 	     );
 
 
