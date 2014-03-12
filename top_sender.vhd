@@ -19,11 +19,8 @@ entity top_sender is
 		 signal_real: in std_logic_vector(11 downto 0);
 		 signal_imag: in std_logic_vector(11 downto 0);
 
-		 dataout_re: out std_logic_vector(11 downto 0);
-		 dataout_im: out std_logic_vector(11 downto 0);
-		 dataout_ce: out std_logic;
-		 data_exp: out std_logic_vector(5 downto 0);
-		 data_exp_ce: out std_logic
+		 data_out: out std_logic_vector(3 downto 0);
+		 dv : out std_logic
 	     );
 end top_sender;
 
@@ -49,7 +46,7 @@ signal signal_start_1w,signal_start_2w,signal_start_3w:std_logic;
 
 signal sig_direct: std_logic;
 signal sig_direct_ce,fifo_empty: std_logic;
-signal read_count: std_logic_vector(8 downto 0);
+signal read_count: std_logic_vector(10 downto 0);
 
 signal rd_exp,rd_data,rd_direct,direct,fifo_data_ce,fifo_data_exp_ce:std_logic;
 signal fifo_data : std_logic_vector(3 downto 0);
@@ -169,7 +166,10 @@ send_udp_i: entity work.send_udp
 
 		 rd_exp =>rd_exp,
 		 i_data_exp =>fifo_data_exp,
-		 i_data_exp_ce =>fifo_data_exp_ce
+		 i_data_exp_ce =>fifo_data_exp_ce,
+
+		 data_out =>data_out,
+		 dv =>dv
 	     );
 
 

@@ -17,7 +17,7 @@ entity send_udp is
 
 		 rd_data: out std_logic;
 		 fifo_empty: in std_logic;
-		 read_count: in std_logic_vector(8 downto 0);
+		 read_count: in std_logic_vector(10 downto 0);
 
 		 rd_direct: out std_logic;
 		 i_direct: in std_logic;
@@ -27,7 +27,10 @@ entity send_udp is
 
 		 rd_exp: out std_logic;
 		 i_data_exp: in std_logic_vector(7 downto 0);
-		 i_data_exp_ce: in std_logic
+		 i_data_exp_ce: in std_logic;
+
+		 data_out: out std_logic_vector(3 downto 0);
+		 dv : out std_logic
 	     );
 end send_udp;
 
@@ -377,6 +380,13 @@ begin
  end if;
 end process;
 
+output_p: process (clk_mac) is
+begin
+     if falling_edge (clk_mac) then
+	     data_out<=s_data_out;
+        dv<=s_dv;
+	  end if;
+end process;
 
 end send_udp;
 

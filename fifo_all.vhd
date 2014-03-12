@@ -20,7 +20,7 @@ entity fifo_all is
 		 rd_data: in std_logic;    --# by clk_mac
 		 rd_exp: in std_logic;     --# by clk_mac
 		 rd_direct: in std_logic;  --# by clk_mac
-		 read_count: out std_logic_vector(8 downto 0);
+		 read_count: out std_logic_vector(10 downto 0);
 
 		 o_direct: out std_logic;
 		 o_data: out std_logic_vector(3 downto 0);
@@ -32,6 +32,23 @@ end fifo_all;
 
 
 architecture fifo_all of fifo_all is
+
+component fifo16x4
+	PORT
+	(
+		aclr		: IN STD_LOGIC  := '0';
+		data		: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+		rdclk		: IN STD_LOGIC ;
+		rdreq		: IN STD_LOGIC ;
+		wrclk		: IN STD_LOGIC ;
+		wrreq		: IN STD_LOGIC ;
+		q		: OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
+		rdempty		: OUT STD_LOGIC ;
+		rdusedw		: OUT STD_LOGIC_VECTOR (10 DOWNTO 0);
+		wrfull		: OUT STD_LOGIC 
+	);
+end component;
+
 
 signal i_direct_reg,directE:std_logic_vector(7 downto 0);
 signal full,empty,wr,wre,full_exp,empty_exp:std_logic;

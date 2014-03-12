@@ -92,13 +92,13 @@ vcom make_abs.vhd
 vcom make_fft.vhd
 vcom send_udp.vhd 
 
-vcom -novopt -work work FromTextFile.vhd 
-vcom -novopt -work work ToTextFile.vhd 
-#vcom -novopt -work work tb.vhd
+vcom top_sender.vhd
+
+vcom tb.vhd
 
 
-#vsim -novopt -t ps work.tb
-#do wave.do
+vsim -novopt -t ps work.tb
+do wave.do
 #run -all
 
 

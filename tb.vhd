@@ -63,7 +63,7 @@ signal ce_fromfile_F,ce_fromfile,ce_fromfile_w1,ce_fromfile_w2:std_logic;
 
 signal tx_coded_data,tx_coded_data_rs:std_logic_vector(7 downto 0);
 signal tx_coded_ce,reset_delay:std_logic;
-signal cccnt:std_logic_vector(13 downto 0):=(others=>'0');
+signal cccnt,cccnt_t:std_logic_vector(13 downto 0):=(others=>'0');
 
 signal dataout_end:std_logic_vector(7 downto 0);
 signal ceout_end:std_logic;
@@ -104,6 +104,8 @@ signal byte1,byte2:std_logic_vector(7 downto 0);
 
 
 signal cnt_udp_frame,cnt_udp_frame_reg,alg_cnt:integer:=0;
+
+signal signal_start:std_logic;
 
 type Tmem is array(0 to 7) of integer;
 constant mem:Tmem:=(-1000,-1000,0,1000,1000,50,50,50);
@@ -152,13 +154,18 @@ begin
  if rising_edge(clk_signal) then
 	cccnt<=cccnt+1;
 	signal_ce<=cccnt(3);
-	if unsigned(cccnt(13 downto 0))<4096 then
+	if unsigned(cccnt(13 downto 0))<4096+10 and unsigned(cccnt(13 downto 0))>=10 then
 	   sweep_ce<='1';
+	   cccnt_t<=cccnt_t+1;
 	else
+	   cccnt_t<=(others=>'0');
 	   sweep_ce<='0';
 	end if;
-	if cccnt(13 downto 0)=11000 then
+	if cccnt(13 downto 0)=2 then
 		signal_direct<=not signal_direct;
+		signal_start<='1';
+	else
+		signal_start<='0';
 	end if;
 	sweep_ce_w1<=sweep_ce;
 
@@ -195,27 +202,30 @@ end process;
 
 
 
-fft_sender_inst: entity work.fft_sender_complex
-	 port map(                     -- 25mhz
-		clk_mac =>clk125,
-		clk_signal =>clk_signal,   -- 5mhz
-		reset =>reset,
-		signal_direct=>signal_direct,
 
-		PayloadIsINPUT => '0',
-		PayloadIsCOUNTER =>'0',
-		PayloadIsZERO =>'0',
+top_sender_i: entity work.top_sender
+	 port map(
+		 reset=>reset,
+		 clk_signal =>clk_signal,
+		 clk_core =>clk125, --# must be quickly than clk_signal
+		 clk_mac =>clk125,
 
-		signal_ce => sweep_ce_w1,
-		reset_signal =>'0',      --# перед каждым свипом
+		 PayloadIsZERO =>'0',
+		 pre_shift =>"000000",
+		 i_direction =>signal_direct,
 
-		data_in_real =>towork2,--cccnt(11 downto 0),
-		data_in_imag =>(others=>'0'),
-		
-		inner_error=>open,
-		data_out=>half_b,
-		dv =>dv
+		 signal_ce =>sweep_ce_w1,
+		 signal_start =>signal_start,
+		 signal_real =>towork2,
+		 signal_imag =>(others=>'0'),
+
+		 data_out=>half_b,
+		 dv =>dv
+
 	     );
+
+
+
 --towork2<=SXT(towork(towork'Length-1 downto 7),towork2'Length);
 towork2<=SXT(towork(towork'Length-1 downto 0),towork2'Length);
 --# (525,809) 54=-10  = div 4
