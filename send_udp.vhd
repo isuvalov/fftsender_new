@@ -39,7 +39,7 @@ architecture send_udp of send_udp is
 
 constant PRMBLE_LEN		:integer:=8;  		--# Number of addition constant data in preamble
 constant HEADER_LEN		:integer:=42;  	--# Number of addition constant data in MAC frame
-constant DATAFRAME_LEN	:integer:=512; 	--# Length of data in MAC frame in bytes
+constant DATAFRAME_LEN	:integer:=512; 	--# Length of data in MAC frame in bytes. Must be DATAFRAME_LEN*n=CUT_LEN
 
 type Prmble_mem is array (0 to PRMBLE_LEN-1) of std_logic_vector(7 downto 0);
 constant pre_mem:Prmble_mem:=  (x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5");
@@ -151,7 +151,7 @@ begin
 	else --# reset
 		case stm_read is
 		when STARTING=>		
-			if (unsigned(read_count)>(DATAFRAME_LEN*3) and fifo_empty_1w='0') then			
+			if (unsigned(read_count)>=(DATAFRAME_LEN*2) and fifo_empty_1w='0') then			
 				stm_read<=PREAMBLE1;
 			    if DEBUG=1 then
 				  print(">>> Start frame sequense "&int_to_string(conv_integer(frame_num)));
@@ -293,18 +293,18 @@ begin
 				crc32<=nextCRC32_D4(fliplr(i_data),crc32); --q_sig
 			end if;															
 
-			--if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1-2*2+1) then  --#Petrov rem
-			if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1-1) then    		--#Petrov add
-				rd_data<='0';									
+--			if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1-1) then    		--#Petrov add
+			if read_cnt=(DATAFRAME_LEN-1)*2-1 then    		--#Petrov add
+				rd_data<='0';
 			else															
-				rd_data<='1';																
+				rd_data<='1';
 			end if;															
 			
 			--if q_sig_fin(0)='1' then
 			--	frame_num<=x"0";
 			--end if;
 			
-			if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1) then
+			if unsigned(read_cnt)=(DATAFRAME_LEN-1)*2-1 then
 				s_dv<='1';
 				stm_read<=PUSHCRC8;
 			else
@@ -360,6 +360,7 @@ begin
 			stm_read<=PUSHCRC6;
 
 		when PUSHCRC8 =>
+			rd_data<='0';
 			s_dv<='1';
 			s_data_out<=C_calc(31 downto 28);  				--#Petrov  x"6"
 			stm_read<=PUSHCRC7;           

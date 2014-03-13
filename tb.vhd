@@ -238,7 +238,7 @@ FromTextFile_inst: entity work.FromTextFile
 			NameOfFile=>"signal.txt")
 	 port map(
 		 clk =>clk_signal,
-		 CE =>cccnt(8),--sweep_ce,
+		 CE =>sweep_ce,--cccnt(8),--sweep_ce,
 		 DataFromFile =>towork
 	     );
 

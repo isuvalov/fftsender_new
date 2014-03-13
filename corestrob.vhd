@@ -37,9 +37,9 @@ end process;
 process (clk_core) is
 begin
 	if rising_edge(clk_core) then
-		if ce_i_bycore='1' and ce_i_bycore_1w='0' then
+		if clk_signal_bycore='1' and clk_signal_bycore_1w='0' then
 			datareg<=data_i_reg;
-			local_ce<='1';
+			local_ce<=ce_i_bycore_1w;
 		else
 			local_ce<='0';
 		end if;
