@@ -156,6 +156,11 @@ begin
 			    if DEBUG=1 then
 				  print(">>> Start frame sequense "&int_to_string(conv_integer(frame_num)));
 			    end if;
+				rd_exp<='1';
+				rd_direct<='1';
+			else
+				rd_exp<='0';
+				rd_direct<='0';
 			end if;
 			rd_data<='0';
 			s_dv<='0';
@@ -163,9 +168,8 @@ begin
 			read_cnt<=(others=>'0');
 			cnt_mac<=(others=>'0');
 			crc32<=(others=>'1');
-			rd_exp<='0';
 			frame_num<=(others=>'0');
-			rd_direct<='0';
+			
 			exp_first_read<='0';
 		when WAITING =>
 			if (fifo_empty_1w='0') then			
@@ -190,8 +194,8 @@ begin
 			 s_dv<='1';
 			 s_data_out<=pre_mem(conv_integer(cnt_mac))(3 downto 0);  								--#Petrov
 			 rd_data<='0';
-			
-
+			 rd_exp<='0';
+             rd_direct<='0';
 		when PREAMBLE2 =>
 			 if unsigned(cnt_mac)<((PRMBLE_LEN)-1) then
 			 	cnt_mac<=cnt_mac+1;
@@ -200,7 +204,7 @@ begin
 			 else
 				cnt_mac<=(others=>'0');
 				stm_read<=DESCR_MAC1;
-				rd_direct<='1';
+				rd_direct<='0';
 			 end if;
 			 s_dv<='1';
 			 s_data_out<=pre_mem(conv_integer(cnt_mac))(7 downto 4);  								--#Petrov
@@ -223,7 +227,7 @@ begin
 				stm_read<=DESCR_POS1;
 				rd_data<='1';
 				if exp_first_read='1' then
-					rd_exp<='1';
+					rd_exp<='0';
 				else
 					rd_exp<='0';
 				end if;

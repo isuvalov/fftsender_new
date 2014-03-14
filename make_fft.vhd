@@ -31,7 +31,7 @@ architecture make_fft of make_fft is
 signal sg_real,sg_imag:std_logic_vector(11 downto 0);
 signal sg_real_ce,sg_imag_ce,signal_start_core:std_logic;
 signal counter : std_logic_vector(11 downto 0); 
-signal master_sink_dav,master_sink_sop:std_logic;
+signal master_sink_dav,master_sink_sop,s_data_exp_ce:std_logic;
 signal fft_real_out,fft_imag_out:std_logic_vector(11 downto 0); 
 signal master_source_ena,master_sink_ena,master_source_sop,master_source_eop,cut_ce:std_logic;
 signal exponent_out:std_logic_vector(5 downto 0);
@@ -86,9 +86,9 @@ fft4096_inst: entity work.fft4096_x16
 makeout : process(clk_signal) is                                                                      
   begin                                                                                         
     if rising_edge(clk_signal) then                                                                   
-		data_exp<=exponent_out;
-		dataout_re<=fft_real_out;
-		dataout_im<=fft_imag_out;
+--		data_exp<=exponent_out;
+--		dataout_re<=fft_real_out;
+--		dataout_im<=fft_imag_out;
 
 		sg_real_ce<=signal_ce;
 		sg_imag_ce<=signal_ce;
@@ -114,9 +114,9 @@ makeout : process(clk_signal) is
 		if master_source_sop='1' then
 			out_time<=(others=>'0');
 			cut_ce<='1';
-			data_exp_ce<='1';
+			s_data_exp_ce<='1';
 		else    
-			data_exp_ce<='0';
+			s_data_exp_ce<='0';
 			if master_source_ena='1' then
 				out_time<=out_time+1;
 			end if;
@@ -130,7 +130,54 @@ makeout : process(clk_signal) is
     end if;                                                                                     
 end process;   
 
-dataout_ce<=cut_ce;
+--dataout_ce<=cut_ce;
+
+
+corestrob_i: entity work.corestrob
+	generic map(
+		WIDTH=>fft_real_out'Length
+	)
+	 port map(
+		 clk_signal =>clk_signal,
+		 clk_core =>clk_core,
+
+		 data_i =>fft_real_out,
+		 ce_i =>cut_ce,
+
+		 data_o =>dataout_re,
+		 ce_o =>dataout_ce
+	     );
+
+corestrob_r: entity work.corestrob
+	generic map(
+		WIDTH=>fft_real_out'Length
+	)
+	 port map(
+		 clk_signal =>clk_signal,
+		 clk_core =>clk_core,
+
+		 data_i =>fft_imag_out,
+		 ce_i =>cut_ce,
+
+		 data_o =>dataout_im,
+		 ce_o =>open
+	     );
+
+
+corestrob_rexp: entity work.corestrob
+	generic map(
+		WIDTH=>exponent_out'Length
+	)
+	 port map(
+		 clk_signal =>clk_signal,
+		 clk_core =>clk_core,
+
+		 data_i =>exponent_out,
+		 ce_i =>s_data_exp_ce,
+
+		 data_o =>data_exp,
+		 ce_o =>data_exp_ce
+	     );
 
 
 

@@ -3,14 +3,17 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.std_logic_arith.all;
 
 entity corestrob is
+	generic(
+		WIDTH:natural:=12
+	);
 	 port(
 		 clk_signal: in std_logic;
 		 clk_core: in std_logic; --# must be quickly than clk_signal
 
-		 data_i: in std_logic_vector(11 downto 0);
+		 data_i: in std_logic_vector(WIDTH-1 downto 0);
 		 ce_i : in std_logic;
 
-		 data_o: out std_logic_vector(11 downto 0);
+		 data_o: out std_logic_vector(WIDTH-1 downto 0);
 		 ce_o : out std_logic
 	     );
 end corestrob;

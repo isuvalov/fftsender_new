@@ -90,6 +90,7 @@ vcom corestrob.vhd
 
 vcom make_abs.vhd
 vcom make_fft.vhd
+vcom fifo_all.vhd
 vcom send_udp.vhd 
 
 vcom top_sender.vhd
