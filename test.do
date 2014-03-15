@@ -5,6 +5,7 @@ vmap work work
 
 vcom FromTextFile.vhd
 vcom ToTextFile.vhd 
+vcom assert_pack.vhd
 vcom ethernet2hexfile.vhd
 
 vcom -novopt -work work fft_lib/fft_pack.vhd                  
@@ -90,6 +91,7 @@ vcom assert_pack.vhd
 vcom corestrob.vhd
 
 vcom make_abs.vhd
+vcom make_adc.vhd
 vcom make_fft.vhd
 vcom fifo_all.vhd
 vcom send_udp.vhd 
