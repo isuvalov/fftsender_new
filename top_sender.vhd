@@ -4,12 +4,16 @@ use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 
 entity top_sender is
+	generic(
+		CLKCORE_EQUAL_CLKSIGNAL:integer:=1 --# if it =1 clk_signal=clk_core, else clk_core>>clk_signal
+	);
 	 port(
 		 reset: in std_logic;
 		 clk_signal: in std_logic;
 		 clk_core: in std_logic; --# must be quickly than clk_signal
 		 clk_mac: in std_logic;
 
+		 payload_is_counter: in std_logic;
 		 PayloadIsZERO: in std_logic;
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
@@ -58,6 +62,7 @@ begin
 
 make_fft_i: entity work.make_fft
 	generic map(
+		CLKCORE_EQUAL_CLKSIGNAL=>CLKCORE_EQUAL_CLKSIGNAL,
 		CUT_LEN=>CUT_LEN 	--# How many samples transfer to MAC
 	)
 	 port map(
@@ -122,6 +127,8 @@ fifo_all_i: entity work.fifo_all
 		 reset =>reset,
 		 clk_core =>clk_core,
 		 clk_mac =>clk_mac,
+
+		 payload_is_counter=>payload_is_counter,
 
 		 i_direct =>sig_direct,
 		 i_direct_ce =>sig_direct_ce,

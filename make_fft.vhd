@@ -5,6 +5,7 @@ use IEEE.std_logic_arith.all;
 
 entity make_fft is
 	generic (
+		CLKCORE_EQUAL_CLKSIGNAL:integer:=1;
 		CUT_LEN:integer:=1024 	--# How many samples transfer to MAC
 	);
 	 port(
@@ -132,6 +133,7 @@ end process;
 
 --dataout_ce<=cut_ce;
 
+ch01: if CLKCORE_EQUAL_CLKSIGNAL/=1 generate
 
 corestrob_i: entity work.corestrob
 	generic map(
@@ -178,7 +180,20 @@ corestrob_rexp: entity work.corestrob
 		 data_o =>data_exp,
 		 ce_o =>data_exp_ce
 	     );
+end generate; --# CLKCORE_EQUAL_CLKSIGNAL/=1
 
+ch02: if CLKCORE_EQUAL_CLKSIGNAL=1 generate
+	process(clk_core) is
+	begin
+		if rising_edge(clk_core) then
+			dataout_re<=fft_real_out;
+			dataout_im<=fft_imag_out;
+			dataout_ce<=cut_ce;
+			data_exp<=exponent_out;
+			data_exp_ce<=s_data_exp_ce;
+		end if;
+	end process;
+end generate; --# CLKCORE_EQUAL_CLKSIGNAL=1
 
 
 end make_fft;

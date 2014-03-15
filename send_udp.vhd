@@ -298,22 +298,20 @@ begin
 			end if;															
 
 --			if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1-1) then    		--#Petrov add
-			if read_cnt=(DATAFRAME_LEN-1)*2-1 then    		--#Petrov add
-				rd_data<='0';
-			else															
+			if read_cnt<(DATAFRAME_LEN)*2-2 then    		--#Petrov add
 				rd_data<='1';
+			else															
+				rd_data<='0';
 			end if;															
 			
 			--if q_sig_fin(0)='1' then
 			--	frame_num<=x"0";
 			--end if;
-			
-			if unsigned(read_cnt)=(DATAFRAME_LEN-1)*2-1 then
-				s_dv<='1';
-				stm_read<=PUSHCRC8;
-			else
-				s_dv<='1';
+--				s_dv<='1';			
+			if unsigned(read_cnt)<(DATAFRAME_LEN)*2-1 then
 				stm_read<=READ_DATA; 
+			else
+				stm_read<=PUSHCRC8;
 			end if;
 			
 		when PUSHCRC1 =>

@@ -9,6 +9,8 @@ entity fifo_all is
 		 clk_core: in std_logic;
 		 clk_mac: in std_logic;
 
+		 payload_is_counter: in std_logic;
+
 		 i_direct: in std_logic;
 		 i_direct_ce: in std_logic;
 		 i_data: in std_logic_vector(15 downto 0);
@@ -33,6 +35,18 @@ end fifo_all;
 
 architecture fifo_all of fifo_all is
 
+constant COUNTER_8BIT:integer:=1;
+
+
+function fliplr(A:std_logic_vector) return std_logic_vector is
+variable R:std_logic_vector(A'Range);
+begin
+  for i in A'Low to A'High loop
+	  R(A'High-(i-A'Low)):=A(i);
+  end loop; 
+  return R;
+end function;
+
 component fifo16x4
 	PORT
 	(
@@ -54,14 +68,18 @@ signal i_direct_reg,directE:std_logic_vector(7 downto 0);
 signal full,empty,wr,wre,full_exp,empty_exp:std_logic;
 signal exponent_outE:std_logic_vector(7 downto 0);
 
+signal data_mux,data_emul_cnt_swap,data_emul_cnt:std_logic_vector(i_data'Length-1 downto 0):=(others=>'0');
+signal data_mux_ce:std_logic;
+
+
 begin
 
-wr<=i_data_ce and not(full);
+wr<=data_mux_ce and not(full);
 wre<=i_data_exp_ce and not(full_exp);
 
 fifo16x4_inst : fifo16x4 PORT MAP (
 		aclr	 => reset,
-		data	 => i_data,
+		data	 => data_mux,
 		rdclk	 => clk_mac,
 		rdreq	 => rd_data,
 		wrclk	 => clk_core,
@@ -119,11 +137,27 @@ fifo8x4b_inst: entity work.aFifo
 i_direct_reg<=EXT("0"&i_direct,8);
 o_direct<=directE(0);
 
+data_emul_cnt_swap<=data_emul_cnt(3 downto 0)&data_emul_cnt(7 downto 4)&data_emul_cnt(11 downto 8)&data_emul_cnt(15 downto 12) when COUNTER_8BIT=0 else
+    data_emul_cnt(11 downto 8)&data_emul_cnt(15 downto 12)&data_emul_cnt(3 downto 0)&data_emul_cnt(7 downto 4);
 process(clk_core) is                                                                      
   begin                                                                                         
     if rising_edge(clk_core) then
 		o_data_ce<=rd_data;
 		o_data_exp_ce<=rd_exp;
+		if payload_is_counter='1' then
+			if COUNTER_8BIT=1 then
+				data_mux<=data_emul_cnt_swap(7 downto 0)&data_emul_cnt_swap(7 downto 0);
+			else
+				data_mux<=data_emul_cnt_swap;			
+			end if;
+		else
+			data_mux<=i_data;
+		end if;
+		data_mux_ce<=i_data_ce;
+
+		if i_data_ce='1' then
+           data_emul_cnt<=data_emul_cnt+1;
+		end if;
 	end if;
 end process;
 

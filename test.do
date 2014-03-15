@@ -5,6 +5,7 @@ vmap work work
 
 vcom FromTextFile.vhd
 vcom ToTextFile.vhd 
+vcom ethernet2hexfile.vhd
 
 vcom -novopt -work work fft_lib/fft_pack.vhd                  
 vcom -novopt -work work fft_lib/twid_rom.vhd                  

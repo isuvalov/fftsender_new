@@ -34,7 +34,7 @@ component mult31_25
 end component;
 
 
-signal clkq,clk125,clk125_div2,clk125_div4:std_logic:='0';
+signal clkq,clk125,clk125_div2,clk125_div4,clk125_n:std_logic:='0';
 signal reset:std_logic:='1'; 
 signal cnt_rd:std_logic_vector(64 downto 0):=(others=>'0');
 signal cnt_wr:std_logic_vector(64 downto 0):=(others=>'0');
@@ -204,12 +204,16 @@ end process;
 
 
 top_sender_i: entity work.top_sender
+	generic map(
+		CLKCORE_EQUAL_CLKSIGNAL=>0
+	)
 	 port map(
 		 reset=>reset,
 		 clk_signal =>clk_signal,
-		 clk_core =>clk125, --# must be quickly than clk_signal
+		 clk_core =>clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
 		 clk_mac =>clk125,
 
+		 payload_is_counter=>'1',
 		 PayloadIsZERO =>'0',
 		 pre_shift =>"000000",
 		 i_direction =>signal_direct,
@@ -244,16 +248,16 @@ FromTextFile_inst: entity work.FromTextFile
 
 
 
-ToTextFile_inst: entity work.ToTextFile
-	generic map(BitLen =>4,
-			WriteHex=>0,  -- if need write file in hex format or std_logic_vector too long(>=64)
-			NameOfFile=>"data.dat")
+ethernet2hexfile_i: entity work.ethernet2hexfile
+	generic map(
+			SWAP_4BITS=>1,			
+			NameOfFile=>"frames.txt")
 	 port map(
 		 clk =>clk125,
-		 CE =>dv_cnt_parse,--dv_cnt,
-		 block_marker=>'0',
-		 DataToSave =>half_b --byted_w1
+		 dv =>dv,
+		 DataToSave =>half_b
 	     );
+
 
 process (clk125) is
 begin
