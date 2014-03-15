@@ -192,7 +192,7 @@ begin
 			 --cnt_mac<=cnt_mac;
 			 stm_read<=PREAMBLE2;
 			 s_dv<='1';
-			 s_data_out<=pre_mem(conv_integer(cnt_mac))(3 downto 0);  								--#Petrov
+			 s_data_out<=pre_mem(conv_integer(cnt_mac))(3 downto 0);
 			 rd_data<='0';
 			 rd_exp<='0';
              rd_direct<='0';
@@ -207,16 +207,15 @@ begin
 				rd_direct<='0';
 			 end if;
 			 s_dv<='1';
-			 s_data_out<=pre_mem(conv_integer(cnt_mac))(7 downto 4);  								--#Petrov
+			 s_data_out<=pre_mem(conv_integer(cnt_mac))(7 downto 4);
 			 rd_data<='0';
 
 		when DESCR_MAC1 =>
-			 --cnt_mac<=cnt_mac;
 			 stm_read<=DESCR_MAC2;
 			 rd_direct<='0';
 			 s_dv<='1';
-          	 s_data_out<=mac_mem(conv_integer(cnt_mac))(3 downto 0);									--#Petrov
-          	 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(3 downto 0)),crc32);  --#Petrov
+          	 s_data_out<=mac_mem(conv_integer(cnt_mac))(3 downto 0);
+          	 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(3 downto 0)),crc32);
 			 		 
 		when DESCR_MAC2 =>
 			 if unsigned(cnt_mac)<((HEADER_LEN)-1) then
@@ -248,12 +247,11 @@ begin
 
 			 end if;
 			 s_dv<='1';
-          s_data_out<=mac_mem(conv_integer(cnt_mac))(7 downto 4);									--#Petrov
-			 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(7 downto 4)),crc32);  --#Petrov 
+          s_data_out<=mac_mem(conv_integer(cnt_mac))(7 downto 4);
+			 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(7 downto 4)),crc32);
 			 	  
 	      when DESCR_POS1 =>
 			s_dv<='1';
-			--if(signal_direct='1')then
 			s_data_out<=sig_dir;
 			crc32<=nextCRC32_D4(fliplr(sig_dir),crc32);
 			stm_read<=DESCR_POS2;
@@ -264,23 +262,22 @@ begin
 			rd_exp<='0';
 			s_dv<='1';
 			s_data_out<=frame_num;
-			crc32<=nextCRC32_D4(fliplr(frame_num),crc32);     --#Petrov	
-			--frame_num<=frame_num+1;
+			crc32<=nextCRC32_D4(fliplr(frame_num),crc32);
 			stm_read<=DESCR_POS3;
 			rd_data<='0';
 			
 		when DESCR_POS3 =>
 			s_dv<='1';
-			s_data_out<=exp_fifosE(3 downto 0);--x"0";
-			crc32<=nextCRC32_D4(fliplr(exp_fifosE(3 downto 0)),crc32);     --#Petrov	
+			s_data_out<=exp_fifosE(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(exp_fifosE(3 downto 0)),crc32);
 			stm_read<=DESCR_POS4;
 			rd_data<='0';	
 			frame_num<=frame_num+1;
    
 		when DESCR_POS4 =>
 			s_dv<='1';
-			s_data_out<=exp_fifosE(7 downto 4);--x"0";
-			crc32<=nextCRC32_D4(fliplr(exp_fifosE(7 downto 4)),crc32);     --#Petrov	
+			s_data_out<=exp_fifosE(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(exp_fifosE(7 downto 4)),crc32);
 			stm_read<=READ_DATA;
 			rd_data<='1';
             if DEBUG=1 then
@@ -293,21 +290,16 @@ begin
 				s_data_out<=x"0";				
 				crc32<=nextCRC32_D4(x"0",crc32);					
 			else																
-				s_data_out<=i_data;--q_sig;
-				crc32<=nextCRC32_D4(fliplr(i_data),crc32); --q_sig
+				s_data_out<=i_data;
+				crc32<=nextCRC32_D4(fliplr(i_data),crc32);
 			end if;															
 
---			if unsigned(read_cnt)>=(DATAFRAME_LEN*2-1-1) then    		--#Petrov add
-			if read_cnt<(DATAFRAME_LEN)*2-2 then    		--#Petrov add
+			if read_cnt<(DATAFRAME_LEN)*2-2 then
 				rd_data<='1';
 			else															
 				rd_data<='0';
 			end if;															
 			
-			--if q_sig_fin(0)='1' then
-			--	frame_num<=x"0";
-			--end if;
---				s_dv<='1';			
 			if unsigned(read_cnt)<(DATAFRAME_LEN)*2-1 then
 				stm_read<=READ_DATA; 
 			else
@@ -316,7 +308,7 @@ begin
 			
 		when PUSHCRC1 =>
 			s_dv<='1';
-			s_data_out<=C_calc(3 downto 0);  				--#Petrov  x"0"
+			s_data_out<=C_calc(3 downto 0);
 			if frame_num=4 then
 				stm_read<=STARTING;
 				if DEBUG=1 then

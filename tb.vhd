@@ -213,8 +213,10 @@ top_sender_i: entity work.top_sender
 		 clk_core =>clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
 		 clk_mac =>clk125,
 
-		 payload_is_counter=>'1',
+		 payload_is_counter=>'0',
 		 PayloadIsZERO =>'0',
+		 send_adc_data =>'0',
+
 		 pre_shift =>"000000",
 		 i_direction =>signal_direct,
 

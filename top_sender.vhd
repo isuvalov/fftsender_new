@@ -15,6 +15,8 @@ entity top_sender is
 
 		 payload_is_counter: in std_logic;
 		 PayloadIsZERO: in std_logic;
+		 send_adc_data: in std_logic;
+
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -40,10 +42,10 @@ signal fft_dataout_ce: std_logic;
 signal fft_data_exp: std_logic_vector(5 downto 0);
 signal fft_data_exp_ce: std_logic;
 
-signal abs_data: std_logic_vector(15 downto 0);
-signal abs_data_ce:std_logic;
-signal abs_data_exp: std_logic_vector(5 downto 0);
-signal abs_data_exp_ce: std_logic;
+signal mux_data,adc_data,abs_data: std_logic_vector(15 downto 0);
+signal mux_data_ce,adc_data_ce,abs_data_ce:std_logic;
+signal mux_data_exp,adc_data_exp,abs_data_exp: std_logic_vector(5 downto 0);
+signal mux_data_exp_ce,adc_data_exp_ce,abs_data_exp_ce: std_logic;
 
 signal direction_1w,direction_2w,direction_3w:std_logic;
 signal signal_start_1w,signal_start_2w,signal_start_3w:std_logic;
@@ -101,6 +103,26 @@ make_abs_i: entity work.make_abs
 		 o_data_exp_ce =>abs_data_exp_ce
 	     );
 
+
+make_adc_i: entity work.make_adc
+	 port map(
+		 reset=>reset,
+		 clk_core=>clk_core, --# must be quickly than clk_signal
+		 pre_shift=>pre_shift,
+
+		 i_data_re =>signal_real,
+		 i_data_im =>signal_imag,
+		 i_data_ce =>signal_ce,
+		 i_data_exp =>(others=>'0'),
+		 i_data_exp_ce =>'0',
+
+		 o_dataout =>adc_data,
+		 o_dataout_ce =>adc_data_ce,
+		 o_data_exp =>adc_data_exp,
+		 o_data_exp_ce =>adc_data_exp_ce
+	     );
+
+
 process(clk_core) is
 begin
 	if rising_edge(clk_core) then
@@ -116,6 +138,20 @@ begin
 		else
 			sig_direct_ce<='0';
 		end if;
+		
+		if send_adc_data='1' then
+			mux_data<=adc_data;
+			mux_data_ce<=adc_data_ce;
+			mux_data_exp<=adc_data_exp;
+			mux_data_exp_ce<=adc_data_exp_ce;
+		else
+			mux_data<=abs_data;
+			mux_data_ce<=abs_data_ce;
+			mux_data_exp<=abs_data_exp;
+			mux_data_exp_ce<=abs_data_exp_ce;
+		end if;
+
+
 	end if;
 end process;
 
@@ -132,10 +168,10 @@ fifo_all_i: entity work.fifo_all
 
 		 i_direct =>sig_direct,
 		 i_direct_ce =>sig_direct_ce,
-		 i_data =>abs_data,
-		 i_data_ce =>abs_data_ce,
-		 i_data_exp =>abs_data_exp,
-		 i_data_exp_ce =>abs_data_exp_ce,
+		 i_data =>mux_data,
+		 i_data_ce =>mux_data_ce,
+		 i_data_exp =>mux_data_exp,
+		 i_data_exp_ce =>mux_data_exp_ce,
 
 		 fifo_empty =>fifo_empty,
 		 rd_data =>rd_data,    --# by clk_mac
