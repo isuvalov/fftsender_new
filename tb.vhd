@@ -205,6 +205,7 @@ end process;
 
 top_sender_i: entity work.top_sender
 	generic map(
+		SWAP_SIGNALBITS=>1,
 		CLKCORE_EQUAL_CLKSIGNAL=>0
 	)
 	 port map(

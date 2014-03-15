@@ -4,6 +4,9 @@ use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 
 entity fifo_all is
+	generic(
+		SWAP_SIGNALBITS:integer:=0
+	);
 	 port(
 		 reset: in std_logic;
 		 clk_core: in std_logic;
@@ -68,7 +71,7 @@ signal i_direct_reg,directE:std_logic_vector(7 downto 0);
 signal full,empty,wr,wre,full_exp,empty_exp:std_logic;
 signal exponent_outE:std_logic_vector(7 downto 0);
 
-signal data_mux,data_emul_cnt_swap,data_emul_cnt:std_logic_vector(i_data'Length-1 downto 0):=(others=>'0');
+signal data_mux,data_emul_cnt_swap,data_emul_cnt,i_data_swap:std_logic_vector(i_data'Length-1 downto 0):=(others=>'0');
 signal data_mux_ce:std_logic;
 
 
@@ -139,6 +142,16 @@ o_direct<=directE(0);
 
 data_emul_cnt_swap<=data_emul_cnt(3 downto 0)&data_emul_cnt(7 downto 4)&data_emul_cnt(11 downto 8)&data_emul_cnt(15 downto 12) when COUNTER_8BIT=0 else
     data_emul_cnt(11 downto 8)&data_emul_cnt(15 downto 12)&data_emul_cnt(3 downto 0)&data_emul_cnt(7 downto 4);
+
+
+sw01:if SWAP_SIGNALBITS=1 generate
+	i_data_swap<=i_data(3 downto 0)&i_data(7 downto 4)&i_data(11 downto 8)&i_data(15 downto 12);
+end generate;
+
+sw00:if SWAP_SIGNALBITS/=1 generate
+	i_data_swap<=i_data;
+end generate;
+
 process(clk_core) is                                                                      
   begin                                                                                         
     if rising_edge(clk_core) then
@@ -151,7 +164,7 @@ process(clk_core) is
 				data_mux<=data_emul_cnt_swap;			
 			end if;
 		else
-			data_mux<=i_data;
+			data_mux<=i_data_swap;
 		end if;
 		data_mux_ce<=i_data_ce;
 

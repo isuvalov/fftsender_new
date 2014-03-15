@@ -5,6 +5,7 @@ use IEEE.std_logic_arith.all;
 
 entity top_sender is
 	generic(
+		SWAP_SIGNALBITS:integer:=0;
 		CLKCORE_EQUAL_CLKSIGNAL:integer:=1 --# if it =1 clk_signal=clk_core, else clk_core>>clk_signal
 	);
 	 port(
@@ -159,6 +160,9 @@ end process;
 
 
 fifo_all_i: entity work.fifo_all
+	generic map(
+		SWAP_SIGNALBITS=>SWAP_SIGNALBITS
+	)
 	 port map(
 		 reset =>reset,
 		 clk_core =>clk_core,
