@@ -42,8 +42,8 @@ architecture rtl of aFifo is
 	attribute ram_extract: string;
 	type RAM is array (integer range <>)of std_logic_vector (DATA_WIDTH-1 downto 0);
 	signal Mem : RAM (0 to FIFO_DEPTH-1);
-	attribute RAM_STYLE of Mem : signal is "block_ram";
-	--attribute ram_extract of Mem : signal is "yes";
+	--attribute RAM_STYLE of Mem : signal is "block_ram";
+	attribute ram_extract of Mem : signal is "yes";
 	
 	signal pNextWordToWrite     :std_logic_vector (ADDR_WIDTH-1 downto 0);
 	signal pNextWordToRead      :std_logic_vector (ADDR_WIDTH-1 downto 0);
