@@ -29,15 +29,37 @@ end make_fft;
 
 architecture make_fft of make_fft is
 
+FUNCTION log2roundup (data_value : integer)
+		RETURN integer IS
+		
+		VARIABLE width       : integer := 0;
+		VARIABLE cnt         : integer := 1;
+		CONSTANT lower_limit : integer := 1;
+		CONSTANT upper_limit : integer := 8;
+		
+	BEGIN
+		IF (data_value <= 1) THEN
+			width   := 0;
+		ELSE
+			WHILE (cnt < data_value) LOOP
+				width := width + 1;
+				cnt   := cnt *2;
+			END LOOP;
+		END IF;
+		
+		RETURN width;
+	END log2roundup;
+
+
 signal sg_real,sg_imag:std_logic_vector(11 downto 0);
 signal sg_real_ce,sg_imag_ce,signal_start_core:std_logic;
-signal counter : std_logic_vector(11 downto 0); 
 signal master_sink_dav,master_sink_sop,s_data_exp_ce:std_logic;
 signal fft_real_out,fft_imag_out:std_logic_vector(11 downto 0); 
 signal master_source_ena,master_sink_ena,master_source_sop,master_source_eop,cut_ce:std_logic;
 signal exponent_out:std_logic_vector(5 downto 0);
 signal out_time:std_logic_vector(11 downto 0);
-signal sg_ce_n,signal_start_core_reg,signal_start_core2,sg_ce,sg_ce_1w:std_logic;
+signal signal_start_core_reg,signal_start_core2,sg_real_ce_p:std_logic;
+signal input_cnt:std_logic_vector(log2roundup(CUT_LEN*2)-1 downto 0);
 
 begin
 
@@ -46,23 +68,29 @@ signal_start_core<=signal_start;
   n_sample_count : process(clk_signal) is                                                       
     begin                                                                                         
       if rising_edge(clk_signal) then                                                                    
-		sg_ce_1w<=sg_ce;
+		master_sink_sop<=signal_start_core2;
         if signal_start_core='1' then                                                                         
-          counter <= (others=>'0');
+          input_cnt <= (others=>'0');
+		  sg_real_ce_p<=sg_real_ce;
         else
 			if sg_real_ce='1' then
-        		counter <= counter + 1;
+				if unsigned(input_cnt)<((CUT_LEN*2)-1) then
+	        		input_cnt <= input_cnt + 1;
+					sg_real_ce_p<=sg_real_ce;
+				else
+					sg_real_ce_p<='0';
+				end if;
 			end if;
         end if;                                                                                    
       end if;                                                                                      
   end process n_sample_count; 
 
-master_sink_sop<=signal_start_core2;
 
 
 
 
-sg_ce_n<=not sg_ce;
+
+--sg_ce_n<=not sg_ce;
 fft4096_inst: entity work.fft4096_x16
 	PORT map(
 		clk	=>clk_signal,--sg_ce_n,--clk_core,
@@ -95,7 +123,7 @@ makeout : process(clk_signal) is
 		sg_imag_ce<=signal_ce;
 		sg_real<=signal_real;
 		sg_imag<=signal_imag;
-		master_sink_dav <= sg_real_ce;
+		master_sink_dav <= sg_real_ce_p;
 
 
 		

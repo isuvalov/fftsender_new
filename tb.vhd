@@ -154,14 +154,14 @@ begin
  if rising_edge(clk_signal) then
 	cccnt<=cccnt+1;
 	signal_ce<=cccnt(3);
-	if unsigned(cccnt(13 downto 0))<4096+10 and unsigned(cccnt(13 downto 0))>=10 then
+	if unsigned(cccnt)<4096+10 and unsigned(cccnt)>=10 then
 	   sweep_ce<='1';
 	   cccnt_t<=cccnt_t+1;
 	else
 	   cccnt_t<=(others=>'0');
 	   sweep_ce<='0';
 	end if;
-	if cccnt(13 downto 0)=2 then
+	if cccnt=3 then
 		signal_direct<=not signal_direct;
 		signal_start<='1';
 	else
@@ -206,12 +206,12 @@ end process;
 top_sender_i: entity work.top_sender
 	generic map(
 		SWAP_SIGNALBITS=>1,
-		CLKCORE_EQUAL_CLKSIGNAL=>0
+		CLKCORE_EQUAL_CLKSIGNAL=>1
 	)
 	 port map(
 		 reset=>reset,
 		 clk_signal =>clk_signal,
-		 clk_core =>clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
+		 clk_core =>clk_signal,--clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
 		 clk_mac =>clk125,
 
 		 payload_is_counter=>'0',
