@@ -27,7 +27,9 @@ entity top_sender is
 		 signal_imag: in std_logic_vector(11 downto 0);
 
 		 data_out: out std_logic_vector(3 downto 0);
-		 dv : out std_logic
+		 dv : out std_logic;
+
+		 tp: out std_logic_vector(7 downto 0)
 	     );
 end top_sender;
 
@@ -41,7 +43,7 @@ signal fft_dataout_re: std_logic_vector(11 downto 0);
 signal fft_dataout_im: std_logic_vector(11 downto 0);
 signal fft_dataout_ce: std_logic;
 signal fft_data_exp: std_logic_vector(5 downto 0);
-signal fft_data_exp_ce: std_logic;
+signal fft_data_exp_ce_2w,fft_data_exp_ce_1w,fft_data_exp_ce: std_logic;
 
 signal mux_data,adc_data,abs_data: std_logic_vector(15 downto 0);
 signal mux_data_ce,adc_data_ce,abs_data_ce:std_logic;
@@ -51,14 +53,14 @@ signal mux_data_exp_ce,adc_data_exp_ce,abs_data_exp_ce: std_logic;
 signal direction_1w,direction_2w,direction_3w:std_logic;
 signal signal_start_1w,signal_start_2w,signal_start_3w:std_logic;
 
-signal sig_direct: std_logic;
+signal sig_direct,making_fft: std_logic;
 signal sig_direct_ce,fifo_empty: std_logic;
 signal read_count: std_logic_vector(10 downto 0);
 
 signal rd_exp,rd_data,rd_direct,direct,fifo_data_ce,fifo_data_exp_ce:std_logic;
 signal fifo_data : std_logic_vector(3 downto 0);
 signal fifo_data_exp : std_logic_vector(7 downto 0);
-
+signal tp_fifo : std_logic_vector(2 downto 0);
 
 begin
 
@@ -133,10 +135,21 @@ begin
 		signal_start_1w<=signal_start;
 		signal_start_2w<=signal_start_1w;
 		signal_start_3w<=signal_start_2w;
+
+		fft_data_exp_ce_1w<=fft_data_exp_ce;
+		fft_data_exp_ce_2w<=fft_data_exp_ce_1w;
+		
+
+		tp<="0000"&making_fft&tp_fifo;
+
 		if signal_start_3w='0' and signal_start_2w='1' then
 			sig_direct<=direction_2w;
-			sig_direct_ce<='1';
+			sig_direct_ce<='1';			
+			making_fft<='1';
 		else
+			if fft_data_exp_ce_2w='0' and fft_data_exp_ce_1w='1' then
+				making_fft<='0';
+			end if;
 			sig_direct_ce<='0';
 		end if;
 		
@@ -187,7 +200,9 @@ fifo_all_i: entity work.fifo_all
 		 o_data =>fifo_data,
 		 o_data_ce =>fifo_data_ce,
 		 o_data_exp =>fifo_data_exp,
-		 o_data_exp_ce =>fifo_data_exp_ce
+		 o_data_exp_ce =>fifo_data_exp_ce,
+		
+		 tp => tp_fifo
 	     );
 
 

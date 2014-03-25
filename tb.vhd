@@ -227,8 +227,9 @@ top_sender_i: entity work.top_sender
 		 signal_imag =>(others=>'0'),
 
 		 data_out=>half_b,
-		 dv =>dv
+		 dv =>dv,
 
+		 tp=>open
 	     );
 
 

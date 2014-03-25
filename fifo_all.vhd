@@ -31,7 +31,9 @@ entity fifo_all is
 		 o_data: out std_logic_vector(3 downto 0);
 		 o_data_ce: out std_logic;
 		 o_data_exp: out std_logic_vector(7 downto 0);
-		 o_data_exp_ce: out std_logic
+		 o_data_exp_ce: out std_logic;
+
+		 tp: out std_logic_vector(2 downto 0)
 	     );
 end fifo_all;
 
@@ -66,9 +68,9 @@ component fifo16x4
 	);
 end component;
 
-
+signal s_read_count_1w,s_read_count: std_logic_vector(10 downto 0);
 signal i_direct_reg,directE:std_logic_vector(7 downto 0);
-signal full,empty,wr,wre,full_exp,empty_exp:std_logic;
+signal have_data,full,empty,wr,wre,full_exp,empty_exp:std_logic;
 signal exponent_outE:std_logic_vector(7 downto 0);
 
 signal data_mux,data_emul_cnt_swap,data_emul_cnt,i_data_swap:std_logic_vector(i_data'Length-1 downto 0):=(others=>'0');
@@ -89,7 +91,7 @@ fifo16x4_inst : fifo16x4 PORT MAP (
 		wrreq	 => wr,
 		q	 	 => o_data,
 		rdempty	 => empty,
-		rdusedw	 => read_count,
+		rdusedw	 => s_read_count,
 		wrfull	 => full
 	);
 
@@ -155,6 +157,16 @@ end generate;
 process(clk_core) is                                                                      
   begin                                                                                         
     if rising_edge(clk_core) then
+
+		tp<=EXT("0"&have_data&empty&full,tp'Length);
+
+		read_count<=s_read_count;
+        s_read_count_1w<=s_read_count;
+		if unsigned(s_read_count_1w)>=1024 then
+			have_data<='1';
+		else
+			have_data<='0';
+		end if;
 		o_data_ce<=rd_data;
 		o_data_exp_ce<=rd_exp;
 		if payload_is_counter='1' then

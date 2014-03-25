@@ -125,8 +125,6 @@ makeout : process(clk_signal) is
 		sg_imag<=signal_imag;
 		master_sink_dav <= sg_real_ce_p;
 
-
-		
 		if signal_start_core='1' then
 			signal_start_core_reg<='1';
 			signal_start_core2<='0';
