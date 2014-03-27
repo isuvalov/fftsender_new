@@ -54,7 +54,7 @@ signal direction_1w,direction_2w,direction_3w:std_logic;
 signal signal_start_1w,signal_start_2w,signal_start_3w:std_logic;
 
 signal sig_direct,making_fft: std_logic;
-signal sig_direct_ce,fifo_empty: std_logic;
+signal sig_direct_ce,fifo_empty,ready: std_logic;
 signal read_count: std_logic_vector(10 downto 0);
 
 signal rd_exp,rd_data,rd_direct,direct,fifo_data_ce,fifo_data_exp_ce:std_logic;
@@ -126,6 +126,14 @@ make_adc_i: entity work.make_adc
 	     );
 
 
+
+process(clk_signal) is
+begin
+	if rising_edge(clk_signal) then
+		tp<="00"&fft_data_exp_ce&fft_dataout_ce&making_fft&tp_fifo;
+	end if;
+end process;
+
 process(clk_core) is
 begin
 	if rising_edge(clk_core) then
@@ -140,7 +148,7 @@ begin
 		fft_data_exp_ce_2w<=fft_data_exp_ce_1w;
 		
 
-		tp<="0000"&making_fft&tp_fifo;
+
 
 		if signal_start_3w='0' and signal_start_2w='1' then
 			sig_direct<=direction_2w;

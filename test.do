@@ -105,4 +105,4 @@ vsim -novopt -t ps work.tb
 do wave.do
 #run -all
 
-
+# vcom D:/Projects/Nienshans/fft_sender_v4/synthes/simulation/modelsim/fftsenderv4.vho
