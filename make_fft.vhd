@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 
 entity make_fft is
-	generic (
+	generic (		
 		CLKCORE_EQUAL_CLKSIGNAL:integer:=1;
 		CUT_LEN:integer:=1024 	--# How many samples transfer to MAC
 	);
@@ -29,6 +29,9 @@ end make_fft;
 
 architecture make_fft of make_fft is
 
+constant ADDITION_FFTCORERESET_BEFORE_START:integer:=1;
+constant AUTORESET_FFTCORE:integer:=0;
+
 FUNCTION log2roundup (data_value : integer)
 		RETURN integer IS
 		
@@ -50,9 +53,13 @@ FUNCTION log2roundup (data_value : integer)
 		RETURN width;
 	END log2roundup;
 
-signal sg_real,sg_imag:std_logic_vector(11 downto 0);
+type Tstm_startfft is (WRESETING,SOPING,RESETING,PAUSING,WORKING);
+signal stm_startfft:Tstm_startfft;
+signal pause_cnt:std_logic_vector(2 downto 0);
+
+signal sg_real_1w,sg_imag_1w,sg_real,sg_imag:std_logic_vector(11 downto 0);
 signal sg_real_ce,sg_imag_ce,signal_start_core:std_logic;
-signal master_sink_dav,master_sink_sop,s_data_exp_ce:std_logic;
+signal master_sink_dav,master_sink_sop,s_data_exp_ce,master_sink_dav_1w:std_logic;
 signal fft_real_out,fft_imag_out:std_logic_vector(11 downto 0); 
 signal master_source_ena,master_sink_ena,master_source_sop,master_source_eop,cut_ce:std_logic;
 signal exponent_out:std_logic_vector(5 downto 0);
@@ -70,6 +77,9 @@ signal_start_core<=signal_start;
   n_sample_count : process(clk_signal) is                                                       
     begin                                                                                         
       if rising_edge(clk_signal) then                                                                    
+		sg_real_1w<=sg_real;
+		sg_imag_1w<=sg_imag;
+		master_sink_dav_1w<=master_sink_dav;	
 --		master_sink_sop<=signal_start_core2;
         if signal_start_core='1' then                                                                         
           input_cnt <= (others=>'0');
@@ -95,7 +105,7 @@ signal_start_core<=signal_start;
 fft4096_inst: entity work.fft4096_x16
 	PORT map(
 		clk	=>clk_signal,
-		reset	=>reset,--reset_fft,--reset,
+		reset	=>reset_fft,--reset_fft,--reset,
 		master_sink_dav	=>master_sink_dav, 
 		master_sink_sop	=>master_sink_sop,
 		master_sink_ena	=>master_sink_ena,
@@ -118,8 +128,73 @@ makeout : process(clk_signal) is
   begin                                                                                         
     if rising_edge(clk_signal) then 
 
-		master_sink_sop<=signal_start_core2;
-		master_sink_dav <= sg_real_ce_p;
+		if reset='1' then
+			stm_startfft<=WRESETING;
+			reset_fft<='1';
+			master_sink_sop<='0';
+			master_sink_dav<='0';
+			pause_cnt<=(others=>'1');
+		else   --# reset
+			case stm_startfft is
+			when WRESETING=>
+				if unsigned(pause_cnt)>0 then
+					pause_cnt<=pause_cnt-1;
+				else
+					stm_startfft<=SOPING;
+					pause_cnt<=(others=>'1');
+				end if;
+				reset_fft<='1';
+				master_sink_sop<='0';
+				master_sink_dav<='0';
+			when SOPING=>
+				reset_fft<='0';
+				if unsigned(pause_cnt)>0 then
+					pause_cnt<=pause_cnt-1;
+				else
+					if ADDITION_FFTCORERESET_BEFORE_START=1 then
+						stm_startfft<=RESETING;
+					else
+						stm_startfft<=PAUSING;
+					end if;
+					pause_cnt<=(others=>'1');
+				end if;
+				master_sink_sop<='1';
+				master_sink_dav<='1';
+			when RESETING=>
+				reset_fft<='1';
+				if unsigned(pause_cnt)>0 then
+					pause_cnt<=pause_cnt-1;
+				else
+					stm_startfft<=PAUSING;
+					pause_cnt<=(others=>'1');
+				end if;
+				master_sink_sop<='0';
+				master_sink_dav<='0';
+			when PAUSING=>
+				master_sink_sop<='0';
+				master_sink_dav<='0';
+				reset_fft<='0';
+				if unsigned(pause_cnt)>0 then
+					pause_cnt<=pause_cnt-1;
+				else
+					stm_startfft<=WORKING;
+					pause_cnt<=(others=>'1');
+				end if;
+			when WORKING=>
+				reset_fft<='0';
+				master_sink_sop<=signal_start_core2;
+				master_sink_dav <= sg_real_ce_p;
+				if AUTORESET_FFTCORE=1 then
+					if master_source_eop='1' then
+						pause_cnt<=(others=>'1');
+						stm_startfft<=WRESETING;
+					end if;
+				end if;
+				
+			when others=>  stm_startfft<=WRESETING;
+			end case;
+		end if; --# reset
+
                                                                   
 		sg_real_ce<=signal_ce;
 		sg_imag_ce<=signal_ce;
