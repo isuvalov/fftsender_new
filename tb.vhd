@@ -16,7 +16,7 @@ architecture tb of tb is
 constant CLK_PERIOD_clk125: TIME := 40 ns; 
 constant CLK_PERIOD_clkq: TIME := 6.45161290322580645 ns; --# < 1/(125e6*(9/8)*(204/186))
 
-constant CLK_PERIOD_clks: TIME := 200.0 ns;
+constant CLK_PERIOD_clks: TIME := 1000.0 ns;
 
 constant FRAME_LEN:natural:=204;
 constant CE_LEN:natural:=188;

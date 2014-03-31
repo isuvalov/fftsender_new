@@ -172,7 +172,7 @@ begin
 			
 			exp_first_read<='0';
 		when WAITING =>
-			if (fifo_empty_1w='0') then			
+			if (fifo_empty_1w='0') and unsigned(read_count)>=(DATAFRAME_LEN*2) then			
 				stm_read<=PREAMBLE1;
 			    if DEBUG=1 then
 				  print("Start frame "&int_to_string(conv_integer(frame_num)));
