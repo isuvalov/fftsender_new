@@ -7,6 +7,7 @@ use work.assert_pack.all;
 
 entity send_udp is
 	generic(
+		CUT_LEN:integer:=1024;
 		DEBUG:integer:=1
 	);
 	 port(
@@ -108,12 +109,25 @@ begin
   return R;
 end function;
 
+
+signal frame_num:std_logic_vector(3 downto 0);
+
+function get_numframes(some:integer) return std_logic_vector is
+variable calc:std_logic_vector(15 downto 0);
+variable fr:std_logic_vector(frame_num'Length-1 downto 0);
+begin
+	calc:=conv_std_logic_vector(CUT_LEN/DATAFRAME_LEN,calc'Length);
+	fr:=calc(fr'Length-1 downto 0);
+	return fr;
+end function;
+
+
 type Tstm_read is (STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
 DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8);
 signal stm_read:Tstm_read;
 
 signal fifo_empty_1w, exp_first_read, signal_direct_reg:std_logic;
-signal frame_num:std_logic_vector(3 downto 0);
+
 signal cnt_mac:std_logic_vector(7 downto 0);
 signal crc32:std_logic_vector(31 downto 0);
 signal C_calc:std_logic_vector(31 downto 0);
@@ -309,6 +323,7 @@ begin
 		when PUSHCRC1 =>
 			s_dv<='1';
 			s_data_out<=C_calc(3 downto 0);
+--			if frame_num=get_numframes(0) then
 			if frame_num=4 then
 				stm_read<=STARTING;
 				if DEBUG=1 then

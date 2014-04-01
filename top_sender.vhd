@@ -216,6 +216,7 @@ fifo_all_i: entity work.fifo_all
 
 send_udp_i: entity work.send_udp
 	generic map(
+		CUT_LEN=>CUT_LEN,
 		DEBUG=>DEBUG
 	)
 	 port map(

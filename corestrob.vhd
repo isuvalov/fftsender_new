@@ -21,8 +21,8 @@ end corestrob;
 
 architecture corestrob of corestrob is
 
-signal clk_signal_bycore,clk_signal_bycore_1w,ce_i_bycore,ce_i_bycore_1w,local_ce :std_logic;
-signal data_i_reg,data_i_reg_1w,datareg:std_logic_vector(data_i'Length-1 downto 0);
+signal clk_signal_bycore_2w,clk_signal_bycore,clk_signal_bycore_1w,ce_i_bycore,ce_i_bycore_1w,local_ce :std_logic;
+signal data_i_reg,data_i_reg_1w,datareg,data_i_bycore:std_logic_vector(data_i'Length-1 downto 0);
 
 begin
 	
@@ -31,16 +31,19 @@ begin
 	if rising_edge(clk_core) then
 		clk_signal_bycore<=clk_signal;
 		clk_signal_bycore_1w<=clk_signal_bycore;
+		clk_signal_bycore_2w<=clk_signal_bycore_1w;
 		ce_i_bycore<=ce_i;
 		ce_i_bycore_1w<=ce_i_bycore;
-		data_i_reg<=data_i;		
+
+		data_i_bycore<=data_i;
+		data_i_reg<=data_i_bycore;		
 	end if;
 end process;
 
 process (clk_core) is
 begin
 	if rising_edge(clk_core) then
-		if clk_signal_bycore='1' and clk_signal_bycore_1w='0' then
+		if clk_signal_bycore_1w='1' and clk_signal_bycore_2w='0' then
 			datareg<=data_i_reg;
 			local_ce<=ce_i_bycore_1w;
 		else

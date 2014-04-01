@@ -34,7 +34,7 @@ component mult31_25
 end component;
 
 
-signal clkq,clk125,clk125_div2,clk125_div4,clk125_n:std_logic:='0';
+signal clkq,clk125,clk125_div2,clk125_div4,clk125_n,clk_signal_p:std_logic:='0';
 signal reset:std_logic:='1'; 
 signal cnt_rd:std_logic_vector(64 downto 0):=(others=>'0');
 signal cnt_wr:std_logic_vector(64 downto 0):=(others=>'0');
@@ -139,10 +139,12 @@ end process;
 
 
 
-sigclk: process(clk_signal)
+sigclk: process(clk_signal_p)
 begin
-	clk_signal<= not clk_signal after CLK_PERIOD_clks/2; 
+	clk_signal_p<= not clk_signal_p after CLK_PERIOD_clks/2; 
 end process;
+
+clk_signal<=clk_signal_p after CLK_PERIOD_clk125/3;
 
 
 data_from_algorithm<=byte1(3 downto 0)&byte1(3 downto 0)&byte1(3 downto 0)&byte1(3 downto 0);
@@ -206,12 +208,12 @@ end process;
 top_sender_i: entity work.top_sender
 	generic map(
 		SWAP_SIGNALBITS=>1,
-		CLKCORE_EQUAL_CLKSIGNAL=>1
+		CLKCORE_EQUAL_CLKSIGNAL=>0
 	)
 	 port map(
 		 reset=>reset,
 		 clk_signal =>clk_signal,
-		 clk_core =>clk_signal,--clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
+		 clk_core =>clk125,--clk_signal,--clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
 		 clk_mac =>clk125,
 			
 		 payload_is_counter=>'0',
