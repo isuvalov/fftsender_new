@@ -46,22 +46,22 @@ begin
 --#   signed char u[4];
 --# } status_resp_t;
 
-typedef struct {
-  unsigned char _;
-  unsigned char no;
-  unsigned char fn;
-  unsigned char rv;
-} base_resp_t;
-
-typedef struct {
-  unsigned char fault       : 1;
-  unsigned char ready       : 1;
-  unsigned char meas_mode   : 1;
-  unsigned char last_unsucc : 1;
-  unsigned char has_unread  : 1;
-} status_t;
-
-
+--# typedef struct {
+--#   unsigned char _;
+--#   unsigned char no;
+--#   unsigned char fn;
+--#   unsigned char rv;
+--# } base_resp_t;
+--# 
+--# typedef struct {
+--#   unsigned char fault       : 1;
+--#   unsigned char ready       : 1;
+--#   unsigned char meas_mode   : 1;
+--#   unsigned char last_unsucc : 1;
+--#   unsigned char has_unread  : 1;
+--# } status_t;
+    
+    
 
 
 process(clk) is
