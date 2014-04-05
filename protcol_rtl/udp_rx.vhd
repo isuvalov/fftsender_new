@@ -26,10 +26,33 @@ constant PRMBLE_LEN		:integer:=8;  		--# Number of addition constant data in pre
 type Prmble_mem is array (0 to PRMBLE_LEN-1) of std_logic_vector(7 downto 0);
 constant pre_mem:Prmble_mem:=  (x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5");
 
-signal correct
+FUNCTION log2roundup (data_value : integer)
+		RETURN integer IS
+		
+		VARIABLE width       : integer := 0;
+		VARIABLE cnt         : integer := 1;
+		CONSTANT lower_limit : integer := 1;
+		CONSTANT upper_limit : integer := 8;
+		
+	BEGIN
+		IF (data_value <= 1) THEN
+			width   := 0;
+		ELSE
+			WHILE (cnt < data_value) LOOP
+				width := width + 1;
+				cnt   := cnt *2;
+			END LOOP;
+		END IF;
+		
+		RETURN width;
+	END log2roundup;
 
-type Tstm is (GET_PREAMBULE);
-signal stm:Tstm;
+
+signal correct_prmb_cnt:std_logic_vector(log2roundup(PRMBLE_LEN)-1 downto 0);
+signal correct_mac_cnt:std_logic_vector(2 downto 0);
+
+type Tstm is (WAITING,GET_PREAMBULE,GETING_MAC1,GETING_MAC2,GETING_ETHER1,GETING_ETHER2,GETING_UDPHEADER);
+signal stm:Tstm:=WAITING;
 
 begin
 
@@ -67,16 +90,61 @@ begin
 process(clk) is
 begin
 	if rising_edge(clk) then
-		if i_start='1' and i_ce='1' then
-			if i_data=pre_mem(0) then
-				stm<=GET_PREAMBULE;
-			end if;
-		else
-			case stm is
-			when GET_PREAMBULE=>
-			when others=>
-			end case;
-		end if;
+		if reset='1' then
+			stm<=WAITING;
+		else --# reset
+			if i_ce='1' then
+				case stm is
+				when WAITING=>
+					if i_start='1' then
+						if i_data=pre_mem(0) then
+							stm<=GET_PREAMBULE;
+							correct_prmb_cnt<=conv_std_logic_vector(1,correct_prmb_cnt'Length);
+						end if;
+					end if;
+					correct_mac_cnt<=(others=>'0');
+			    
+				when GET_PREAMBULE=>
+					if i_data=pre_mem(conv_integer(correct_prmb_cnt)) then
+						if correct_prmb_cnt<PRMBLE_LEN-1 then
+							correct_prmb_cnt<=correct_prmb_cnt+1;
+						else
+							stm<=GETING_MAC1;
+						end if;
+					else
+						stm<=WAITING;
+					end if;
+				when GETING_MAC1=>
+					if unsigned(correct_mac_cnt)<6-1 then
+						correct_mac_cnt<=correct_mac_cnt+1;
+					else
+						stm<=GETING_MAC2;
+						correct_mac_cnt<=(others=>'0');
+					end if;
+				when GETING_MAC2=>
+					if unsigned(correct_mac_cnt)<6-1 then
+						correct_mac_cnt<=correct_mac_cnt+1;
+					else
+						stm<=GETING_ETHER1;
+						correct_mac_cnt<=(others=>'0');
+					end if;
+				when GETING_ETHER1=>
+					if i_data=x"08" then
+						stm<=GETING_ETHER2;
+					else
+						stm<=WAITING;
+					end if; 
+				when GETING_ETHER2=>
+					if i_data=x"00" then
+						stm<=GETING_UDPHEADER;
+					else
+						stm<=WAITING;
+					end if; 
+				when GETING_UDPHEADER=>
+				when others=>
+				end case;
+			end if; --# ce
+		end if;  --# reset
 	end if;
 end process;
 
