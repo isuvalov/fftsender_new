@@ -79,12 +79,15 @@ typedef struct {
 typedef struct {
   double spd;
   double dist;
+  unsigned char spd_status;
 } target_t;
 
+#pragma pack(push,1)
 typedef struct {
   int power;
   unsigned char status;
 } raw_pt_t;
+#pragma pack(pop)
 
 typedef struct {
   base_resp_t base_resp;
@@ -93,8 +96,9 @@ typedef struct {
   raw_pt_t rise[1024];
   raw_pt_t fall[1024];
   unsigned char ntargets;
-  target_t targets[255];
+  target_t *targets;
 } data_alt_resp_t;
+
 
 typedef struct {
   unsigned short p;
@@ -111,7 +115,7 @@ typedef data_el_t target_pt_t;
 
 typedef struct {
   base_req_t base_req;
-  char mode;
+  unsigned char mode;
   unsigned short cycle_dur;
 } meas_ctl_req_t;
 

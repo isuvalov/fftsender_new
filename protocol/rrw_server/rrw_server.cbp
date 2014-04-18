@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="rrw_server" />
+		<Option platforms="Windows;" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="src\;include\;" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/rrw_server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add directory="include/" />
+					<Add directory="include/nc" />
+					<Add directory="include/pthread" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add library="wsock32" />
+					<Add library="lib\libconfig++.dll.a" />
+					<Add library="lib\libpthreadGCE2.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/new_rrw_server" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="common.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="data_processor.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debuglog.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="eudp.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="include/CfgClass.h" />
+		<Unit filename="include/RrwProtocol.h" />
+		<Unit filename="include/Timer.h" />
+		<Unit filename="include/UdpConnection.h" />
+		<Unit filename="include/UdpRadar.h" />
+		<Unit filename="include/UdpServer.h" />
+		<Unit filename="include/common.h" />
+		<Unit filename="include/data_processor.h" />
+		<Unit filename="include/debuglog.h" />
+		<Unit filename="include/eudp.h" />
+		<Unit filename="include/radar.h" />
+		<Unit filename="include/radar_cli.h" />
+		<Unit filename="include/rrw_proto.h" />
+		<Unit filename="include/timeutils.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="rrw_proto.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rrw_server.cfg" />
+		<Unit filename="src/CfgClass.cpp" />
+		<Unit filename="src/RrwProtocol.cpp" />
+		<Unit filename="src/Timer.cpp" />
+		<Unit filename="src/UdpConnection.cpp" />
+		<Unit filename="src/UdpRadar.cpp" />
+		<Unit filename="src/UdpServer.cpp" />
+		<Unit filename="timeutils.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

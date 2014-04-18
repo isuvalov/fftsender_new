@@ -144,7 +144,7 @@ int srv_handle_setth_req(srv_t *srv) {
   ipt_t *pts;
   int i;
 
-  pts = malloc(sizeof(ipt_t)*req->npts);
+  pts = (ipt_t*) malloc(sizeof(ipt_t)*req->npts);
   for(i=0; i<req->npts; i++) {
     pts[i].x = req->pts[i].d;
     pts[i].y = req->pts[i].p;

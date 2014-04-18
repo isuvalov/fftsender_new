@@ -23,7 +23,7 @@ void data_proc_init(proc_t *proc,
   proc->max_fails_num = max_fails_num;
   proc->fails_counter = 0;
   proc->avg_spds_num = avg_spds_num;
-  proc->avg_spds = malloc(sizeof(double)*avg_spds_num);
+  proc->avg_spds = (double*) malloc(sizeof(double)*avg_spds_num);
   proc->avg_spds_filled = 1;
   memset(&proc->locked_mvmt,0,sizeof(mvmt_t));
   memset(&proc->lock_pt,0,sizeof(target_pt_t));
@@ -102,7 +102,15 @@ mvmt_t *get_locked_mvmt(proc_t *proc) {
 }
 
 double dbm(double val, int harm) {
-  return 20.0 * log10(val/1300.0) - 40.0 + 3.2175 * log10(harm / 0.5) - 3.6;
+    if (val <= 0 || harm <= 0)
+        return -90;
+    double dist = harm * 0.5;
+    double part1 = 20 * log10(val/1300) - 40.0;
+    double part2 = dist <= 200 ? 14.75 * log10(dist) + 15 : 44.0;
+    double part3 = -27.32;
+    return part1 + part2 + part3;
+  //return 20.0 * log10(val/1300.0) - 40.0 + 3.2175 * log10(double(harm) / 0.5) - 3.6; //Chernovs version
+
 }
 
 void target_pt_init(target_pt_t* pt, int i, double pow_val) {

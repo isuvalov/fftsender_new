@@ -35,7 +35,7 @@ void rcli_init(rcli_t *cli, rdr_t *rdr,
   cli->coll_sz = coll_sz;
   cli->meas_data_unit_sz = meas_data_unit_sz;
   cli->meas_data_sz = (cli->rdr->pkt_sz/meas_data_unit_sz)*cli->coll_sz;
-  cli->targets = malloc(sizeof(data_el_t)*cli->meas_data_sz);
+  cli->targets = (data_el_t*) malloc(sizeof(data_el_t)*cli->meas_data_sz);
 
   cli->th.points = th_pts;
   cli->th.size = th_pts_num;
@@ -374,6 +374,7 @@ int rcli_collect(rdr_t *rdr, void *coll, int coll_sz, void *arg) {
       for(j=0; j<pkt_data_size; j+=1) {
         sweeps->data[i][j+o] = data[j] << 5;
         sweeps->data[i][j+o] >>= exp_val;
+        //printf("%i\n", sweeps->data[i][j+o]);
         zero_counter+=(sweeps->data[i][j+o]==0);
 //        sweeps->data[i][j+o] <<= 3; //just for normalization, not necessery
       }

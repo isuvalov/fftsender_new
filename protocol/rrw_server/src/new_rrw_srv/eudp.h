@@ -117,6 +117,3 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 int eudp_open_bl(eudp_t *hnd,
 		 char *addr, int port);
 #endif
-
-void eudp_set_rcv_timeout(eudp_t *hnd, int ms);
-void eudp_set_snd_timeout(eudp_t *hnd, int ms);

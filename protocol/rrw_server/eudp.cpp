@@ -98,7 +98,7 @@ int eudp_close(eudp_t *hnd) {
 int eudp_en_broadcast(eudp_t *hnd) {
     int bc_f = 1;
 #ifdef WIN32
-    return setsockopt(hnd->sock,SOL_SOCKET,SO_BROADCAST,(void *)&bc_f,sizeof(bc_f));
+    return setsockopt(hnd->sock,SOL_SOCKET,SO_BROADCAST,(char *)&bc_f,sizeof(bc_f));
 #else
     return setsockopt(hnd->sock,SOL_SOCKET,SO_BROADCAST,(char *)&bc_f,sizeof(bc_f));
 #endif
