@@ -9,9 +9,8 @@ entity udp_rx is
 	 port(
 		 reset: in std_logic;
 		 clk : in std_logic;
-		 i_start : in std_logic; --# must be with i_ce 
+		 i_dv : in std_logic; --# must be with i_ce 
 		 i_ce : in std_logic;
-		 i_stop : in std_logic;
 		 i_data : in std_logic_vector(7 downto 0);
 
 		 rx2tx: out Trx2tx_wires;
@@ -102,7 +101,7 @@ begin
 			if i_ce='1' then
 				case stm is
 				when WAITING=>
-					if i_start='1' then
+					if i_dv='1' then
 						if i_data=pre_mem(0) then
 							stm<=GET_PREAMBULE;
 							correct_prmb_cnt<=conv_std_logic_vector(1,correct_prmb_cnt'Length);
@@ -153,7 +152,7 @@ begin
 						stm<=GET_REQ_PROPERTY;
 					end if;
 				when GET_REQ_PROPERTY=>
-					
+					stm<=WAITING;
 				when others=>
 				end case;
 			end if; --# ce

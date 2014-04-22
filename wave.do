@@ -1,166 +1,149 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-add wave -noupdate /tb/top_sender_i/clk_signal
-add wave -noupdate /tb/top_sender_i/clk_core
-add wave -noupdate /tb/top_sender_i/clk_mac
-add wave -noupdate /tb/top_sender_i/payloadiszero
-add wave -noupdate /tb/top_sender_i/pre_shift
-add wave -noupdate -color blue -itemcolor blue /tb/top_sender_i/reset
-add wave -noupdate -color Blue -itemcolor Blue /tb/top_sender_i/signal_ce
-add wave -noupdate -color Blue -itemcolor Blue /tb/top_sender_i/i_direction
-add wave -noupdate -color Blue -itemcolor Blue /tb/top_sender_i/signal_start
-add wave -noupdate -color Blue -itemcolor Blue -radix unsigned -subitemconfig {/tb/top_sender_i/signal_real(11) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(10) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(9) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(8) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(7) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(6) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(5) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(4) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(3) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(2) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(1) {-color #00000000ffff -itemcolor #00000000ffff} /tb/top_sender_i/signal_real(0) {-color #00000000ffff -itemcolor #00000000ffff}} /tb/top_sender_i/signal_real
-add wave -noupdate -color Blue -itemcolor Blue -radix unsigned /tb/top_sender_i/signal_imag
-add wave -noupdate -color Blue -itemcolor Blue -radix hexadecimal /tb/top_sender_i/data_out
-add wave -noupdate -color Blue -itemcolor Blue /tb/top_sender_i/dv
-add wave -noupdate -radix decimal /tb/top_sender_i/fft_dataout_re
-add wave -noupdate -radix decimal /tb/top_sender_i/fft_dataout_im
-add wave -noupdate /tb/top_sender_i/fft_dataout_ce
-add wave -noupdate /tb/top_sender_i/fft_data_exp
-add wave -noupdate /tb/top_sender_i/fft_data_exp_ce
-add wave -noupdate -radix unsigned /tb/top_sender_i/abs_data
-add wave -noupdate /tb/top_sender_i/abs_data_ce
-add wave -noupdate /tb/top_sender_i/abs_data_exp
-add wave -noupdate /tb/top_sender_i/abs_data_exp_ce
-add wave -noupdate /tb/top_sender_i/direction_1w
-add wave -noupdate /tb/top_sender_i/direction_2w
-add wave -noupdate /tb/top_sender_i/direction_3w
-add wave -noupdate /tb/top_sender_i/signal_start_1w
-add wave -noupdate /tb/top_sender_i/signal_start_2w
-add wave -noupdate /tb/top_sender_i/signal_start_3w
-add wave -noupdate /tb/top_sender_i/sig_direct
-add wave -noupdate /tb/top_sender_i/sig_direct_ce
-add wave -noupdate /tb/top_sender_i/fifo_empty
-add wave -noupdate -radix unsigned /tb/top_sender_i/read_count
-add wave -noupdate /tb/top_sender_i/rd_exp
-add wave -noupdate /tb/top_sender_i/rd_data
-add wave -noupdate /tb/top_sender_i/rd_direct
-add wave -noupdate /tb/top_sender_i/direct
-add wave -noupdate /tb/top_sender_i/fifo_data_ce
-add wave -noupdate /tb/top_sender_i/fifo_data_exp_ce
-add wave -noupdate -radix hexadecimal /tb/top_sender_i/fifo_data
-add wave -noupdate -radix hexadecimal /tb/top_sender_i/fifo_data_exp
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/reset
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/clk_signal
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/clk_core
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/signal_ce
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/signal_start
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/signal_real
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/signal_imag
-add wave -noupdate -expand -group make_fft -radix decimal /tb/top_sender_i/make_fft_i/dataout_re
-add wave -noupdate -expand -group make_fft -radix decimal /tb/top_sender_i/make_fft_i/dataout_im
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/dataout_ce
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/data_exp
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/data_exp_ce
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/sg_real
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/sg_imag
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/sg_real_ce
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/sg_imag_ce
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/signal_start_core
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/signal_start_core2
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/signal_start_core_reg
-add wave -noupdate -expand -group make_fft -radix decimal /tb/top_sender_i/make_fft_i/fft_real_out
-add wave -noupdate -expand -group make_fft -radix decimal /tb/top_sender_i/make_fft_i/fft_imag_out
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/reset_fft
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/waitcnt
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/addition_end
-add wave -noupdate -expand -group make_fft -radix unsigned /tb/top_sender_i/make_fft_i/output_cnt
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/master_source_ena
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/master_sink_dav
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/master_sink_ena
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/master_sink_sop
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/master_source_sop
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/master_source_eop
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/cut_ce
-add wave -noupdate -expand -group make_fft -radix hexadecimal /tb/top_sender_i/make_fft_i/exponent_out
-add wave -noupdate -expand -group make_fft /tb/top_sender_i/make_fft_i/dataout_ce
-add wave -noupdate -expand -group make_fft -radix unsigned /tb/top_sender_i/make_fft_i/out_time
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/reset
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/clk_mac
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/payloadiszero
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/rd_data
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/fifo_empty
-add wave -noupdate -group send_upd -radix unsigned /tb/top_sender_i/send_udp_i/read_count
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/rd_direct
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/i_direct
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/i_data
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/i_data_ce
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/rd_exp
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/i_data_exp
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/i_data_exp_ce
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/data_out
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/dv
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/stm_read
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/fifo_empty_1w
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/exp_first_read
-add wave -noupdate -group send_upd /tb/top_sender_i/send_udp_i/signal_direct_reg
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/frame_num
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/cnt_mac
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/crc32
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/c_calc
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/s_data_out
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/s_dv
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/read_cnt
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/sig_dir
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/exp_fifose
-add wave -noupdate -group send_upd -radix hexadecimal /tb/top_sender_i/send_udp_i/delay_cnt
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/reset
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/clk_core
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/pre_shift
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/i_data_re
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/i_data_im
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/i_data_ce
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/i_data_exp
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/i_data_exp_ce
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/o_dataout
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/o_dataout_ce
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/o_data_exp
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/o_data_exp_ce
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/sq_dataout_re
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/sq_dataout_im
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/tosqrt
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/fft_plus_shift
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/fft_plus
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/dataout_ce_1w
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/dataout_ce_2w
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/s_dataout
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/exp_ce_w
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/data_ce_w
-add wave -noupdate -group make_abs /tb/top_sender_i/make_abs_i/exp_data_w
-add wave -noupdate -group fifo_all /tb/top_sender_i/fifo_all_i/reset
-add wave -noupdate -group fifo_all /tb/top_sender_i/fifo_all_i/clk_core
-add wave -noupdate -group fifo_all /tb/top_sender_i/fifo_all_i/clk_mac
-add wave -noupdate -group fifo_all /tb/top_sender_i/fifo_all_i/i_direct
-add wave -noupdate -group fifo_all /tb/top_sender_i/fifo_all_i/i_direct_ce
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/i_data
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/i_data_ce
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/i_data_exp
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/i_data_exp_ce
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/fifo_empty
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/rd_data
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/rd_exp
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/rd_direct
-add wave -noupdate -group fifo_all -radix unsigned /tb/top_sender_i/fifo_all_i/read_count
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/o_direct
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/o_data
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/o_data_ce
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/o_data_exp
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/o_data_exp_ce
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/i_direct_reg
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/directe
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/full
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/empty
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/wr
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/wre
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/full_exp
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/empty_exp
-add wave -noupdate -group fifo_all -radix hexadecimal /tb/top_sender_i/fifo_all_i/exponent_oute
+add wave -noupdate -radix unsigned /tb/cccnt
+add wave -noupdate -group top /tb/top_top_i/reset
+add wave -noupdate -group top /tb/top_top_i/clk_signal
+add wave -noupdate -group top /tb/top_top_i/clk_core
+add wave -noupdate -group top /tb/top_top_i/clk_mac
+add wave -noupdate -group top /tb/top_top_i/payload_is_counter
+add wave -noupdate -group top /tb/top_top_i/PayloadIsZERO
+add wave -noupdate -group top /tb/top_top_i/send_adc_data
+add wave -noupdate -group top /tb/top_top_i/pre_shift
+add wave -noupdate -group top /tb/top_top_i/i_direction
+add wave -noupdate -group top /tb/top_top_i/signal_ce
+add wave -noupdate -group top /tb/top_top_i/signal_start
+add wave -noupdate -group top /tb/top_top_i/signal_real
+add wave -noupdate -group top /tb/top_top_i/signal_imag
+add wave -noupdate -group top /tb/top_top_i/data_out
+add wave -noupdate -group top /tb/top_top_i/dv
+add wave -noupdate -group top /tb/top_top_i/data_i
+add wave -noupdate -group top /tb/top_top_i/dv_i
+add wave -noupdate -group top /tb/top_top_i/tp_tx
+add wave -noupdate -group top /tb/top_top_i/tp_rx
+add wave -noupdate -group top /tb/top_top_i/reset_tx
+add wave -noupdate -group top /tb/top_top_i/reset_rx
+add wave -noupdate -group top /tb/top_top_i/to_tx_module
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/reset
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_signal
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_core
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_mac
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/payload_is_counter
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/PayloadIsZERO
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/send_adc_data
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/pre_shift
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/i_direction
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_start
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_real
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_imag
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/data_out
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/dv
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/to_tx_module
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/tp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_dataout_re
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_dataout_im
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_dataout_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_data_exp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_data_exp_ce_2w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_data_exp_ce_1w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fft_data_exp_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/mux_data
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/adc_data
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/abs_data
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/mux_data_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/adc_data_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/abs_data_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/mux_data_exp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/adc_data_exp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/abs_data_exp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/mux_data_exp_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/adc_data_exp_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/abs_data_exp_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/direction_1w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/direction_2w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/direction_3w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_start_1w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_start_2w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/signal_start_3w
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/sig_direct
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/making_fft
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/sig_direct_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_empty
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/ready
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/read_count
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/rd_exp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/rd_data
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/rd_direct
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/direct
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data_exp_ce
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data_exp
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/tp_fifo
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/reset
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/clk_core
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/clk_mac
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/to_tx_module
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/data_i
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/dv_i
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/tp
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/cnt_conv
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/data8
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/dv8
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/ce8
+add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/regs_from_host
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/clk
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/data_i
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/ce_i
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/dv_i
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/data_o
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/dv_o
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/cnt_conv
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/data_reg
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/s_data_o
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/s_dv_o
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/ce_1w
+add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/dv_reg
+add wave -noupdate -group stimulus /tb/client_stimulus_i/reset
+add wave -noupdate -group stimulus /tb/client_stimulus_i/ce
+add wave -noupdate -group stimulus /tb/client_stimulus_i/clk
+add wave -noupdate -group stimulus /tb/client_stimulus_i/send_ask_radar_status
+add wave -noupdate -group stimulus /tb/client_stimulus_i/send_ask_data
+add wave -noupdate -group stimulus /tb/client_stimulus_i/dv_o
+add wave -noupdate -group stimulus /tb/client_stimulus_i/data_o
+add wave -noupdate -group stimulus /tb/client_stimulus_i/stm
+add wave -noupdate -group stimulus /tb/client_stimulus_i/s_dv
+add wave -noupdate -group stimulus /tb/client_stimulus_i/s_data
+add wave -noupdate -group stimulus /tb/client_stimulus_i/cnt
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/reset
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/clk
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/i_dv
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/i_ce
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/i_data
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/o_regs
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/correct_prmb_cnt
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/correct_mac_cnt
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/udp_header_cnt
+add wave -noupdate -group udp_rx /tb/top_top_i/top_receiver_i/udp_rx_i/stm
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/clk
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/data_i
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/dv_i
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/data_o
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/ce_o
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/dv_o
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/cnt_conv
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/dv_i_1w
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/dv_i_2w
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/s_ce
+add wave -noupdate -expand -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/data_reg
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {7626660000 ps} 0}
-configure wave -namecolwidth 273
+WaveRestoreCursors {{Cursor 1} {99258940 ps} 0}
+quietly wave cursor active 1
+configure wave -namecolwidth 265
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
-configure wave -signalnamewidth 0
+configure wave -signalnamewidth 1
 configure wave -snapdistance 10
 configure wave -datasetprefix 0
 configure wave -rowmargin 4
@@ -171,4 +154,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {10500 us}
+WaveRestoreZoom {98765507 ps} {100064974 ps}

@@ -111,6 +111,10 @@ type Tmem is array(0 to 7) of integer;
 constant mem:Tmem:=(-1000,-1000,0,1000,1000,50,50,50);
 
 signal localc,allalg:integer:=0;
+signal data_send8:std_logic_vector(7 downto 0);
+signal data_send4:std_logic_vector(3 downto 0);
+signal dv_send8,dv_send4,send_ask_radar_status,mac_clk_div2:std_logic:='0';
+
 
 begin
 
@@ -171,6 +175,15 @@ begin
 	end if;
 	sweep_ce_w1<=sweep_ce;
 
+
+
+	case conv_integer(cccnt) is
+	when 30=>
+		send_ask_radar_status<='1';
+	when others=>
+		send_ask_radar_status<='0';
+	end case;
+
 --	data_from_algorithm<=data_to_algorithm;
 	ce_from_algorithm<=ce_to_algorithm;
 	finish_from_algorithm<=finish_to_algorithm;
@@ -205,7 +218,7 @@ end process;
 
 
 
-top_sender_i: entity work.top_sender
+top_top_i: entity work.top_top
 	generic map(
 		SWAP_SIGNALBITS=>1,
 		CLKCORE_EQUAL_CLKSIGNAL=>0
@@ -213,7 +226,7 @@ top_sender_i: entity work.top_sender
 	 port map(
 		 reset=>reset,
 		 clk_signal =>clk_signal,
-		 clk_core =>clk125,--clk_signal,--clk125,--clk_signal,--clk125, --# must be quickly than clk_signal
+		 clk_core =>clk125,
 		 clk_mac =>clk125,
 			
 		 payload_is_counter=>'0',
@@ -231,7 +244,41 @@ top_sender_i: entity work.top_sender
 		 data_out=>half_b,
 		 dv =>dv,
 
-		 tp=>open
+		 data_i =>data_send4,
+		 dv_i =>dv_send4,
+
+		 tp_tx=>open,
+		 tp_rx=>open
+	     );
+
+
+client_stimulus_i: entity work.client_stimulus
+	 port map(
+		 reset=>reset,
+		 ce => mac_clk_div2,
+		 clk =>clk125,
+		 send_ask_radar_status=>send_ask_radar_status,
+		 send_ask_data=>'0',
+
+		 dv_o=>dv_send8,
+		 data_o=>data_send8
+	     );
+
+
+
+macbits_conv8to4_i: entity work.macbits_conv8to4
+	generic map(
+		MSB=>1
+		)
+	 port map(
+		 clk=>clk125,
+
+		 data_i=>data_send8,
+		 ce_i =>mac_clk_div2,
+		 dv_i =>dv_send8,
+
+		 data_o =>data_send4,
+		 dv_o =>dv_send4
 	     );
 
 
@@ -301,6 +348,8 @@ begin
 	if dv='0' and dv_1w='1' then
 		cnt_udp_frame_reg<=cnt_udp_frame;
 	end if;
+
+	mac_clk_div2<=not mac_clk_div2;
 
  end if;
 end process;

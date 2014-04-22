@@ -14,15 +14,14 @@ entity client_stimulus is
 		 send_ask_data: in std_logic;
 
 		 dv_o: out std_logic;
-		 data_o: out std_logic_vector(7 downto 0);
-
+		 data_o: out std_logic_vector(7 downto 0)
 	     );
 end client_stimulus;
 
 
 architecture client_stimulus of client_stimulus is
 
-type Task_radar_status_mem is array (0 to 50-1) of std_logic_vector(7 downto 0);
+type Task_radar_status_mem is array (0 to 50-1+3) of std_logic_vector(7 downto 0);
 --constant ask_radar_status_mem:Task_radar_status_mem:=  ( x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5",
 --x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"00",x"1E",x"68",x"AE",x"76",x"FF",x"08",x"00",x"45",x"00",
 --x"02",x"1E",x"00",x"00",x"00",x"00",x"40",x"11",x"E2",x"75",x"C0",x"A8",x"0A",x"0A",x"C0",x"A8",
@@ -56,37 +55,43 @@ begin
 
 process(clk)
 begin
-	if reset='1' then
-		stm<=WAITING;
-	else
-		case stm is
-		when WAITING=>
-			if send_ask_radar_status='1' then
-				stm<=SEND_01;
-			end if;	
-			s_data<=x"00";
-			s_dv<='0';
-			cnt<=x"00";
-		when SEND_01=>
-			if unsigned(cnt)<50-1 then
-				cnt<=cnt+1;
-			else
-				stm<=SEND_CRC;
-				cnt<=x"00";
-			end if;
-			s_data<=ask_radar_status_mem(conv_integer(cnt));
-            s_dv<='1';
-		when SEND_CRC=>
-			s_data<=x"FF";
-			s_dv<='1';
-			if unsigned(cnt)<4-1 then
-				cnt<=cnt+1;
-			else
-				stm<=WAITING;
-			end if;
-
-		when others=>
-		end case;
+	if rising_edge(clk) then
+		if reset='1' then
+			stm<=WAITING;
+		else
+			if ce='1' then
+				case stm is
+				when WAITING=>
+					if send_ask_radar_status='1' then
+						stm<=SEND_01;
+					end if;	
+					s_data<=x"00";
+					s_dv<='0';
+					cnt<=x"00";
+				when SEND_01=>
+					if unsigned(cnt)<50-1 then
+						cnt<=cnt+1;
+					else
+						stm<=SEND_CRC;
+						cnt<=x"00";
+					end if;
+					s_data<=ask_radar_status_mem(conv_integer(cnt));
+                    s_dv<='1';
+				when SEND_CRC=>
+					s_data<=x"FF";
+					s_dv<='1';
+					if unsigned(cnt)<4-1 then
+						cnt<=cnt+1;
+					else
+						stm<=WAITING;
+					end if;
+        
+				when others=>
+				end case;
+				data_o<=s_data;
+				dv_o<=s_dv;
+			end if; --# ce		
+		end if;
 	end if;
 end process;
 

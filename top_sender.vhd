@@ -2,6 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
+library work;
+use work.regs_pack.all;
 
 entity top_sender is
 	generic(
@@ -29,6 +31,7 @@ entity top_sender is
 		 data_out: out std_logic_vector(3 downto 0);
 		 dv : out std_logic;
 
+		 to_tx_module: in Trx2tx_wires;
 		 tp: out std_logic_vector(7 downto 0)
 	     );
 end top_sender;

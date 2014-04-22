@@ -90,13 +90,22 @@ vcom assert_pack.vhd
 
 vcom corestrob.vhd
 
+vcom protcol_rtl/regs_pack.vhd
+vcom protcol_rtl/udp_rx.vhd 
+vcom protcol_rtl/client_stimulus.vhd
+
 vcom make_abs.vhd
 vcom make_adc.vhd
 vcom make_fft.vhd
 vcom fifo_all.vhd
 vcom send_udp.vhd 
 
+vcom macbits_conv4to8.vhd
+vcom macbits_conv8to4.vhd 
+
+vcom top_receiver.vhd 
 vcom top_sender.vhd
+vcom top_top.vhd
 
 vcom tb.vhd
 
