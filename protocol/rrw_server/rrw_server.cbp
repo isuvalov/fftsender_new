@@ -75,6 +75,11 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="rrw_server.cfg" />
+		<Unit filename="rtl/connect.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rtl/connect.h" />
+		<Unit filename="rtl/data_s.h" />
 		<Unit filename="src/CfgClass.cpp" />
 		<Unit filename="src/RrwProtocol.cpp" />
 		<Unit filename="src/Timer.cpp" />

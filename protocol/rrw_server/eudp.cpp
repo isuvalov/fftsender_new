@@ -1,11 +1,24 @@
 #include<common.h>
 #include<eudp.h>
 
+#define RTL_SIMULATION 1
+
+#ifdef RTL_SIMULATION
+//	#include "..\rtl\connect.h"
+	#include "..\rtl\connect.c"
+	//#include "..\rtl\data_s.h"
+	TCHAR RegFileName[] =TEXT("Global\\cpu_8_reg");
+#endif /* RTL_SIMULATION */
+
+
 #ifdef WIN32
 static WSADATA wsa;
 #endif
 
 int eudp_start() {
+#ifdef RTL_SIMULATION
+    ConnectInit (RegFileName);
+#endif  /* RTL_SIMULATION  */
 #ifdef WIN32
     if(WSAStartup(MAKEWORD(2,2),&wsa)!=0)
         return -1;
@@ -366,21 +379,66 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
   return rv;
 }
 
-int eudp_recv(eudp_t *hnd, char *buf, int len) {
-    memset(buf,0,sizeof(char)*len);
-    return recv(hnd->sock,buf,len,0);
-}
+
 
 int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
   int addr_len = sizeof(struct sockaddr);
   return recvfrom(hnd->sock,buf,sizeof(char)*len,0,(struct sockaddr *)from,&addr_len);
 }
 
-int eudp_send(eudp_t *hnd, char *buf, int len) {
-    return sendto(hnd->sock,buf,len,0,(struct sockaddr *)&(hnd->dest),sizeof(hnd->dest));
-}
+#ifndef RTL_SIMULATION
+	int eudp_recv(eudp_t *hnd, char *buf, int len) {
+	    memset(buf,0,sizeof(char)*len);
+	    return recv(hnd->sock,buf,len,0);
+	}
 
-int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
-    return sendto(hnd->sock,buf,len,0,(struct sockaddr *)dest,sizeof(eudp_addr_t));
-}
+	int eudp_send(eudp_t *hnd, char *buf, int len) {
+	    return sendto(hnd->sock,buf,len,0,(struct sockaddr *)&(hnd->dest),sizeof(hnd->dest));
+	}
+
+	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
+	    return sendto(hnd->sock,buf,len,0,(struct sockaddr *)dest,sizeof(eudp_addr_t));
+	}
+#else
+	int eudp_recv(eudp_t *hnd, char *buf, int len) {
+		int val,cnt,addr;
+	    memset(buf,0,sizeof(char)*len);
+		cnt=0;
+        addr=0;
+		while(1)
+		{
+			val=RdReg16(addr);
+			if ((val>>7)&1)
+			{
+				buf[cnt]=val&0xFF;
+				cnt++;
+				if (cnt>=len) break;
+			}
+		}
+		return 0;
+	}
+
+
+	int eudp_send(eudp_t *hnd, char *buf, int len) {
+		int i,addr,vall;
+		vall=0; addr=0;
+		WrReg16(addr,vall);
+		for (i=0;i<len;i++)
+			WrReg16(addr,(buf[i]&0xFF)|(1<<8));
+		WrReg16(addr,vall);
+	    return 0;
+	}
+
+	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
+		int i;
+		WrReg16(0,0);
+		for (i=0;i<len;i++)
+			WrReg16(0,buf[i]|(1<<8));
+		WrReg16(0,0);
+	    return 0;
+	}
+
+
+#endif /* RTL_SIMULATION */
+
 
