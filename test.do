@@ -107,11 +107,13 @@ vcom top_receiver.vhd
 vcom top_sender.vhd
 vcom top_top.vhd
 
+vlog protcol_rtl/vpi_cpu/cpu.v
+vcom protcol_rtl/vpi_cpu/cpu_wrapper.vhd 
+
 vcom tb.vhd
 
+do modelsim_my.tcl
 
-vsim -novopt -t ps work.tb
+vsim -novopt -t ps work.tb -pli protcol_rtl/dll.dll 
 do wave.do
-#run -all
 
-# vcom D:/Projects/Nienshans/fft_sender_v4/synthes/simulation/modelsim/fftsenderv4.vho

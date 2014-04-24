@@ -102,6 +102,9 @@ signal finish_from_algorithm:  std_logic;
 
 signal byte1,byte2:std_logic_vector(7 downto 0);
 
+signal datafromcpu,datatocpu:std_logic_vector(15 downto 0);
+signal cpu_wr,cpu_rd:std_logic;
+
 
 signal cnt_udp_frame,cnt_udp_frame_reg,alg_cnt:integer:=0;
 
@@ -215,6 +218,15 @@ begin
  end if;
 end process;
 
+cpu_i: entity work.cpu_wrapper
+    Port map(clk =>clk125,
+		  reset =>reset,
+		  oaddr=>open,
+		  odata =>datafromcpu,
+		  wr =>cpu_wr,
+		  rd =>cpu_rd,
+		  idata =>datatocpu
+	);
 
 
 
