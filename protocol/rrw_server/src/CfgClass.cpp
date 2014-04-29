@@ -31,6 +31,11 @@ bool CfgClass::is_exist(const char* name) {
 
 void CfgClass::load(string cfg_root)
 {
+    #ifdef RTL_SIMULATION
+        this->cfg_root = cfg_root;
+        return;
+    #endif // RTL_SIMULATION
+
     if (config != 0)
         delete config;
     // Read the file. If there is an error, report it and exit.
@@ -54,6 +59,9 @@ void CfgClass::load(string cfg_root)
 
 bool CfgClass::isLoaded()
 {
+    #ifdef RTL_SIMULATION
+        return true;
+    #endif // RTL_SIMULATION
     return config != 0;
 
 }

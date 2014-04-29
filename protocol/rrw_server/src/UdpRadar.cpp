@@ -5,10 +5,14 @@ UdpRadar::UdpRadar(string cfg_root):UdpConnection(cfg_root)
     if (!isInit())
         return;
 
-    timeout = (int) cfg["timeout"];
-    pkt_params.count = cfg["packet.count"];
-    pkt_params.size = cfg["packet.size"];
-    pkt_params.unit = cfg["packet.unit"];
+
+    ip ="127.0.0.1";
+    port = 65002;
+
+    timeout = 100;
+    pkt_params.count = 4;
+    pkt_params.size = 514;
+    pkt_params.unit = 2;
 
     packet.assign(pkt_params.size,'\0');
 
