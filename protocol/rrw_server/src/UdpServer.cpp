@@ -7,11 +7,14 @@ UdpServer::UdpServer(bool start_after_init, string cfg_root):UdpConnection(cfg_r
     if (!isInit())
         return;
     init_status = false;
-    timeout_rcv = (int) cfg["timeout_rcv"];
-    timeout_snd = (int) cfg["timeout_snd"];
+    timeout_rcv = 10;
+    timeout_snd = 1000;
     request.reserve(REQ_BUF_SZ);
     init_status = true;
     pthread_mutex_init(&mtx,NULL);
+
+    ip ="127.0.0.1";
+    port = 60606;
 
     if (start_after_init)
         start();
