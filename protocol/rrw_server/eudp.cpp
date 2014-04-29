@@ -408,13 +408,15 @@ int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
 		while(1)
 		{
 			val=RdReg16(addr);
-			if ((val>>7)&1)
+			if ((val>>8)&1)
 			{
+				printf("%x ",val);
 				buf[cnt]=val&0xFF;
 				cnt++;
 				if (cnt>=len) break;
 			}
 		}
+		printf("\n");
 		return 0;
 	}
 

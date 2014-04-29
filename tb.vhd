@@ -103,18 +103,18 @@ signal finish_from_algorithm:  std_logic;
 signal byte1,byte2:std_logic_vector(7 downto 0);
 
 signal datafromcpu,datatocpu:std_logic_vector(15 downto 0);
-signal cpu_wr,cpu_rd:std_logic;
+signal cpu_wr,cpu_rd,dv_send8_cpu:std_logic;
 
 
 signal cnt_udp_frame,cnt_udp_frame_reg,alg_cnt:integer:=0;
 
-signal signal_start:std_logic;
+signal signal_start,cpu_rd_1w,cpu_rd_parse:std_logic;
 
 type Tmem is array(0 to 7) of integer;
 constant mem:Tmem:=(-1000,-1000,0,1000,1000,50,50,50);
 
 signal localc,allalg:integer:=0;
-signal data_send8:std_logic_vector(7 downto 0);
+signal data_send8,data_send8_cpu:std_logic_vector(7 downto 0);
 signal data_send4:std_logic_vector(3 downto 0);
 signal dv_send8,dv_send4,send_ask_radar_status,mac_clk_div2:std_logic:='0';
 
@@ -230,6 +230,21 @@ cpu_i: entity work.cpu_wrapper
 
 
 
+datatocpu<="0000000"&dv_send8_cpu&data_send8_cpu;
+
+client_stimulus_cpu_i: entity work.client_stimulus_cpu
+	 port map(
+		 reset=>reset,
+		 ce => cpu_rd_parse,
+		 clk =>clk125,
+		 send_ask_radar_status=>send_ask_radar_status,
+		 send_ask_data=>'0',
+
+		 dv_o=>dv_send8_cpu,
+		 data_o=>data_send8_cpu
+	     );
+
+
 top_top_i: entity work.top_top
 	generic map(
 		SWAP_SIGNALBITS=>1,
@@ -323,10 +338,14 @@ ethernet2hexfile_i: entity work.ethernet2hexfile
 		 DataToSave =>half_b
 	     );
 
+cpu_rd_parse<='1' when cpu_rd='1' and cpu_rd_1w='0' else '0';
 
 process (clk125) is
 begin
  if rising_edge(clk125) then
+
+
+    cpu_rd_1w<=cpu_rd;
 	byted_w1<=byted;
 	if dv_cnt='1' then
 		byted2<=byted_w1;

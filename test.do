@@ -93,6 +93,7 @@ vcom corestrob.vhd
 vcom protcol_rtl/regs_pack.vhd
 vcom protcol_rtl/udp_rx.vhd 
 vcom protcol_rtl/client_stimulus.vhd
+vcom protcol_rtl/client_stimulus_cpu.vhd
 
 vcom make_abs.vhd
 vcom make_adc.vhd
