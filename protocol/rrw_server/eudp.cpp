@@ -420,20 +420,27 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	}
 
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
-		int val,cnt,addr;
+		int val,cnt,addr,work;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
         addr=0;
+        work=0;
 		while(1)
 		{
 			val=RdReg16(addr);
-			if ((val>>7)&1)
+			if ((val>>8)&1)
 			{
+                work=1;
+				printf("%x ",val);
 				buf[cnt]=val&0xFF;
 				cnt++;
-				if (cnt>=len) break;
+			}
+			else {
+                if (work) break;
 			}
 		}
+		printf(" (len=%i) \n",cnt);
+		len=cnt;
 		return 0;
 	}
 
@@ -441,6 +448,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	int eudp_send(eudp_t *hnd, char *buf, int len) {
 		int i,addr,vall;
 		vall=0; addr=0;
+		printf("send!\n");
 		WrReg16(addr,vall);
 		for (i=0;i<len;i++)
 			WrReg16(addr,(buf[i]&0xFF)|(1<<8));

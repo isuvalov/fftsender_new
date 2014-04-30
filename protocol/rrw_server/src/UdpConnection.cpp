@@ -19,6 +19,11 @@ UdpConnection::~UdpConnection()
 
 void UdpConnection::init() {
 
+    #ifdef RTL_SIMULATION
+        init_status = true;
+        return;
+    #endif // RTL_SIMULATION
+
     ip = (const char*) cfg["ip"];
     port = (int) cfg["port"];
     init_status = true;
