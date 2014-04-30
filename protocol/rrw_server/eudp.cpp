@@ -381,12 +381,13 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 
 
 
-int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
-  int addr_len = sizeof(struct sockaddr);
-  return recvfrom(hnd->sock,buf,sizeof(char)*len,0,(struct sockaddr *)from,&addr_len);
-}
 
 #ifndef RTL_SIMULATION
+    int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
+      int addr_len = sizeof(struct sockaddr);
+      return recvfrom(hnd->sock,buf,sizeof(char)*len,0,(struct sockaddr *)from,&addr_len);
+    }
+
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
 	    memset(buf,0,sizeof(char)*len);
 	    return recv(hnd->sock,buf,len,0);
@@ -400,6 +401,24 @@ int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
 	    return sendto(hnd->sock,buf,len,0,(struct sockaddr *)dest,sizeof(eudp_addr_t));
 	}
 #else
+    int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
+		int val,cnt,addr;
+	    memset(buf,0,sizeof(char)*len);
+		cnt=0;
+        addr=0;
+		while(1)
+		{
+			val=RdReg16(addr);
+			if ((val>>7)&1)
+			{
+				buf[cnt]=val&0xFF;
+				cnt++;
+				if (cnt>=len) break;
+			}
+		}
+		return 0;
+	}
+
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
 		int val,cnt,addr;
 	    memset(buf,0,sizeof(char)*len);
