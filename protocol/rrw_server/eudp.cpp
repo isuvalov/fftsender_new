@@ -401,22 +401,27 @@ int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
 	}
 #else
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
-		int val,cnt,addr;
+		int val,cnt,addr,work;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
         addr=0;
+        work=0;
 		while(1)
 		{
 			val=RdReg16(addr);
 			if ((val>>8)&1)
 			{
+                work=1;
 				printf("%x ",val);
 				buf[cnt]=val&0xFF;
 				cnt++;
-				if (cnt>=len) break;
+			}
+			else {
+                if (work) break;
 			}
 		}
-		printf("\n");
+		printf(" (len=%i) \n",cnt);
+		len=cnt;
 		return 0;
 	}
 
@@ -424,6 +429,7 @@ int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
 	int eudp_send(eudp_t *hnd, char *buf, int len) {
 		int i,addr,vall;
 		vall=0; addr=0;
+		printf("send!\n");
 		WrReg16(addr,vall);
 		for (i=0;i<len;i++)
 			WrReg16(addr,(buf[i]&0xFF)|(1<<8));

@@ -29,12 +29,12 @@ type Task_radar_status_mem is array (0 to 3-1) of std_logic_vector(7 downto 0);
 
 
 constant ask_radar_status_mem:Task_radar_status_mem:=  (  
-      x"5A",  x"33",  x"00"  );  --# Послать запрос состояния радара (3 байта): 0x5A (признак), номер запроса, 0x00 (состояние радара).
+      x"5A",  x"00",  x"00"  );  --# Послать запрос состояния радара (3 байта): 0x5A (признак), номер запроса, 0x00 (состояние радара).
 
 
 
 constant ask_data_mem:Task_radar_status_mem:=  ( 
-      x"5A",  x"33",  x"01"  );  --# запрос данных (3 байта): 0x5A (признак), номер запроса, 0x01 (получить данные).
+      x"5A",  x"00",  x"01"  );  --# запрос данных (3 байта): 0x5A (признак), номер запроса, 0x01 (получить данные).
 								 --# Высылается если флаг have_unread_measurement=1 высланный по запросу ask_radar_status_mem
 
 
@@ -66,7 +66,7 @@ begin
 					if unsigned(cnt)<3-1 then
 						cnt<=cnt+1;
 					else
-						stm<=SEND_CRC;
+						stm<=WAITING;--SEND_CRC;
 						cnt<=x"00";
 					end if;
 					s_data<=ask_radar_status_mem(conv_integer(cnt));
