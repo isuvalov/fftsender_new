@@ -148,7 +148,7 @@ add wave -noupdate -expand -group cpu /tb/cpu_i/oaddrE
 add wave -noupdate -expand -group cpu /tb/cpu_i/odataE
 add wave -noupdate -expand -group cpu /tb/cpu_i/idataE
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2518694524 ps} 0}
+WaveRestoreCursors {{Cursor 1} {34748356 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 265
 configure wave -valuecolwidth 100
@@ -164,4 +164,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {2486423494 ps} {2804670777 ps}
+WaveRestoreZoom {29232288 ps} {42172695 ps}

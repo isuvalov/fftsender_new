@@ -402,20 +402,27 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	}
 #else
     int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
-		int val,cnt,addr;
+		int val,cnt,addr,work;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
         addr=0;
+        work=0;
 		while(1)
 		{
 			val=RdReg16(addr);
-			if ((val>>7)&1)
+			if ((val>>8)&1)
 			{
+                work=1;
+				printf("%x ",val);
 				buf[cnt]=val&0xFF;
 				cnt++;
-				if (cnt>=len) break;
+			}
+			else {
+                if (work) break;
 			}
 		}
+		printf(" (len=%i) \n",cnt);
+		len=cnt;
 		return 0;
 	}
 
@@ -458,6 +465,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
 		int i;
+		printf("send to! (%i)\n",len);
 		WrReg16(0,0);
 		for (i=0;i<len;i++)
 			WrReg16(0,buf[i]|(1<<8));
