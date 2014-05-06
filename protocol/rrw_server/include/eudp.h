@@ -53,11 +53,11 @@ typedef struct {
     int sz_buf_rd;
     char *buf_wr;
     int sz_buf_wr;
-    #ifndef RTL_SIMULATION
+    #ifdef RTL_SIMULATION
         static int rx_busy;
     #endif // RTL_SIMULATION
 } eudp_t;
-#ifndef RTL_SIMULATION
+#ifdef RTL_SIMULATION
 int eudp_t::rx_busy = 0;
 #endif // RTL_SIMULATION
 
