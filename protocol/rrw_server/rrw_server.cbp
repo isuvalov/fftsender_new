@@ -16,6 +16,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-DRTL_SIMULATION=1" />
 					<Add directory="include/" />
 					<Add directory="include/nc" />
 					<Add directory="include/pthread" />

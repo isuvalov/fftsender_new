@@ -5,8 +5,8 @@ module cpu
                 ADDR_WIDTH = 256,
                 DATA_WIDTH = 256,
                 TRN_WAIT   = 64'h10,
-                WR_WAIT    = 64'h1,
-                RD_WAIT    = 64'h1
+                WR_WAIT    = 64'h5,
+                RD_WAIT    = 64'h5
   )
 (
   input  wire iclk,
