@@ -403,6 +403,9 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 #else
     int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
 		int val,cnt,addr,work;
+
+		//while(!txing_now) {;;}
+        receiving_now=1;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
         addr=0;
@@ -423,11 +426,15 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		}
 		printf(" (len=%i) \n",cnt);
 		len=cnt;
+        receiving_now=0;
 		return 0;
 	}
 
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
 		int val,cnt,addr,work;
+
+		//while(!txing_now) {;;}
+        receiving_now=1;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
         addr=0;
@@ -448,6 +455,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		}
 		printf(" (len=%i) \n",cnt);
 		len=cnt;
+		receiving_now=0;
 		return 0;
 	}
 
@@ -464,12 +472,24 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	}
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
-		int i;
-		printf("send to! (%i)\n",len);
+		int i,vall;
+
+//		txing_now=1;
+		printf("send to! (%i): ",len);
+		while(!receiving_now) {;;}
 		WrReg16(0,0);
-		for (i=0;i<len;i++)
-			WrReg16(0,buf[i]|(1<<8));
+		printf("|");
+		for (i=0;i<16;i++)
+            {
+//                printf("%x ",buf[i]&0xFF);
+//                WrReg16(0,(buf[i]&0xFF)|(1<<8));
+                printf("%x ",i+1);
+                vall=i+1;
+                WrReg16(0,vall);
+            }
 		WrReg16(0,0);
+		printf("|.\n");
+//		txing_now=0;
 	    return 0;
 	}
 

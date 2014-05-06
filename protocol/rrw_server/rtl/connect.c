@@ -12,6 +12,8 @@ extern TCHAR RegFileName[];
   MemFile_s MemFile;
   RegData_p RegData;
 
+int receiving_now,txing_now;
+
 int MemFileOpen (MemFile_p MemFile, char *FileNameStr)
 {
 
@@ -49,6 +51,8 @@ int ConnectInit (char *RegFileName)
     while (MemFileOpen (&MemFile, RegFileName) != 0) {};
   }
   printf ("MSim is start\n");
+  txing_now=0;
+  receiving_now=0;
 
   RegData  = (RegData_p) MemFile.Buff_p;
   RegData->Trn = IDLE;
@@ -109,6 +113,8 @@ int RdReg256 (int *Addr, int *RdData)
 
 int WrReg16 (int Addr, int WrData)
 {
+    //while(!receiving_now) {;;}
+//    txing_now=1;
     RegData->addr  [0] = Addr;
     RegData->odata [0] = WrData;
 
@@ -116,18 +122,21 @@ int WrReg16 (int Addr, int WrData)
     while (RegData->Ack != 1) {};
     RegData->Trn = IDLE;
     while (RegData->Ack != 0) {};
+    //txing_now=0;
 
     return 0;
 }
 
 int RdReg16 (int Addr)
 {
+ // receiving_now=1;
+//  while(!txing_now) {;;}
   RegData->addr  [0] = Addr;
 
   RegData->Trn = RD_REG;
   while (RegData->Ack != 1) {};
   RegData->Trn = IDLE;
   while (RegData->Ack != 0) {};
-
+  //receiving_now=0;
   return (RegData->idata [0]);
 }
