@@ -405,6 +405,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		int val,cnt,addr,work;
 		if (hnd->rx_busy)
             return 0;
+        hnd->rx_busy = 1;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
         addr=0;
@@ -425,12 +426,14 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		}
 		printf(" (len=%i) \n",cnt);
 		len=cnt;
+		hnd->rx_busy = 0;
 		return 0;
 	}
 
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
 	    if (hnd->rx_busy)
             return 0;
+		hnd->rx_busy = 1;
 		int val,cnt,addr,work;
 	    memset(buf,0,sizeof(char)*len);
 		cnt=0;
@@ -452,6 +455,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		}
 		printf(" (len=%i) \n",cnt);
 		len=cnt;
+		hnd->rx_busy = 0;
 		return 0;
 	}
 
@@ -469,6 +473,8 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
 		int i;
+		if (hnd->rx_busy)
+            return 0;
 		hnd->rx_busy = 1;
 		printf("send to! (%i)\n",len);
 		WrReg16(0,0);
