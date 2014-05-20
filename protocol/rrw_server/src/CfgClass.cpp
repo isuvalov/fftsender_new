@@ -31,22 +31,17 @@ bool CfgClass::is_exist(const char* name) {
 
 void CfgClass::load(string cfg_root)
 {
-    #ifdef RTL_SIMULATION
-        this->cfg_root = cfg_root;
-        return;
-    #endif // RTL_SIMULATION
-
     if (config != 0)
         delete config;
+
     // Read the file. If there is an error, report it and exit.
-    try {;
+    try {
         config = new Config();
         config->readFile(CFG_FILE);
-
         this->cfg_root = cfg_root;
 
-        string msg = "config " + (cfg_root.empty() ? "" : "for " + cfg_root) + " is loaded successfully!\n";
-        cout << msg;
+        //string msg = "config " + (cfg_root.empty() ? "" : "for " + cfg_root) + " is loaded successfully!\n";
+        //cout << msg;
     }
     catch(const FileIOException &fioex) {
         std::cerr << "I/O error while reading file." << std::endl;
@@ -59,9 +54,6 @@ void CfgClass::load(string cfg_root)
 
 bool CfgClass::isLoaded()
 {
-    #ifdef RTL_SIMULATION
-        return true;
-    #endif // RTL_SIMULATION
     return config != 0;
 
 }
@@ -84,6 +76,7 @@ const Setting& CfgClass::operator[](const char* name)
 }
 
 //return array of points (X,Y)
+/*
 points_t CfgClass::read_array(const char* name)
 {
     string param_name = name;
@@ -106,3 +99,4 @@ points_t CfgClass::read_array(const char* name)
     }
     return points;
 }
+*/

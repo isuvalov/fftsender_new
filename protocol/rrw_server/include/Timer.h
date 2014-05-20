@@ -14,7 +14,8 @@ class Timer
         ~Timer();
         void start();
         //void stop();
-        unsigned int elapsed_ms();
+        unsigned long elapsed_ms();
+        double elapsed_db_ms();
     protected:
     private:
         timeval t_begin;

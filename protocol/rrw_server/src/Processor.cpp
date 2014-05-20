@@ -1,4 +1,6 @@
 #include "Processor.h"
+#include<math.h>
+#include<fstream>
 
 Processor::Processor(string cfg_root)
 {
@@ -15,14 +17,146 @@ Processor::~Processor()
 
 void Processor::init()
 {
-
-    threshold = cfg.read_array("threshold_polyline");
-    window.push_back((int)cfg["window.min"]);
-    window.push_back((int)cfg["window.max"]);
-
-
+    status_find_trg = false;
 }
 
+
+void Processor::get_targets(vector<target_t> *targets_proto, capture_data_t* capture_data, unsigned short time_ms)
+{
+    unsigned char MAX_COUNT_TRG_LOST = 5;
+    this->time_ms = time_ms;
+    rrw_targets_t* new_targets = sweeps.get_targets(capture_data);
+
+    if (targets.empty() && new_targets->empty()) {
+        //cout << "TARGETS ARE LOST :(" << endl;
+    } else {
+        detect_targets(&targets, new_targets);
+
+        if (!targets.empty()) {
+            rrw_targets_t::iterator itr_trg = targets.begin();
+            for (; itr_trg < targets.end(); itr_trg++) {
+                if (itr_trg == targets.end())
+                    break;
+                if ((*itr_trg).is_detected == false) {
+                    (*itr_trg).count_lost++;
+                    if ((*itr_trg).count_lost == MAX_COUNT_TRG_LOST) {
+                        //cout << " ---- ERASE TARGET: " << (*itr_trg).ID << endl;
+                        targets.erase(itr_trg);
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < targets.size(); i++) {
+        target_t trg;
+        trg.dist = targets[i].s;
+        trg.spd = targets[i].v;
+        trg.spd_status = 0;
+        targets_proto->push_back(trg);
+
+        /*
+            cout.precision(1);
+            cout.setf(std::ios::fixed, std::ios::floatfield);
+            cout << "Trg " << targets[i].ID << ": vel = " << targets[i].v << " km/h, dist = " << targets[i].s << " m;";
+            if (targets[i].count_lost > 0)
+                cout << "---- Is LOST " << targets[i].count_lost << " time. -----" << endl;
+            else
+                cout << " status = " << (targets[i].is_updated ? " updated" : "new target.") << endl;
+        */
+    }
+    //cout << endl << "---------------------------" << endl;
+}
+
+void Processor::detect_targets(rrw_targets_t *curr_targets, rrw_targets_t *new_targets) {
+
+    for(int i = 0; i < curr_targets->size(); i++)
+        (*curr_targets)[i].is_detected = false;
+
+    unsigned long t_stamp = global_timer.elapsed_ms();
+    double t = double(t_stamp) * 1e-3;
+
+    for(int j = 0; j < new_targets->size(); j++) {
+
+        rrw_target_t *new_trg = &(*new_targets)[j];
+        new_trg->t = t;
+
+        for(int i = 0; i < curr_targets->size(); i++) {
+            rrw_target_t *curr_trg = &(*curr_targets)[i];
+            if (curr_trg->is_detected)
+                continue;
+
+            if (fabs(curr_trg->s - new_trg->s) > 2.5) //2.5 м - это максимальное смещение за 100мс при 90км/ч
+                continue;
+                //double teor_s = targets[i].s + targets[i].v * t /*+ a * t*t / 2*/;//теоретическая координата цели
+                //if ( fabs(teor_s - new_trg.s) > 3 )
+                //    continue;
+
+                //double ofst_v = new_trg.v - targets[i].v;
+
+                /*
+                double a = (new_trg.v - targets[i].v) / t;
+                cout << "new v = " << new_trg.v << "; old v = " << targets[i].v << " t = "<<t <<endl;
+                if (fabs(a) >= 2.5)//2 m/s2 - accelerance for fast auto
+                {
+                    cout << " NO: accel" << endl;
+                    continue;
+                }
+                */
+
+                new_trg->is_detected = true;
+                new_trg->is_updated = true;
+                new_trg->ID = curr_trg->ID;
+                new_trg->is_moved = curr_trg->s != new_trg->s;
+                new_trg->is_speed_const = curr_trg->v == new_trg->v;
+                *curr_trg = *new_trg;
+                break;
+        }
+        if (!new_trg->is_detected) {
+            new_trg->is_detected = true;
+
+            if (!curr_targets->empty())
+               new_trg->ID = (*(curr_targets->end() - 1)).ID++;
+            curr_targets->push_back(*new_trg);
+        }
+    }
+}
+
+void Processor::threshold_read(vector<int> *th) {
+    if (!th)
+        return;
+    th->clear();
+    ifstream f(THRESHOLD_FILE);
+    if (!f)
+        return;
+    int val;
+
+    while (!(f >> val).eof()) {
+        th->push_back(val);
+    }
+    f.close();
+}
+
+void Processor::threshold_write(vector<int> *th) {
+    if (!th)
+        return;
+
+    ofstream f(THRESHOLD_FILE);
+    if (!f) {
+        cout << "ERROR OPEN THRESHOLD FILE" << endl;
+        return;
+    }
+
+    cout << endl << "SERVER: writing threshold in file...";
+    for (int i = 0; i < th->size(); i++)
+        f << th->at(i) << endl;
+    f.close();
+    threshold = *th;
+    cout << "OK!" << endl;
+}
+
+
+/* Старая версия, когда порого определялся по ломаной кривой
 bool Processor::is_above_threshold (point_t point)
 {
     if (threshold.empty())
@@ -44,78 +178,4 @@ bool Processor::is_above_threshold (point_t point)
     }
     return false;
 }
-
-struct sort_condition_t {
-    int a;
-    bool operator() (int i, int j) { return abs(i - a) < abs(j - a);};
-};
-
-void Processor::find_target(capture_data_t capture_data)
-{
-    this->capture_data = capture_data;
-
-    peaks.clear();
-    point_t::iterator itr;
-
-    maximumes.clear();
-
-    for (int i = 0; i < capture_data.size(); i++) {
-        peaks_sweep[i].clear();
-
-        point_t arr_max;
-        maximumes.push_back(arr_max);
-
-        search_maximums(capture_data[i].begin(), capture_data[i].end(), i);
-        /*
-        itr = max_element(capture_data[i].begin(), capture_data[i].end());
-        point_t peak;
-        peak.push_back(itr - capture_data[i].begin()); //save harm
-        peak.push_back(*itr);//save power
-        peaks.push_back(peak);
-        cout << "i_" << i << " = " << peak[0] << "; ";
-        */
-        cout << (i==0 ? "sweep rise: " : "sweep fall: ");
-        for (int j = 0; j < peaks_sweep[i].size(); j++) {
-            cout << "(" << peaks_sweep[i][j][0] << ", " << peaks_sweep[i][j][1] << "); ";
-        }
-        cout << endl;
-    }
-    cout << "-----------------" << endl;
-
-    for(int sweep = 0; sweep < 2; sweep++)
-        std::sort(maximumes[sweep].begin(), maximumes[sweep].end());
-
-
-    for(int i = 0; i < maximumes[0].size(); i++) {
-        std::sort(maximumes[sweep].begin(), maximumes[sweep].end());
-
-    }
-
-}
-
-
-
-void Processor::search_maximums(point_t::iterator itr_begin, point_t::iterator itr_end, int sweep)
-{
-    point_t::iterator itr_max;
-    itr_max = max_element(itr_begin, itr_end);
-    int harm = itr_max - itr_begin;
-    unsigned short val = *itr_max;
-
-    if (dbm(double(val), harm) < -50 )
-        return;
-    //Save max
-    point_t point;
-    point.push_back(harm);
-    point.push_back(val);
-    peaks_sweep[sweep].push_back(point);
-
-    maximumes[sweep].push_back(harm);
-
-    if (itr_max - itr_begin > 10)
-        search_maximums(itr_begin, itr_max - 5, sweep);
-    if (itr_end - itr_max > 10)
-        search_maximums(itr_max +  5, itr_end, sweep);
-}
-
-
+*/

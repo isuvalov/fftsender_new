@@ -5,8 +5,8 @@
 #define RRW_FN_STATUS    0x00
 #define RRW_FN_DATA_ALT  0x01
 #define RRW_FN_MEAS_CTL  0x02
-#define RRW_FN_SET_TH    0x03
-#define RRW_FN_GET_TH    0x04
+#define RRW_FN_GET_TH    0x03
+#define RRW_FN_SET_TH    0x04
 
 //Function return codes
 #define RRW_RV_SUCCESS  0x00
@@ -41,6 +41,7 @@ typedef struct {
   unsigned char meas_mode   : 1;
   unsigned char last_unsucc : 1;
   unsigned char has_unread  : 1;
+  unsigned char _unused     : 3;
 } status_t;
 #pragma pack(pop)
 
