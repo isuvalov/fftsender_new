@@ -4,14 +4,7 @@
 #include<radar_cli.h>
 #include<UdpConnection.h>
 
-#include<types.h>
 
-
-typedef struct {
-    int size;
-    int count;
-    int unit;
-} pkt_params_t ;
 
 class UdpRadar : public UdpConnection
 {
@@ -23,10 +16,9 @@ class UdpRadar : public UdpConnection
         ~UdpRadar();
         void start();
         void read_sweeps();
-        bool isWorking();
         bool is_data_captured();
 
-        capture_data_t wait_for_data(int time_wait_ms = 100);
+        bool wait_for_data(capture_data_t *capture_data, int time_wait_ms = 300);
 
         capture_data_t* get_data();
     protected:
@@ -50,7 +42,6 @@ class UdpRadar : public UdpConnection
         bool is_packets_collected();
 
     private:
-        bool is_working;
 };
 
 #endif // UDPRADAR_H

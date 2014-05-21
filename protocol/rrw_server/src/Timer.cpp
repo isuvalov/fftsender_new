@@ -16,12 +16,20 @@ void Timer::start()
 
 }
 
-unsigned int Timer::elapsed_ms()
+unsigned long Timer::elapsed_ms()
 {
     struct timeval t;
     gettimeofday(&t_end, NULL);
-    double ms = (t_end.tv_sec - t_begin.tv_sec) * 1e6 + (t_end.tv_usec - t_begin.tv_usec);
-    ms /= 1e3;
+    double ms = (t_end.tv_sec - t_begin.tv_sec) * 1e6 + (t_end.tv_usec - t_begin.tv_usec);//в микросекундах
+    ms /= 1e3;//перевод в милисекунды
     return ms;
-
 }
+
+double Timer::elapsed_db_ms() {
+    struct timeval t;
+    gettimeofday(&t_end, NULL);
+    double ms = (t_end.tv_sec - t_begin.tv_sec) * 1e6 + (t_end.tv_usec - t_begin.tv_usec);//в микросекундах
+    ms /= 1e3;//перевод в милисекунды
+    return ms;
+}
+

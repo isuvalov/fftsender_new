@@ -58,7 +58,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="include/CfgClass.h" />
+		<Unit filename="include/Processor.h" />
 		<Unit filename="include/RrwProtocol.h" />
+		<Unit filename="include/SweepRadar.h" />
 		<Unit filename="include/Timer.h" />
 		<Unit filename="include/UdpConnection.h" />
 		<Unit filename="include/UdpRadar.h" />
@@ -82,7 +84,9 @@
 		<Unit filename="rtl/connect.h" />
 		<Unit filename="rtl/data_s.h" />
 		<Unit filename="src/CfgClass.cpp" />
+		<Unit filename="src/Processor.cpp" />
 		<Unit filename="src/RrwProtocol.cpp" />
+		<Unit filename="src/SweepRadar.cpp" />
 		<Unit filename="src/Timer.cpp" />
 		<Unit filename="src/UdpConnection.cpp" />
 		<Unit filename="src/UdpRadar.cpp" />

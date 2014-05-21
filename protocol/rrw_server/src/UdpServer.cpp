@@ -1,45 +1,32 @@
 #include "UdpServer.h"
 
-UdpServer::UdpServer(bool start_after_init, string cfg_root):UdpConnection(cfg_root)
+UdpServer::UdpServer(string cfg_root):UdpConnection(cfg_root)
 {
-    radar = 0;
-
+    //radar = 0;
     if (!isInit())
         return;
     init_status = false;
-    timeout_rcv = 10;
-    timeout_snd = 1000;
+    timeout_rcv = (int) cfg["timeout_rcv"];
+    timeout_snd = (int) cfg["timeout_snd"];
     request.reserve(REQ_BUF_SZ);
     init_status = true;
-    pthread_mutex_init(&mtx,NULL);
-
-    ip ="127.0.0.1";
-    port = 60606;
-
-    if (start_after_init)
-        start();
 }
 
 UdpServer::~UdpServer()
 {
-    if (radar)
-        delete radar;
-
-    close();
-    pthread_mutex_destroy(&mtx);
+    is_need_udp_finish = true;
 }
 
 bool UdpServer::open()
 {
     bool rv = false;
-    eudp_start();
 
     const char* str = ip.c_str();
     char *addr = new char[ip.size()];
     strcpy(addr, str);
 
     if (eudp_open_bl(&udp, addr, port) < 0) {
-        cout << "UDP OPEN ERROR." << endl;
+        cout << cfg.get_cfg_root() << ": UDP OPEN ERROR\n" << endl;
     } else {
         eudp_set_rcv_timeout(&udp, timeout_rcv);
         eudp_set_snd_timeout(&udp, timeout_snd);
@@ -49,76 +36,88 @@ bool UdpServer::open()
     return rv;
 }
 
-void UdpServer::close(void)
-{
-    eudp_close(&udp);
-    eudp_finish();
-}
-
 void UdpServer::start()
 {
     if (!isInit()) {
         cout << "ERROR init server." << endl;
         return;
     }
-    if (radar)
-        delete radar;
-    radar = new UdpRadar();
 
-    if (!open()) {
-        delete radar;
+    if (!open() || !radar.is_working) {
+        cout << "START ERROR!" << endl;
         return;
     }
-
-    radar->start();
 
     status.meas_mode = 0;
     status.fault = 0;
     status.ready = 0;
-    status.has_unread = 1;
+    status.has_unread = 0;
     status.last_unsucc = 0;
 
-    cout << "Server is RUN!" << endl << "----------" << endl;
-    is_busy = false;
+    cout << "SYSTEM is RUN!" << endl << "----------" << endl;
     #ifdef LOG
-       cout << "Server is waiting for client request...";
+       cout << "is waiting for client request...";
     #endif // LOG
 
-    while(1)
-        dispatch_request();
+    pthread_t th;
+    pthread_create(&th, NULL, th_start_dispatch, this);
+
+    bool res = 0;
+    is_working = true;
+
+    start_measure();
 }
 
-bool UdpServer::is_req_recieved()
-{
-    vector<char> request;
-    request.reserve(REQ_BUF_SZ);
-    request.assign(REQ_BUF_SZ, '\0');
+void UdpServer::start_measure() {
+    while(is_working) {
+        mutex_lock();
+        if (status.meas_mode) {
+
+            mutex_lock(false);
+            //sleep_ms(50);
+            create_data();
+
+        } else
+            mutex_lock(false);
+    }
+    sleep_ms(1);
+}
+
+void UdpServer::stop() {
+    cout << endl <<"RADAR is stoping...";
+    is_working = false;
+    sleep_ms(200);
+}
+
+void* UdpServer::th_start_dispatch(void* arg) {
+    UdpServer *server = (UdpServer*)arg;
+    while(server->is_working)
+        server->dispatch_request();
+}
+
+bool UdpServer::get_request() {
+    request.clear();
     char req[REQ_BUF_SZ];
     int len = eudp_recvfrom(&udp, &from_addr, req, REQ_BUF_SZ);
-    pthread_mutex_lock(&mtx);
-    if (is_busy) {
-        pthread_mutex_unlock(&mtx);
-        //sleep_ms(10);
+    if (len <= 0)
+        return false;
+    request.assign(req, req + len);
+    if (request[0] != 0x5A) {
+        request.clear();
+        cout << "SERVER: request is not valid" << endl;
         return false;
     }
-    pthread_mutex_unlock(&mtx);
-
-    bool rv = false;
-    if (len >= 0) {
-        if (rv = protocol.load_request(req, len)) {
-            #ifdef LOG
-                cout << "OK!" << endl;
-            #endif
-        }
-    }
-    return rv;
+    return true;
 }
 
-void UdpServer::send_resp()
+void UdpServer::send_resp(RrwProtocol* prot)
 {
-    pthread_mutex_lock(&mtx);
-    if (!resp.empty()) {
-        int fn = *((char*) (&resp[2]));
+    if (prot == 0)
+        return;
+    const resp_t *resp = prot->get_response();
+
+    if (!resp->empty()) {
+        int fn = resp->at(2);
         string msg = "status";
 
         switch (fn) {
@@ -141,188 +140,164 @@ void UdpServer::send_resp()
                 break;
         }
         #ifdef LOG
-            cout << "SERVER: send " + msg + ".....";
+            cout << "SERVER: send resp ... ";
         #endif // LOG
         string res = "Error";
-        if (eudp_sendto(&udp, &from_addr, (char*) (&resp[0]), resp.size()))
-            res = "Success";
+        if (eudp_sendto(&udp, &from_addr, (char*) resp->data(), resp->size()))
+            res = "OK!";
 
         #ifdef LOG
                 cout << res << endl << "------------" << endl;
         #endif // LOG
 
     }
-
-
-    is_busy = false;
     #ifdef LOG
-        cout << "SERVER: is waiting for client request....";
+        if (status.meas_mode)
+            cout << "SERVER: continue measuring...." << endl;
+        else
+            cout << "is waiting for client request....";
     #endif // LOG
-    pthread_mutex_unlock(&mtx);
 }
 
 void UdpServer::dispatch_request()
 {
+    mutex_lock();
 
-    if (!is_req_recieved())
+    if(!get_request()) {
+        mutex_lock(false);
         return;
+    }
+    int func_ID = request[2];
 
-    switch(protocol.request_func_id()) {
+    #ifdef LOG
+        cout << "CLIENT: request #" << (int)request[1] << ": ";
+    #endif
+
+    RrwProtocol* proto = (func_ID == RRW_FN_DATA_ALT)? &protocol_data: &protocol;
+    proto->load_request(&request);
+
+    vector<int> threshold;
+    switch(func_ID) {
         case RRW_FN_STATUS:
-            is_busy = true;
             #ifdef LOG
-                cout << "CLIENT: request STATUS" << endl;
+                cout << "STATUS" << endl;
             #endif // LOG
-            pthread_create(&disp_req_status_th, NULL, fn_req_status, this);
+            if(status._unused) {//неиспльзуемое поле примен€етс€ дл€ определени€ момента сн€ти€ флага наличи€ данных
+                status.has_unread = 0;
+                status._unused = 0;
 
+                //meas_data.data_sweeps.clear();
+                //meas_data.elapsed = 0;
+                //meas_data.targets.clear();
+            }
+            proto->create_response(&status);
+            //cout << "status: has unread = " << (int)status.has_unread << endl;
+            //cout << "status: has meas mode = " << (int)status.meas_mode << endl;
             break;
 
         case RRW_FN_DATA_ALT:
-            is_busy = true;
             #ifdef LOG
-                cout << "CLIENT: request DATA" << endl;
+                cout << "DATA" << endl;
             #endif // LOG
-            pthread_create(&disp_req_data_th, NULL, fn_data_alt, this);
-            //fn_data_alt();
+            proto = &protocol_data;
+            proto->create_response(&meas_data);
+            status._unused = 1;
             break;
 
         case RRW_FN_MEAS_CTL:
             #ifdef LOG
-                cout << "CLIENT: request  MEAS CTL" << endl;
+                cout << "MEAS CTL" << endl;
             #endif // LOG
-
-            //fn_meas_ctl();
+            //ѕарсим режим и длительность из запроса клиента
+            duration_meas = proto->parse_req_duration();
+            status.meas_mode = proto->parse_req_meas_mode();
+            proto->create_response(&status, true);
             break;
 
         case RRW_FN_GET_TH:
-            fn_get_th();
-            break;
-
         case RRW_FN_SET_TH:
-            fn_set_th();
+            if (func_ID == RRW_FN_GET_TH)
+                processor.threshold_read(&threshold);
+            else {
+                proto->parse_req_threshold(&threshold);
+                processor.threshold_write(&threshold);
+            }
+            proto->create_response(&threshold);
             break;
 
         default:
-            cout << "CLIENT: UNKNOWN REQ." << endl;
+            proto = 0;
+            cout << "UNKNOWN REQ." << endl;
             break;
     }
+    if (proto)
+        send_resp(proto);
+    mutex_lock(false);
 }
 
-void* UdpServer::fn_req_status(void* arg)
-{
-    UdpServer *server = (UdpServer*)arg;
-
-    server->protocol.create_response(server->resp, server->status, false, false);
-    server->send_resp();
-}
-
-void* UdpServer::fn_data_alt(void* arg)
-{
-    UdpServer *server = (UdpServer*)arg;
-
-    unsigned char result_status = 0;
-
-    if (!server->create_data())
-        result_status = 2;
-
-    server->protocol.create_response(server->resp, &server->meas_data, result_status);
-    server->send_resp();
-}
-
-bool UdpServer::create_data() {
+int UdpServer::create_data() {
     Timer timer;
-    timer.start();
-
-    target_t *targets = 0;
-    meas_data.data_sweeps.clear();
-    meas_data.elapsed = 0;
-    meas_data.ntargets = 0;
-
     timer.start();//fixing timestamp of meas start
 
-    #ifdef LOG
-        cout << "SERVER: waiting for DATA from radar....";
+    #ifdef LOG1
+        cout << "capture data..." << endl;
     #endif // LOG
 
-    capture_data_t data = radar->wait_for_data();
-    //int h;
-    //cin >> h;
-
-
-    if (data.empty()) {
-        cout << "Data is NULL" << endl;
-        return false;
+    capture_data_t data;
+    meas_data_t meas_data_curr;
+    if (!radar.wait_for_data(&data)) {
+        cout << "SERVER: NO Data." << endl;
+        return 0;
     }
 
-    if (data[0].size() != 1024) {
-        cout << "ERROR: Data size <> 1024 byte" << endl;
-        return false;
-    }
-    //cout << "DATA has come. data[0][100] = " << data[0][100] << "\n" << endl;
+    sleep_ms(1);
 
+    #ifdef LOG1
+        cout << "data has come (" << timer.elapsed_ms() << " ms)!" << endl;
+    #endif // LOG endl;
+
+    /*
+    meas_data.data_sweeps.clear();
+    meas_data.elapsed = 0;
+    meas_data.targets.clear();
+    */
+
+    vector<target_t> targets;
+    processor.get_targets(&targets, &data, timer.elapsed_ms());
 
     for (int i = 0; i < data.size(); i++) {
-        vector<raw_pt_t> vect;
-        meas_data.data_sweeps.push_back(vect);
 
+        vector<raw_pt_t> vect;
+        meas_data_curr.data_sweeps.push_back(vect);
         for (int j = 0; j < data[i].size(); j++) {
             raw_pt_t pt;
             double pw = dbm(data[i][j], j);
-            pt.power = pw * 1000;
-
-            //cout << j << ": " << data[i][j] << " = ";
-
+            pt.power = pw;
             //cout.precision(3);
             //cout.setf(std::ios::fixed, std::ios::floatfield);
             //cout <<  pw << " dbm\n";
             pt.status = j > 0 ? 0 : 3;
-            meas_data.data_sweeps[i].push_back(pt);
+            meas_data_curr.data_sweeps[i].push_back(pt);
         }
     }
 
-    meas_data.meas_index ++;
-    sleep_ms(80);
-    meas_data.elapsed = (unsigned short) timer.elapsed_ms();
-    #ifdef LOG
-        cout << "OK (" << meas_data.elapsed << " ms)!" << endl;
+    meas_data_curr.meas_index ++;
+    unsigned short elapsed = timer.elapsed_ms();
+    unsigned short elapsed_add = elapsed >= 90? 0: 90 - elapsed;
+    if (elapsed_add > 0)
+        sleep_ms(elapsed_add);//досыпаем до 100 мс
+    meas_data_curr.elapsed = timer.elapsed_ms();
+
+    #ifdef LOG1
+        cout << "OK (" << meas_data_curr.elapsed << "  " << elapsed_add << " ms)!" << endl;
     #endif // LOG
 
-    //status.has_unread = 1;
-    return true;
+    mutex_lock();
+    meas_data = meas_data_curr;
+    meas_data.targets = targets;
+
+    status.has_unread = 1;
+    mutex_lock(false);
+
+    return 1;
 }
-
-
-void UdpServer::fn_meas_ctl()
-{
-    #ifdef LOG
-        cout << "set meas mode: was " << USHORT(status.meas_mode);
-    #endif // LOG
-
-    meas_ctl_req_t meas_ctl_req = protocol.get_meas_ctl_req();
-
-    status.meas_mode = meas_ctl_req.mode;
-    //status.has_unread = status.meas_mode;
-
-    #ifdef LOG
-        cout << "; now " << USHORT(status.meas_mode) <<  "\n" << "dur = " << meas_ctl_req.cycle_dur << "\n";
-    #endif // LOG
-
-    resp = protocol.create_response(resp, status, true);
-    send_resp();
-
-    //timer.start();
-    //pthread_create(&cycle_meas_th, NULL, process_cycle_meas, this);
-    //status.meas_mode = 0;
-}
-
-void UdpServer::fn_get_th()
-{
-    cout << "get th\n";
-
-}
-
-void UdpServer::fn_set_th()
-{
-    cout << "set th\n";
-}
-

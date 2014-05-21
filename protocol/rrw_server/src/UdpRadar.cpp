@@ -5,11 +5,7 @@ UdpRadar::UdpRadar(string cfg_root):UdpConnection(cfg_root)
     if (!isInit())
         return;
 
-
-    ip ="127.0.0.1";
-    port = 65002;
-
-    timeout = 100;
+    timeout = 300;
     pkt_params.count = 4;
     pkt_params.size = 514;
     pkt_params.unit = 2;
@@ -25,21 +21,21 @@ UdpRadar::UdpRadar(string cfg_root):UdpConnection(cfg_root)
         packets_t packets(pkt_params.count);
             sweeps.push_back(packets);
     }
-    data_is_captured = false;
-    pthread_mutex_init(&mtx,NULL);
+
+    start();
 }
 
 UdpRadar::~UdpRadar()
 {
-    packet.clear();
-    pthread_mutex_destroy(&mtx);
+
 }
 
 void UdpRadar::start()
 {
-    if (!open())
-        return;
+    //if (!open())
+    //    return;
 
+    is_working = true;
     pthread_create(&main_th, NULL, th_fnc_main, this);
 }
 
@@ -49,16 +45,10 @@ void* UdpRadar::th_fnc_main(void* arg)
 
     //cout << "START READ\n" << endl;
     Timer timer;
-    while (true) {
-        timer.start();
-        radar->read_sweeps();
-        //cout << "Radar create data for " << timer.elapsed_ms() << " ms\n";
-    }
-}
 
-bool UdpRadar::isWorking()
-{
-    return is_working;
+    while (true)
+        radar->read_sweeps();
+
 }
 
 bool UdpRadar::open()
@@ -68,7 +58,7 @@ bool UdpRadar::open()
     strcpy(addr, str);
 
     if (eudp_open_bl_reciever(&udp, addr, port) < 0) {
-        cout << "UDP OPEN ERROR\n" << endl;
+        cout << cfg.get_cfg_root() << ": UDP OPEN ERROR\n" << endl;
         delete [] addr;
         return false;
     }
@@ -87,13 +77,15 @@ bool UdpRadar::is_data_captured()
 
 int UdpRadar::collect_packets()
 {
-
     clear_data();
     int i = 0, j = 0;
+
     while (!is_packets_collected()) {
 
-        if (pkt_params.size != eudp_recv(&udp, &packet[0], pkt_params.size))
+        if (pkt_params.size != eudp_recv(&udp, &packet[0], pkt_params.size)) {
+            cout << "RADAR: error packet size." << endl;
             return -1;
+        }
 
         char pkt = *(&packet[0]);
         j = (unsigned char) pkt >> 4;
@@ -114,41 +106,40 @@ int UdpRadar::collect_packets()
 
 void UdpRadar::read_sweeps()
 {
+    #ifndef RTL_SIMULATION
     if(collect_packets() < 0)
         return;
 
     //cout << "packets is collected\nStart write in DATA\n" << endl;
 
-    union ch2ush {
-        unsigned short value;
-        struct char2{
-            unsigned char a;
-            unsigned char b;
-        } char2;
-    } ch2ush;
-
-
+    ch2ush_t ch2ush;
     for (int i = 0; i < 2; i++) {
         int n = 0;
         for (int j = 0; j < pkt_params.count; j++) {
-
-            ch2ush.char2.a = sweeps[i][j][0];
-            ch2ush.char2.b = sweeps[i][j][1];
+            ch2ush.chars[0] = sweeps[i][j][0];
+            ch2ush.chars[1] = sweeps[i][j][1];
             int exp_val = (ch2ush.value >> 8) - 243;
 
             for (int k = 2; k < pkt_params.size; k += 2, n++) {
-                ch2ush.char2.a = sweeps[i][j][k];
-                ch2ush.char2.b = sweeps[i][j][k + 1];
+                ch2ush.chars[0] = sweeps[i][j][k];
+                ch2ush.chars[1] = sweeps[i][j][k + 1];
 
                 data[i][ n] = (ch2ush.value << 5) >> exp_val;
             }
         }
     }
-    pthread_mutex_lock(&mtx);
-    data_is_captured = true;
-    data_for_server.clear();
+    #else
+    for (int i = 0; i < data.size(); i++)
+        for (int j = 0; j < data[i].size(); j++)
+            data[i][j] = j;
+
+    #endif
+    mutex_lock();
+
     data_for_server = data;
-    pthread_mutex_unlock(&mtx);
+    data_is_captured = true;
+
+    mutex_lock(false);
 }
 
 bool UdpRadar::is_packets_collected()
@@ -164,7 +155,6 @@ bool UdpRadar::is_packets_collected()
 
 void UdpRadar::clear_data()
 {
-
     //cout << "clear\n" << endl;
     if(!data.empty()) {
         for (int i = 0; i < data.size(); i++) {
@@ -186,25 +176,31 @@ capture_data_t* UdpRadar::get_data()
     return rv_data;
 }
 
-capture_data_t UdpRadar::wait_for_data(int time_wait_ms)
+bool UdpRadar::wait_for_data(capture_data_t *capture_data, int time_wait_ms)
 {
     Timer timer;
     timer.start();
-
-    capture_data_t rv_data;
+    bool rv = false;
     while(true) {
-
-        pthread_mutex_lock(&mtx);
+        mutex_lock();
         if (data_is_captured)
             break;
-        pthread_mutex_unlock(&mtx);
-        sleep_ms(30);
-        if (timer.elapsed_ms() > time_wait_ms)
-            return rv_data;
+        mutex_lock(false);
+
+        if (timer.elapsed_ms() > time_wait_ms) {
+            cout << cfg.get_cfg_root() << ": timeout." << endl;
+            return rv;
+        }
 
     }
-    rv_data = data_for_server;
+
+    //mutex_lock();
+    *capture_data = data_for_server;
     data_is_captured = false;
-    pthread_mutex_unlock(&mtx);
-    return rv_data;
+    rv = !capture_data->empty();
+    mutex_lock(false);
+    if (!rv) {
+        cout << "Radar: there is Not DATA." << endl;
+    }
+    return rv;
 }

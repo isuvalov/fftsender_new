@@ -1,7 +1,13 @@
 #include <UdpServer.h>
-int main(int argc, char *argv[]) {
-    UdpServer server;
+UdpServer server;
+void close(void) {
+  server.stop();
+  cout << "OK" << endl << "---------" << endl <<"Programm exit.";
+}
 
+int main(int argc, char *argv[]) {
+    atexit(close);
+    server.start();
     return 0;
 }
 
