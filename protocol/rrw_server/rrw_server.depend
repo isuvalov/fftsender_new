@@ -423,17 +423,18 @@
 	<sys/time.h>
 	<fcntl.h>
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\main.cpp
+1400691238 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\main.cpp
 	<UdpServer.h>
 	<Processor.h>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\udpserver.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\udpserver.h
 	<UdpConnection.h>
 	<UdpRadar.h>
 	<RrwProtocol.h>
-	<types.h>
+	<Processor.h>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\udpconnection.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\udpconnection.h
+	<types.h>
 	<CfgClass.h>
 	<eudp.h>
 	<timeutils.h>
@@ -441,12 +442,12 @@
 	<vector>
 	<Timer.h>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\cfgclass.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\cfgclass.h
+	<types.h>
 	<iostream>
-	<vector>
 	"libconfig.h++"
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\libconfig.h++
+1398805409 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\libconfig.h++
 	<stdio.h>
 	<exception>
 	<string>
@@ -468,17 +469,16 @@
 	<sys/types.h>
 	<time.h>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\timer.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\timer.h
 	<iostream>
 	<sys/time.h>
 	<time.h>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\udpradar.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\udpradar.h
 	<radar_cli.h>
 	<UdpConnection.h>
-	<types.h>
 
-1397828514 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\radar_cli.h
+1398805409 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\radar_cli.h
 	<data_processor.h>
 	<common.h>
 	<timeutils.h>
@@ -486,44 +486,48 @@
 	<rrw_proto.h>
 	<radar.h>
 
-1397828514 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\radar.h
+1398805409 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\radar.h
 	<eudp.h>
 
-1397828514 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\types.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\types.h
+	<vector>
+	<data_processor.h>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\rrwprotocol.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\rrwprotocol.h
+	<types.h>
 	<common.h>
 	<rrw_proto.h>
 	<vector>
 
-1397828512 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\processor.h
+1400691238 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\processor.h
 	<CfgClass.h>
-	<algorithm>
+	<Timer.h>
 	<types.h>
-	<data_processor.h>
+	<SweepRadar.h>
 
 1398805409 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\rrw_proto.cpp
 	<common.h>
 	<rrw_proto.h>
 	<string.h>
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\cfgclass.cpp
+1400754472 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\cfgclass.cpp
 	"CfgClass.h"
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\rrwprotocol.cpp
+1400691238 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\rrwprotocol.cpp
 	"RrwProtocol.h"
 	<iostream>
+	<string.h>
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\timer.cpp
+1400691238 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\timer.cpp
 	"Timer.h"
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\udpconnection.cpp
+1400754472 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\udpconnection.cpp
 	"UdpConnection.h"
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\udpradar.cpp
+1400754472 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\udpradar.cpp
 	<UdpRadar.h>
 
-1397828514 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\udpserver.cpp
+1400757796 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\udpserver.cpp
 	"UdpServer.h"
 
 1398805409 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\timeutils.cpp
@@ -531,7 +535,7 @@
 	<timeutils.h>
 	<stdio.h>
 
-1321606781 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\rtl\connect.c
+1400757778 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\rtl\connect.c
 	<windows.h>
 	<stdio.h>
 	<conio.h>
@@ -754,10 +758,23 @@
 	<timeutils.h>
 	<stdio.h>
 
-1400748773 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\rtl\connect.c
+1400757778 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\rtl\connect.c
 	<windows.h>
 	<stdio.h>
 	<conio.h>
 	<tchar.h>
 	"connect.h"
+
+1400748805 d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\include\\sweepradar.h
+	<types.h>
+	<algorithm>
+	<math.h>
+
+1400691238 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\processor.cpp
+	"Processor.h"
+	<math.h>
+	<fstream>
+
+1400748805 source:d:\john\nien\fft_v4\fftsender_new\protocol\rrw_server\src\sweepradar.cpp
+	"SweepRadar.h"
 

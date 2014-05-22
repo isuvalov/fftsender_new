@@ -427,7 +427,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		printf(" (len=%i) \n",cnt);
 		len=cnt;
 		hnd->rx_busy = 0;
-		return 0;
+		return len;
 	}
 
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
@@ -456,7 +456,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		printf(" (len=%i) \n",cnt);
 		len=cnt;
 		hnd->rx_busy = 0;
-		return 0;
+		return len;
 	}
 
 
@@ -468,7 +468,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		for (i=0;i<len;i++)
 			WrReg16(addr,(buf[i]&0xFF)|(1<<8));
 		WrReg16(addr,vall);
-	    return 0;
+	    return len;
 	}
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
@@ -482,7 +482,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 			WrReg16(0,buf[i]|(1<<8));
 		WrReg16(0,0);
 		hnd->rx_busy = 0;
-	    return 0;
+	    return len;
 	}
 
 
