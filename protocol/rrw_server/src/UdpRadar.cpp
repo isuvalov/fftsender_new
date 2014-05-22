@@ -5,6 +5,7 @@ UdpRadar::UdpRadar(string cfg_root):UdpConnection(cfg_root)
     if (!isInit())
         return;
 
+    port = 65002;
     timeout = 300;
     pkt_params.count = 4;
     pkt_params.size = 514;

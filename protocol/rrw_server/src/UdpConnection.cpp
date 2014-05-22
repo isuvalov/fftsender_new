@@ -7,9 +7,10 @@ UdpConnection::UdpConnection(string cfg_root)
 {
     is_need_udp_finish = false;
     is_working = false;
-    ip ="0.0.0.0";
-    port = -1;
+    ip ="127.0.0.1";
+    port = 60606;
     init_status = false;
+
     if (!cfg_root.empty())
         cfg.load(cfg_root);
     if (cfg.isLoaded())
@@ -20,7 +21,6 @@ UdpConnection::UdpConnection(string cfg_root)
         is_need_udp_start = false;
     }
     pthread_mutex_init(&mtx,NULL);
-
 }
 
 UdpConnection::~UdpConnection()
@@ -35,8 +35,8 @@ UdpConnection::~UdpConnection()
 
 void UdpConnection::init() {
 
-    ip = (const char*) cfg["ip"];
-    port = (int) cfg["port"];
+    //ip = "127"//(const char*) cfg["ip"];
+    //port = //(int) cfg["port"];
     init_status = true;
     cout << cfg.get_cfg_root() + ": ip = " << ip << "; port = " << port << "\n" << endl;
 }

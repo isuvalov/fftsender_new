@@ -6,8 +6,9 @@ UdpServer::UdpServer(string cfg_root):UdpConnection(cfg_root)
     if (!isInit())
         return;
     init_status = false;
-    timeout_rcv = (int) cfg["timeout_rcv"];
-    timeout_snd = (int) cfg["timeout_snd"];
+    port = 60606;
+    timeout_rcv = 100;//(int) cfg["timeout_rcv"];
+    timeout_snd = 100;//(int) cfg["timeout_snd"];
     request.reserve(REQ_BUF_SZ);
     init_status = true;
 }

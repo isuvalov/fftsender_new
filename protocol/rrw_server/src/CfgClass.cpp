@@ -36,8 +36,8 @@ void CfgClass::load(string cfg_root)
 
     // Read the file. If there is an error, report it and exit.
     try {
-        config = new Config();
-        config->readFile(CFG_FILE);
+        //config = new Config();
+        //config->readFile(CFG_FILE);
         this->cfg_root = cfg_root;
 
         //string msg = "config " + (cfg_root.empty() ? "" : "for " + cfg_root) + " is loaded successfully!\n";
@@ -54,7 +54,8 @@ void CfgClass::load(string cfg_root)
 
 bool CfgClass::isLoaded()
 {
-    return config != 0;
+    return true;
+    //return config != 0;
 
 }
 
