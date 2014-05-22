@@ -103,6 +103,12 @@ bool UdpServer::get_request() {
     if (len <= 0)
         return false;
     request.assign(req, req + len);
+
+    cout << "Your request:";
+    for (int i = 0; i < request.size(); i++)
+        cout << " " << hex << request[i];
+    cout << endl;
+
     if (request[0] != 0x5A) {
         request.clear();
         cout << "SERVER: request is not valid" << endl;
