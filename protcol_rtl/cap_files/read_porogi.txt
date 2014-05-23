@@ -1,0 +1,9 @@
+x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"69", x"00", x"00", x"80", x"11", x"1b", x"b7", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c4", x"5a", x"bd", x"03"
+44.85
+
+constant read_porogi01:Tread_porogi:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"69", x"00", x"00", x"80", x"11", x"1b", x"b7", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c4", x"5a", x"bd", x"03");
+
+constant read_porogi02:Tread_porogi:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"6d", x"00", x"00", x"80", x"11", x"1b", x"b3", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c3", x"5a", x"be", x"03");
+
+constant read_porogi03:Tread_porogi:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"6e", x"00", x"00", x"80", x"11", x"1b", x"b2", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c2", x"5a", x"bf", x"03");
+

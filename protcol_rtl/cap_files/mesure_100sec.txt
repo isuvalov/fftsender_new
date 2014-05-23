@@ -1,0 +1,7 @@
+x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"22", x"60", x"d4", x"00", x"00", x"80", x"11", x"18", x"49", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0e", x"10", x"a6", x"5a", x"d5", x"02", x"00", x"00", x"00"
+47.85
+
+constant measure_100sec_01:Tmeasure_period:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"22", x"60", x"d4", x"00", x"00", x"80", x"11", x"18", x"49", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0e", x"10", x"a6", x"5a", x"d5", x"02", x"00", x"00", x"00");
+
+constant measure_100sec_02:Tmeasure_period:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"22", x"60", x"d6", x"00", x"00", x"80", x"11", x"18", x"47", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0e", x"10", x"40", x"5a", x"d6", x"02", x"01", x"00", x"64");
+
