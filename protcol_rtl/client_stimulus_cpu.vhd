@@ -144,18 +144,25 @@ begin
 			big_stm<=CHOOSE_NEXT;
 			current_frame<=0;
 			current_pos<=0;
+			s_dv<='0';
 		else    --#reset
+			if ce='1' then
 			case big_stm is
 			when WAITING=>
 			when SEND_ARRAY=>
 				if current_len>0 then
 					current_len<=current_len-1;					
+					s_data<=big_sequense_array(current_pos);
+			    	s_dv<='1';
 				else
 					big_stm<=MAKE_GAP;
+					s_data<=x"00";
+				    s_dv<='0';
 				end if;
 				current_pos<=current_pos+1;
-				s_data<=big_sequense_array(current_pos);
 			when MAKE_GAP=>
+				s_dv<='0';
+				s_data<=x"00";
 				cntgap<=gap_pauses(current_frame);
 				big_stm<=MAKE_GAP_PAUSE;
 			when MAKE_GAP_PAUSE =>
@@ -177,11 +184,18 @@ begin
 					big_sequense_array<=copy_45(start_connection02,frame_lens(current_frame));
 				when others=>
 					current_frame<=0;
+					current_len<=frame_lens(0);
+					big_sequense_array<=copy_45(start_connection01,frame_lens(0));
 				end case;
 				big_stm<=SEND_ARRAY;
 			when others=>
 			end case;
+				data_o<=s_data;
+				dv_o<=s_dv;
+
+		end if; --#ce
 		end if; --#reset
+
 	end if; --# clk
 end process;
 
