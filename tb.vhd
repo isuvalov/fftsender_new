@@ -233,6 +233,9 @@ cpu_i: entity work.cpu_wrapper
 datatocpu<="0000000"&dv_send8_cpu&data_send8_cpu;
 
 client_stimulus_cpu_i: entity work.client_stimulus_cpu
+	generic map(
+		CUT_FRAMES=>42
+	)
 	 port map(
 		 reset=>reset,
 		 ce => cpu_rd_parse,
@@ -242,6 +245,22 @@ client_stimulus_cpu_i: entity work.client_stimulus_cpu
 
 		 dv_o=>dv_send8_cpu,
 		 data_o=>data_send8_cpu
+	     );
+
+
+client_stimulus_i: entity work.client_stimulus_cpu
+	generic map(
+		CUT_FRAMES=>0
+	)
+	 port map(
+		 reset=>reset,
+		 ce => cpu_rd_parse,
+		 clk =>clk125,
+		 send_ask_radar_status=>send_ask_radar_status,
+		 send_ask_data=>'0',
+
+		 dv_o=>open,   --# Надо подконектить к top_top через конвертор 8в4
+		 data_o=>open  --# Надо подконектить к top_top через конвертор 8в4
 	     );
 
 

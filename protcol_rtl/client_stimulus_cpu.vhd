@@ -6,6 +6,9 @@ library work;
 use work.regs_pack.all;
 
 entity client_stimulus_cpu is
+	generic (
+		CUT_FRAMES:integer:=42
+	);
 	 port(
 		 reset: in std_logic;
 		 ce : in std_logic;
@@ -51,28 +54,28 @@ constant start_connection18:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff
 constant start_connection19:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"57", x"c0", x"00", x"00", x"80", x"11", x"21", x"60", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e2", x"ce", x"ec", x"be", x"00", x"0b", x"14", x"8a", x"5a", x"12", x"00");
 
 
-constant request_status01:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"20", x"00", x"00", x"80", x"11", x"1a", x"00", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"c0", x"5a", x"c1", x"00");
-constant request_status02:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"26", x"00", x"00", x"80", x"11", x"19", x"fa", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bf", x"5a", x"c2", x"00");
-constant request_status03:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"27", x"00", x"00", x"80", x"11", x"19", x"f9", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"be", x"5a", x"c3", x"00");
-constant request_status04:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"28", x"00", x"00", x"80", x"11", x"19", x"f8", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bd", x"5a", x"c4", x"00");
-constant request_status05:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"29", x"00", x"00", x"80", x"11", x"19", x"f7", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bc", x"5a", x"c5", x"00");
-constant request_status06:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"2d", x"00", x"00", x"80", x"11", x"19", x"f3", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bb", x"5a", x"c6", x"00");
-constant request_status07:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"2f", x"00", x"00", x"80", x"11", x"19", x"f1", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"ba", x"5a", x"c7", x"00");
-constant request_status08:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"30", x"00", x"00", x"80", x"11", x"19", x"f0", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b9", x"5a", x"c8", x"00");
-constant request_status09:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"31", x"00", x"00", x"80", x"11", x"19", x"ef", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b8", x"5a", x"c9", x"00");
-constant request_status10:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"33", x"00", x"00", x"80", x"11", x"19", x"ed", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b7", x"5a", x"ca", x"00");
-constant request_status11:Trequest_status:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"34", x"00", x"00", x"80", x"11", x"19", x"ec", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b6", x"5a", x"cb", x"00");
+constant request_status01:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"20", x"00", x"00", x"80", x"11", x"1a", x"00", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"c0", x"5a", x"c1", x"00");
+constant request_status02:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"26", x"00", x"00", x"80", x"11", x"19", x"fa", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bf", x"5a", x"c2", x"00");
+constant request_status03:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"27", x"00", x"00", x"80", x"11", x"19", x"f9", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"be", x"5a", x"c3", x"00");
+constant request_status04:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"28", x"00", x"00", x"80", x"11", x"19", x"f8", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bd", x"5a", x"c4", x"00");
+constant request_status05:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"29", x"00", x"00", x"80", x"11", x"19", x"f7", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bc", x"5a", x"c5", x"00");
+constant request_status06:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"2d", x"00", x"00", x"80", x"11", x"19", x"f3", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"bb", x"5a", x"c6", x"00");
+constant request_status07:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"2f", x"00", x"00", x"80", x"11", x"19", x"f1", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"ba", x"5a", x"c7", x"00");
+constant request_status08:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"30", x"00", x"00", x"80", x"11", x"19", x"f0", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b9", x"5a", x"c8", x"00");
+constant request_status09:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"31", x"00", x"00", x"80", x"11", x"19", x"ef", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b8", x"5a", x"c9", x"00");
+constant request_status10:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"33", x"00", x"00", x"80", x"11", x"19", x"ed", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b7", x"5a", x"ca", x"00");
+constant request_status11:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5f", x"34", x"00", x"00", x"80", x"11", x"19", x"ec", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"12", x"b6", x"5a", x"cb", x"00");
 
 
-constant request_data01:Trequest_data:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"45", x"00", x"00", x"80", x"11", x"16", x"db", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a8", x"5a", x"d9", x"01");
-constant request_data02:Trequest_data:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"46", x"00", x"00", x"80", x"11", x"16", x"da", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a7", x"5a", x"da", x"01");
-constant request_data03:Trequest_data:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"4a", x"00", x"00", x"80", x"11", x"16", x"d6", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a6", x"5a", x"db", x"01");
-constant request_data04:Trequest_data:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"4b", x"00", x"00", x"80", x"11", x"16", x"d5", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a5", x"5a", x"dc", x"01");
+constant request_data01:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"45", x"00", x"00", x"80", x"11", x"16", x"db", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a8", x"5a", x"d9", x"01");
+constant request_data02:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"46", x"00", x"00", x"80", x"11", x"16", x"da", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a7", x"5a", x"da", x"01");
+constant request_data03:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"4a", x"00", x"00", x"80", x"11", x"16", x"d6", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a6", x"5a", x"db", x"01");
+constant request_data04:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"62", x"4b", x"00", x"00", x"80", x"11", x"16", x"d5", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"11", x"a5", x"5a", x"dc", x"01");
 
 
-constant read_porogi01:Tread_porogi:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"69", x"00", x"00", x"80", x"11", x"1b", x"b7", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c4", x"5a", x"bd", x"03");
-constant read_porogi02:Tread_porogi:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"6d", x"00", x"00", x"80", x"11", x"1b", x"b3", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c3", x"5a", x"be", x"03");
-constant read_porogi03:Tread_porogi:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"6e", x"00", x"00", x"80", x"11", x"1b", x"b2", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c2", x"5a", x"bf", x"03");
+constant read_porogi01:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"69", x"00", x"00", x"80", x"11", x"1b", x"b7", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c4", x"5a", x"bd", x"03");
+constant read_porogi02:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"6d", x"00", x"00", x"80", x"11", x"1b", x"b3", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c3", x"5a", x"be", x"03");
+constant read_porogi03:Tstart_connection:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"5d", x"6e", x"00", x"00", x"80", x"11", x"1b", x"b2", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0b", x"0f", x"c2", x"5a", x"bf", x"03");
 
 
 constant measure_300sec_01:Tmeasure_period:=(x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"22", x"60", x"30", x"00", x"00", x"80", x"11", x"18", x"ed", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e3", x"e9", x"ec", x"be", x"00", x"0e", x"0f", x"82", x"5a", x"cc", x"02", x"01", x"01", x"2c");
@@ -111,6 +114,16 @@ begin
 end;
 
 
+function copy_47(inn: Tmeasure_period; len:integer) return Tbig_sequense_array is
+variable seq_array:Tbig_sequense_array;
+begin
+	for i in 0 to len-1 loop
+		seq_array(i):=inn(i);
+	end loop;
+	return seq_array;
+end;
+
+
 type Tstm is (WAITING,SEND_01,SEND_CRC);
 signal stm:Tstm:=WAITING;
 
@@ -120,12 +133,13 @@ signal big_sequense_array:Tbig_sequense_array;
 --signal sequence:T_sequence;
 type T_gap_pauses is array(0 to 5-1) of integer;
 type T_frame_lens is array(0 to 5-1) of integer;
-constant gap_pauses:T_gap_pauses:=(100,100,100,100,100);
+constant gap_pauses:T_gap_pauses:=(1000,1000,1000,1000,1000);
 constant frame_lens:T_frame_lens:=(45,45,45,45,45);
 
 signal short_seq:Tstart_connection;
 
-type Tbig_stm is (WAITING,PREP_START_CON01,PREP_REQ_STATUS01,SEND_ARRAY,MAKE_GAP,MAKE_GAP_PAUSE,CHOOSE_NEXT);
+type Tbig_stm is (WAITING,SEND_55_01,SEND_55_02,SEND_55_03,SEND_55_04,SEND_55_05,SEND_55_06,SEND_55_07,SEND_D5,
+		PREP_START_CON01,PREP_REQ_STATUS01,SEND_ARRAY,MAKE_GAP,MAKE_GAP_PAUSE,CHOOSE_NEXT);
 signal big_stm:Tbig_stm;
 signal current_len,current_frame,current_pos,cntgap:integer;
 
@@ -148,11 +162,44 @@ begin
 		else    --#reset
 			if ce='1' then
 			case big_stm is
-			when WAITING=>
+
+			when SEND_55_01=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_55_02;
+			when SEND_55_02=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_55_03;
+			when SEND_55_03=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_55_04;
+			when SEND_55_04=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_55_05;
+			when SEND_55_05=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_55_06;
+			when SEND_55_06=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_55_07;
+			when SEND_55_07=>
+				s_data<=x"55";
+			    s_dv<='1';
+				big_stm<=SEND_D5;
+			when SEND_D5=>
+				s_data<=x"D5";
+			    s_dv<='1';
+				big_stm<=SEND_ARRAY;
+
 			when SEND_ARRAY=>
 				if current_len>0 then
 					current_len<=current_len-1;					
-					s_data<=big_sequense_array(current_pos);
+					s_data<=big_sequense_array(current_pos+CUT_FRAMES);
 			    	s_dv<='1';
 				else
 					big_stm<=MAKE_GAP;
@@ -177,17 +224,58 @@ begin
 				current_pos<=0;
 				case current_frame is 
 				when 0=>
-					current_len<=frame_lens(current_frame);
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
 					big_sequense_array<=copy_45(start_connection01,frame_lens(current_frame));
 				when 1=>
-					current_len<=frame_lens(current_frame);
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
 					big_sequense_array<=copy_45(start_connection02,frame_lens(current_frame));
+				when 2=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(start_connection03,frame_lens(current_frame));
+
+
+				when 3=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(request_status01,frame_lens(current_frame));
+				when 4=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(request_status02,frame_lens(current_frame));
+
+
+				when 5=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(read_porogi01,frame_lens(current_frame));
+				when 6=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(read_porogi02,frame_lens(current_frame));
+
+
+				when 7=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_47(measure_300sec_01,frame_lens(current_frame));
+				when 8=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_47(measure_300sec_02,frame_lens(current_frame));
+
+				when 9=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(request_data01,frame_lens(current_frame));
+				when 10=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(request_data02,frame_lens(current_frame));
+
+
+
 				when others=>
 					current_frame<=0;
-					current_len<=frame_lens(0);
+					current_len<=frame_lens(0)-CUT_FRAMES;
 					big_sequense_array<=copy_45(start_connection01,frame_lens(0));
 				end case;
-				big_stm<=SEND_ARRAY;
+				if CUT_FRAMES=0 then
+					big_stm<=SEND_55_01;
+				else
+					big_stm<=SEND_ARRAY;
+				end if;
 			when others=>
 			end case;
 				data_o<=s_data;
