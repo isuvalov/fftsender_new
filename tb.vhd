@@ -114,9 +114,9 @@ type Tmem is array(0 to 7) of integer;
 constant mem:Tmem:=(-1000,-1000,0,1000,1000,50,50,50);
 
 signal localc,allalg:integer:=0;
-signal data_send8,data_send8_cpu:std_logic_vector(7 downto 0);
+signal data_send8_rtl,data_send8,data_send8_cpu:std_logic_vector(7 downto 0);
 signal data_send4:std_logic_vector(3 downto 0);
-signal dv_send8,dv_send4,send_ask_radar_status,mac_clk_div2:std_logic:='0';
+signal ce_send8_rtl,dv_send8,dv_send4,send_ask_radar_status,mac_clk_div2:std_logic:='0';
 
 
 begin
@@ -254,13 +254,13 @@ client_stimulus_i: entity work.client_stimulus_cpu
 	)
 	 port map(
 		 reset=>reset,
-		 ce => cpu_rd_parse,
+		 ce => mac_clk_div2,
 		 clk =>clk125,
 		 send_ask_radar_status=>send_ask_radar_status,
 		 send_ask_data=>'0',
 
-		 dv_o=>open,   --# Надо подконектить к top_top через конвертор 8в4
-		 data_o=>open  --# Надо подконектить к top_top через конвертор 8в4
+		 dv_o=>ce_send8_rtl,   --# Надо подконектить к top_top через конвертор 8в4
+		 data_o=>data_send8_rtl  --# Надо подконектить к top_top через конвертор 8в4
 	     );
 
 
@@ -298,19 +298,6 @@ top_top_i: entity work.top_top
 	     );
 
 
-client_stimulus_i: entity work.client_stimulus
-	 port map(
-		 reset=>reset,
-		 ce => mac_clk_div2,
-		 clk =>clk125,
-		 send_ask_radar_status=>send_ask_radar_status,
-		 send_ask_data=>'0',
-
-		 dv_o=>dv_send8,
-		 data_o=>data_send8
-	     );
-
-
 
 macbits_conv8to4_i: entity work.macbits_conv8to4
 	generic map(
@@ -319,9 +306,9 @@ macbits_conv8to4_i: entity work.macbits_conv8to4
 	 port map(
 		 clk=>clk125,
 
-		 data_i=>data_send8,
+		 data_i=>data_send8_rtl,
 		 ce_i =>mac_clk_div2,
-		 dv_i =>dv_send8,
+		 dv_i =>ce_send8_rtl,
 
 		 data_o =>data_send4,
 		 dv_o =>dv_send4

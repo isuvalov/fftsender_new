@@ -138,11 +138,12 @@ constant frame_lens:T_frame_lens:=(45,45,45,45,45);
 
 signal short_seq:Tstart_connection;
 
-type Tbig_stm is (WAITING,SEND_55_01,SEND_55_02,SEND_55_03,SEND_55_04,SEND_55_05,SEND_55_06,SEND_55_07,SEND_D5,
+type Tbig_stm is (START_DELAY,WAITING,SEND_55_01,SEND_55_02,SEND_55_03,SEND_55_04,SEND_55_05,SEND_55_06,SEND_55_07,SEND_D5,
 		PREP_START_CON01,PREP_REQ_STATUS01,SEND_ARRAY,MAKE_GAP,MAKE_GAP_PAUSE,CHOOSE_NEXT);
 signal big_stm:Tbig_stm;
 signal current_len,current_frame,current_pos,cntgap:integer;
 
+signal delay_cnt:integer;
 
 signal s_dv:std_logic;
 signal s_data:std_logic_vector(7 downto 0);
@@ -155,14 +156,20 @@ process(clk)
 begin
 	if rising_edge(clk) then
 		if reset='1' then
-			big_stm<=CHOOSE_NEXT;
+			big_stm<=START_DELAY;--CHOOSE_NEXT;
 			current_frame<=0;
 			current_pos<=0;
 			s_dv<='0';
+			delay_cnt<=500;
 		else    --#reset
 			if ce='1' then
 			case big_stm is
-
+			when START_DELAY=>
+				if delay_cnt>0 then
+					delay_cnt<=delay_cnt-1;
+				else
+					big_stm<=CHOOSE_NEXT;
+				end if;
 			when SEND_55_01=>
 				s_data<=x"55";
 			    s_dv<='1';
