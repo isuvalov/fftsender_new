@@ -131,10 +131,10 @@ signal big_sequense_array:Tbig_sequense_array;
 
 --type T_sequence is (PREP_START_CON01,PREP_START_CON02,PREP_START_CON03,PREP_REQ_STATUS01,PREP_REQ_STATUS02);
 --signal sequence:T_sequence;
-type T_gap_pauses is array(0 to 5-1) of integer;
-type T_frame_lens is array(0 to 5-1) of integer;
-constant gap_pauses:T_gap_pauses:=(1000,1000,1000,1000,1000);
-constant frame_lens:T_frame_lens:=(45,45,45,45,45);
+type T_gap_pauses is array(0 to 11-1) of integer;
+type T_frame_lens is array(0 to 11-1) of integer;
+constant gap_pauses:T_gap_pauses:=(1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000);
+constant frame_lens:T_frame_lens:=(45,45,45,45,45,45,45,47,47,45,45);
 
 signal short_seq:Tstart_connection;
 
