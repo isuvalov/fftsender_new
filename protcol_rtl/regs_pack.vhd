@@ -7,16 +7,9 @@ package regs_pack is
 
 type Trx2tx_wires is record
 	new_request_received: std_logic;
+	request_type:std_logic_vector(7 downto 0);
 end record Trx2tx_wires;
 							  
-type Tregs_from_host is record	
-	start_work: std_logic;
-end record Tregs_from_host;
-
-constant DEFAULT_FROMHOST_REGS:Tregs_from_host:=(
-	start_work=>'0'
-);
-
 
 
 end regs_pack;

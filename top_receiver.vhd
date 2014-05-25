@@ -11,7 +11,7 @@ entity top_receiver is
 		 reset: in std_logic;
 		 clk_core: in std_logic; --# must be quickly than clk_signal
 		 clk_mac: in std_logic;
-
+		 port_number: in std_logic_vector(15 downto 0);
 		 to_tx_module: out Trx2tx_wires;
 
 		 data_i: in std_logic_vector(3 downto 0);
@@ -32,7 +32,7 @@ signal data8:  std_logic_vector(7 downto 0);
 signal dv8,ce8 : std_logic;
 
 --signal rx2tx: Trx2tx_wires;
-signal regs_from_host: Tregs_from_host;
+--signal regs_from_host: Tregs_from_host;
 
 
 begin
@@ -57,12 +57,14 @@ udp_rx_i: entity work.udp_rx
 	 port map(
 		 reset =>reset,
 		 clk =>clk_mac,
+
+		 port_number=>port_number,
+
 		 i_dv =>dv8, --# must be with i_ce 
 		 i_ce =>ce8,
 		 i_data =>data8,
 
-		 rx2tx=>to_tx_module,
-		 o_regs=>regs_from_host
+		 rx2tx=>to_tx_module
 	     );
 
 

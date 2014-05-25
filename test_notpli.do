@@ -115,6 +115,6 @@ vcom tb.vhd
 
 do modelsim_my.tcl
 
-vsim -novopt -t ps work.tb -pli dll.dll -gNOT_PLI=0
+vsim -novopt -t ps work.tb -gNOT_PLI=1
 do wave.do
 

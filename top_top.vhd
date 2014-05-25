@@ -21,6 +21,8 @@ entity top_top is
 		 PayloadIsZERO: in std_logic;
 		 send_adc_data: in std_logic;
 
+
+		 port_number: in std_logic_vector(15 downto 0);  --# UDP port number
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -94,6 +96,7 @@ top_receiver_i: entity work.top_receiver
 		 clk_core=>clk_core, --# must be quickly than clk_signal
 		 clk_mac=>clk_mac,
 
+		 port_number=>port_number,
 		 to_tx_module =>to_tx_module,
 
 		 data_i=>data_i,

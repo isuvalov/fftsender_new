@@ -6,6 +6,9 @@ use IEEE.std_logic_unsigned.all;
 --use std.textio.all;
 
 entity tb is
+generic (
+	NOT_PLI:integer:=0
+);
 end tb;
 
 
@@ -218,19 +221,22 @@ begin
  end if;
 end process;
 
-cpu_i: entity work.cpu_wrapper
-    Port map(clk =>clk125,
+
+NOT_PLI_i: if NOT_PLI=0 generate
+	cpu_i: entity work.cpu_wrapper
+    	port map(clk =>clk125,
 		  reset =>reset,
 		  oaddr=>open,
 		  odata =>datafromcpu,
 		  wr =>cpu_wr,
 		  rd =>cpu_rd,
 		  idata =>datatocpu
-	);
-
+		);
+end generate;
 
 
 datatocpu<="0000000"&dv_send8_cpu&data_send8_cpu;
+
 
 client_stimulus_cpu_i: entity work.client_stimulus_cpu
 	generic map(
@@ -278,6 +284,8 @@ top_top_i: entity work.top_top
 		 payload_is_counter=>'0',
 		 PayloadIsZERO =>'0',
 		 send_adc_data =>'0',
+
+		 port_number=>conv_std_logic_vector(60606,16),
 
 		 pre_shift =>"000000",
 		 i_direction =>signal_direct,
