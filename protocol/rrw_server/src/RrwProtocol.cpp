@@ -28,7 +28,7 @@ unsigned short RrwProtocol::parse_req_duration() {
     else {
         if (client_req->at(2) == RRW_FN_MEAS_CTL) {
             int ofst = sizeof(base_req_t);
-            unsigned char buf[2] = {client_req->at(ofst + 1), client_req->at(ofst + 0)};
+            unsigned char buf[2] = {client_req->at(ofst + 2), client_req->at(ofst + 1)};
             return *((unsigned short*) buf);
         }
     }
