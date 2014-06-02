@@ -9,6 +9,7 @@ entity udp_rx is
 	 port(
 		 reset: in std_logic;
 		 clk : in std_logic;
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
 		 port_number: in std_logic_vector(15 downto 0);
 		 i_dv : in std_logic; --# must be with i_ce 
 		 i_ce : in std_logic;
@@ -57,8 +58,8 @@ signal port_number_correct,port_error:std_logic;
 
 
 type Tstm is (WAITING,GET_PREAMBULE,GETING_MAC1,GETING_MAC2,GETING_ETHER1,GETING_ETHER2,GETING_UDPHEADER,
-	GET_REQ_PROPERTY
-	);
+	GET_REQ_PROPERTY,GET_REQNUM	);
+
 signal stm:Tstm:=WAITING;
 signal s_rx2tx:Trx2tx_wires;
 
@@ -187,10 +188,14 @@ begin
 						if unsigned(udp_header_cnt)<UDPHEADER_LEN-1 then
 							udp_header_cnt<=udp_header_cnt+1;
 						else
-							stm<=GET_REQ_PROPERTY;
+							stm<=GET_REQNUM;
 						end if;
 					end if;
 					s_rx2tx.new_request_received<='0';
+				when GET_REQNUM=>
+					s_rx2tx.number_of_req<=i_data;
+					s_rx2tx.new_request_received<='0';
+					stm<=GET_REQ_PROPERTY;
 				when GET_REQ_PROPERTY=>
 					s_rx2tx.request_type<=i_data;
 					s_rx2tx.new_request_received<='1';

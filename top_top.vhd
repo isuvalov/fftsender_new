@@ -21,8 +21,9 @@ entity top_top is
 		 PayloadIsZERO: in std_logic;
 		 send_adc_data: in std_logic;
 
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
+		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
 
-		 port_number: in std_logic_vector(15 downto 0);  --# UDP port number
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -47,6 +48,9 @@ architecture top_top of top_top is
 
 signal reset_tx,reset_rx:std_logic;
 signal to_tx_module: Trx2tx_wires;
+signal s_data_out: std_logic_vector(3 downto 0);
+signal s_dv : std_logic;
+
 
 begin
 
@@ -74,6 +78,9 @@ top_sender_i: entity work.top_sender
 		 PayloadIsZERO=>PayloadIsZERO,
 		 send_adc_data=>send_adc_data,
 
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
+		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
+
 		 pre_shift=>pre_shift,
 		 i_direction =>i_direction,
 
@@ -82,12 +89,21 @@ top_sender_i: entity work.top_sender
 		 signal_real =>signal_real,
 		 signal_imag =>signal_imag,
 
-		 data_out =>data_out,
-		 dv =>dv,
+		 data_out =>s_data_out,
+		 dv =>s_dv,
 
 		 to_tx_module=>to_tx_module,
 		 tp =>tp_rx
 	     );
+
+
+output_p: process (clk_mac) is
+begin
+     if falling_edge (clk_mac) then
+	     data_out<=s_data_out;
+         dv<=s_dv;
+	  end if;
+end process;
 
 
 top_receiver_i: entity work.top_receiver
@@ -96,7 +112,8 @@ top_receiver_i: entity work.top_receiver
 		 clk_core=>clk_core, --# must be quickly than clk_signal
 		 clk_mac=>clk_mac,
 
-		 port_number=>port_number,
+		 udp_IPaddr=>udp_IPaddr,
+		 port_number=>udp_port_number,
 		 to_tx_module =>to_tx_module,
 
 		 data_i=>data_i,

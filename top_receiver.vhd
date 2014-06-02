@@ -12,6 +12,7 @@ entity top_receiver is
 		 clk_core: in std_logic; --# must be quickly than clk_signal
 		 clk_mac: in std_logic;
 		 port_number: in std_logic_vector(15 downto 0);
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
 		 to_tx_module: out Trx2tx_wires;
 
 		 data_i: in std_logic_vector(3 downto 0);
@@ -58,6 +59,7 @@ udp_rx_i: entity work.udp_rx
 		 reset =>reset,
 		 clk =>clk_mac,
 
+		 udp_IPaddr=>udp_IPaddr,
 		 port_number=>port_number,
 
 		 i_dv =>dv8, --# must be with i_ce 

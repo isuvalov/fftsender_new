@@ -91,7 +91,6 @@ add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/cnt_conv
 add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/data8
 add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/dv8
 add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/ce8
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/regs_from_host
 add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/clk
 add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/data_i
 add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/ce_i
@@ -132,8 +131,7 @@ add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_dv
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_ce
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_data
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/o_regs
+add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal -subitemconfig {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received {-radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type {-radix hexadecimal}} -expand -subitemconfig {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received {-radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type {-radix hexadecimal}} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_prmb_cnt
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_mac_cnt
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/udp_header_cnt
@@ -143,7 +141,7 @@ add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_error
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/stm
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {468075708 ps} 0}
+WaveRestoreCursors {{Cursor 1} {612225705 ps} 0}
 configure wave -namecolwidth 265
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -158,4 +156,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {467603493 ps} {468425147 ps}
+WaveRestoreZoom {0 ps} {1050 us}

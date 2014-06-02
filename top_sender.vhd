@@ -20,6 +20,9 @@ entity top_sender is
 		 PayloadIsZERO: in std_logic;
 		 send_adc_data: in std_logic;
 
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
+		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
+
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -64,6 +67,11 @@ signal rd_exp,rd_data,rd_direct,direct,fifo_data_ce,fifo_data_exp_ce:std_logic;
 signal fifo_data : std_logic_vector(3 downto 0);
 signal fifo_data_exp : std_logic_vector(7 downto 0);
 signal tp_fifo : std_logic_vector(2 downto 0);
+
+signal rls_dv:std_logic;
+signal rls_data_out:std_logic_vector(3 downto 0);
+
+signal rls_mux,rls_finish:std_logic;
 
 begin
 
@@ -242,9 +250,38 @@ send_udp_i: entity work.send_udp
 		 i_data_exp =>fifo_data_exp,
 		 i_data_exp_ce =>fifo_data_exp_ce,
 
-		 data_out =>data_out,
-		 dv =>dv
+		 sequense_finish=>rls_finish,
+		 data_out =>rls_data_out,
+		 dv =>rls_dv
 	     );
+
+process(clk_mac) is
+begin
+	if rising_edge(clk_mac) then
+		if to_tx_module.new_request_received='1' then
+			case to_tx_module.request_type is
+			when x"01" =>
+				data_req_event<='1';
+			when others =>
+				data_req_event<='0';
+			end case;
+		else
+			data_req_event<='0';
+		end if;
+
+
+		if data_req_event='1' then
+			rls_mux<='1';
+		else
+			if rls_finish='1' then
+				rls_mux<='0';
+			end if;
+		end if;
+
+	end if;
+end process;
+
+
 
 
 end top_sender;

@@ -5,7 +5,7 @@ use IEEE.std_logic_arith.all;
 library work;
 use work.assert_pack.all;
 
-entity send_udp is
+entity send_protocol_udp is
 	generic(
 		CUT_LEN:integer:=1024;
 		DEBUG:integer:=1
@@ -13,24 +13,9 @@ entity send_udp is
 	 port(
 		 reset: in std_logic;
 		 clk_mac: in std_logic;
-
-		 PayloadIsZERO: in std_logic; --# if it '1' make zero all data in MAC frame
-
-		 rd_data: out std_logic;
-		 fifo_empty: in std_logic;
-		 read_count: in std_logic_vector(10 downto 0);
-
-		 rd_direct: out std_logic;
-		 i_direct: in std_logic;
-
-		 i_data: in std_logic_vector(3 downto 0);
-		 i_data_ce: in std_logic;
-
-		 rd_exp: out std_logic;
-		 i_data_exp: in std_logic_vector(7 downto 0);
-		 i_data_exp_ce: in std_logic;
-
-		 sequense_finish: out std_logic;
+		 
+		 radar_status: in std_logic_vector(7 downto 0); --# send by request N_0
+		 to_tx_module: in Trx2tx_wires;
 
 		 data_out: out std_logic_vector(3 downto 0);
 		 dv : out std_logic
@@ -41,17 +26,18 @@ end send_udp;
 architecture send_udp of send_udp is
 
 constant PRMBLE_LEN		:integer:=8;  		--# Number of addition constant data in preamble
-constant HEADER_LEN		:integer:=42;  	--# Number of addition constant data in MAC frame
+constant HEADER_LEN		:integer:=51;  	--# Number of addition constant data in MAC frame
 constant DATAFRAME_LEN	:integer:=512; 	--# Length of data in MAC frame in bytes. Must be DATAFRAME_LEN*n=CUT_LEN
+
 
 type Prmble_mem is array (0 to PRMBLE_LEN-1) of std_logic_vector(7 downto 0);
 constant pre_mem:Prmble_mem:=  (x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5");
 
 type Tmac_mem is array (0 to HEADER_LEN-1) of std_logic_vector(7 downto 0);
-constant mac_mem:Tmac_mem:=  (
-x"FF",x"FF",x"FF",x"FF",x"FF",x"FF",x"00",x"1E",x"68",x"AE",x"76",x"FF",x"08",x"00",x"45",x"00",
-x"02",x"1E",x"00",x"00",x"00",x"00",x"40",x"11",x"E2",x"75",x"C0",x"A8",x"0A",x"0A",x"C0",x"A8",
-x"0A",x"FF",x"00",x"3F",x"00",x"3F",x"02",x"0A",x"00",x"00");  --# Ethernet header
+constant mac_mem:Tmac_mem:=  (x"FF", x"FF", x"FF", x"FF", x"FF", x"FF", x"00", x"16", x"EA", x"CA", x"09", x"3A", x"08",
+	     x"00", x"45", x"00", x"00", x"1F", x"57", x"AC", x"00", x"00", x"80", x"11", x"21", x"74", x"C0", x"A8", x"01",
+	     x"06", x"FF", x"FF", x"FF", x"FF", x"E2", x"CE", x"EC", x"BE", x"00", x"0B", x"14", x"9C", x"5A", x"00", x"EC",
+		 x"BE", x"00", x"0B", x"14", x"9C", x"A5");  --# Ethernet header
 
 
  function nextCRC32_D4 -- Calculate ETH CRC32
@@ -125,7 +111,9 @@ end function;
 
 
 type Tstm_read is (STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
-DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8);
+DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8,
+SEND_REQ_NUM01,SEND_REQ_NUM02,MAKE_RADAR_STATE01,MAKE_RADAR_STATE02
+);
 signal stm_read:Tstm_read;
 
 signal fifo_empty_1w, exp_first_read, signal_direct_reg:std_logic;
@@ -139,6 +127,8 @@ signal read_cnt: std_logic_vector(15 downto 0);
 signal sig_dir:std_logic_vector(3 downto 0);
 signal exp_fifosE:std_logic_vector(7 downto 0);
 signal delay_cnt:std_logic_vector(4 downto 0);
+signal request_type_reg,number_of_req_reg:std_logic_vector(7 downto 0);
+signal to_tx_module_1w: Trx2tx_wires;
 
 begin
 
@@ -156,9 +146,10 @@ begin
 	fifo_empty_1w<=fifo_empty;
 	signal_direct_reg<=i_direct;
 	exp_fifosE<=i_data_exp;
+	to_tx_module_1w<=to_tx_module;
 
 	if reset='1' then
-		stm_read<=STARTING;--WAITING;
+		stm_read<=WAITING;
 		rd_data<='0';
 		s_dv<='0';
 		frame_num<=(others=>'0');
@@ -167,36 +158,13 @@ begin
 		sequense_finish<='0';
 	else --# reset
 		case stm_read is
-		when STARTING=>		
-			if (unsigned(read_count)>=(DATAFRAME_LEN*2) and fifo_empty_1w='0') then			
-				stm_read<=PREAMBLE1;
-			    if DEBUG=1 then
-				  print(">>> Start frame sequense "&int_to_string(conv_integer(frame_num)));
-			    end if;
-				rd_exp<='1';
-				rd_direct<='1';
-			else
-				rd_exp<='0';
-				rd_direct<='0';
-			end if;
-			rd_data<='0';
-			s_dv<='0';
-			s_data_out<=(others=>'0');	
-			read_cnt<=(others=>'0');
-			cnt_mac<=(others=>'0');
-			crc32<=(others=>'1');
-			frame_num<=(others=>'0');
-			sequense_finish<='0';			
-			exp_first_read<='0';
 		when WAITING =>
-			sequense_finish<='0';
-			if (fifo_empty_1w='0') and unsigned(read_count)>=(DATAFRAME_LEN*2) then			
+		    if to_tx_module_1w.to_tx_module='1' then
+				request_type_reg<=to_tx_module_1w.request_type;
+				number_of_req_reg<=to_tx_module_1w.number_of_req;
 				stm_read<=PREAMBLE1;
-			    if DEBUG=1 then
-				  print("Start frame "&int_to_string(conv_integer(frame_num)));
-			    end if;
-
 			end if;
+			
 			rd_direct<='0';
 			rd_data<='0';
 			s_dv<='0';
@@ -241,33 +209,81 @@ begin
 				stm_read<=DESCR_MAC1;
 			 else
 				cnt_mac<=(others=>'0');
-				stm_read<=DESCR_POS1;
+--				stm_read<=DESCR_POS1;
+                stm<=SEND_REQ_NUM01;
+--number_of_req_reg
+
+
+
 				rd_data<='1';
-				if exp_first_read='1' then
-					rd_exp<='0';
-				else
-					rd_exp<='0';
-				end if;
-				exp_first_read<='1';
-			if signal_direct_reg='1' then 
-			   sig_dir<=x"C";
-			   if DEBUG=1 then
-				 print(" Direction 1");
-			   end if;
-			else
-			   sig_dir<=x"F";
-			   if DEBUG=1 then
-				 print(" Direction 0");
-			   end if;
-			end if;
-
-
-
 			 end if;
 			 s_dv<='1';
           s_data_out<=mac_mem(conv_integer(cnt_mac))(7 downto 4);
 			 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(7 downto 4)),crc32);
 			 	  
+		 when SEND_REQ_NUM01=>
+			s_dv<='1';
+			s_data_out<=number_of_req_reg(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(number_of_req_reg(3 downto 0)),crc32);
+			stm_read<=SEND_REQ_NUM02;
+		 when SEND_REQ_NUM02=>
+			s_dv<='1';
+			s_data_out<=number_of_req_reg(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(number_of_req_reg(7 downto 4)),crc32);
+			stm_read<=MAKE_RADAR_STATE01;
+			case request_type_reg is
+			when x"00" =>  stm_read<=MAKE_RADAR_STATE01;
+			when x"03" =>  stm_read<=MAKE_GET_TH01; --# form_getth_resp() шлем 0x0300
+			when others=>  stm_read<=WAITING;
+			end case;
+
+
+
+		 when MAKE_RADAR_STATE01=>
+			s_dv<='1';
+			s_data_out<=radar_status(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(radar_status(3 downto 0)),crc32);
+			stm_read<=MAKE_RADAR_STATE02;
+		 when MAKE_RADAR_STATE02=>
+			s_dv<='1';
+			s_data_out<=radar_status(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(radar_status(7 downto 4)),crc32);
+			stm_read<=MAKE_RADAR_STATE03;
+            cnt_mac<=x"00";
+		 when MAKE_RADAR_STATE03=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+			if unsigned(cnt_mac)<2*14-1 then
+				cnt_mac<=cnt_mac+1;
+			else
+				stm_read<=PUSHCRC8;
+			end if;
+
+
+
+		 when MAKE_GET_TH01=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+			stm_read<=MAKE_GET_TH02;
+		 when MAKE_GET_TH02=>
+			s_dv<='1';
+			s_data_out<=x"3";
+			crc32<=nextCRC32_D4(fliplr(x"3"),crc32);
+			stm_read<=MAKE_GET_TH03;
+		 when MAKE_GET_TH03=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+			stm_read<=MAKE_GET_TH04;
+		 when MAKE_GET_TH04=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+			stm_read<=PUSHCRC8;
+			
+
 	      when DESCR_POS1 =>
 			s_dv<='1';
 			s_data_out<=sig_dir;
