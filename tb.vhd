@@ -285,7 +285,9 @@ top_top_i: entity work.top_top
 		 PayloadIsZERO =>'0',
 		 send_adc_data =>'0',
 
-		 port_number=>conv_std_logic_vector(60606,16),
+		 udp_IPaddr=>x"C0A80001",  --# UDP port number
+		 udp_port_number=>conv_std_logic_vector(60606,16),  --# UDP port number
+
 
 		 pre_shift =>"000000",
 		 i_direction =>signal_direct,

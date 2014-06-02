@@ -78,8 +78,8 @@ top_sender_i: entity work.top_sender
 		 PayloadIsZERO=>PayloadIsZERO,
 		 send_adc_data=>send_adc_data,
 
-		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
-		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
+		 udp_IPaddr=>udp_IPaddr,  --# UDP port number
+		 udp_port_number=>udp_port_number,  --# UDP port number
 
 		 pre_shift=>pre_shift,
 		 i_direction =>i_direction,

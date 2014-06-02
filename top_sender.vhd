@@ -71,7 +71,7 @@ signal tp_fifo : std_logic_vector(2 downto 0);
 signal rls_dv:std_logic;
 signal rls_data_out:std_logic_vector(3 downto 0);
 
-signal rls_mux,rls_finish:std_logic;
+signal rls_mux,rls_finish,data_req_event:std_logic;
 
 begin
 
