@@ -278,7 +278,8 @@ int UdpServer::create_data() {
         meas_data_curr.data_sweeps.push_back(vect);
         for (int j = 0; j < data[i].size(); j++) {
             raw_pt_t pt;
-            double pw = dbm(data[i][j], j);//перевод в Dbm
+            printf("%i\n",j);
+            double pw = (double)j;//dbm(data[i][j], j);//перевод в Dbm
             pt.power = pw;
             //cout.precision(3);
             //cout.setf(std::ios::fixed, std::ios::floatfield);

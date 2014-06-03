@@ -6,7 +6,7 @@ add wave -noupdate -group top /tb/top_top_i/clk_signal
 add wave -noupdate -group top /tb/top_top_i/clk_core
 add wave -noupdate -group top /tb/top_top_i/clk_mac
 add wave -noupdate -group top /tb/top_top_i/payload_is_counter
-add wave -noupdate -group top /tb/top_top_i/payloadiszero
+add wave -noupdate -group top /tb/top_top_i/PayloadIsZERO
 add wave -noupdate -group top /tb/top_top_i/send_adc_data
 add wave -noupdate -group top /tb/top_top_i/pre_shift
 add wave -noupdate -group top /tb/top_top_i/i_direction
@@ -28,7 +28,7 @@ add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_signal
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_core
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_mac
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/payload_is_counter
-add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/payloadiszero
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/PayloadIsZERO
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/send_adc_data
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/pre_shift
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/i_direction
@@ -125,23 +125,34 @@ add wave -noupdate -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_con
 add wave -noupdate -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/dv_i_2w
 add wave -noupdate -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/s_ce
 add wave -noupdate -group {conv 4 to 8} /tb/top_top_i/top_receiver_i/macbits_conv4to8_i/data_reg
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/reset
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/clk
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_dv
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_ce
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_data
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal -subitemconfig {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received {-radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type {-radix hexadecimal}} -expand -subitemconfig {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received {-radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type {-radix hexadecimal}} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_prmb_cnt
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_mac_cnt
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/udp_header_cnt
-add wave -noupdate -expand -group udp_rx_02 -radix unsigned /tb/top_top_i/top_receiver_i/udp_rx_i/by_frame_cnt
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number_reg
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number_correct
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_error
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/stm
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/reset
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/clk
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_dv
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_ce
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_data
+add wave -noupdate -group udp_rx_02 -radix hexadecimal -childformat {{/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received -radix hexadecimal} {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.number_of_req -radix hexadecimal} {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type -radix hexadecimal}} -expand -subitemconfig {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received {-height 15 -radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.number_of_req {-height 15 -radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type {-height 15 -radix hexadecimal}} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_prmb_cnt
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_mac_cnt
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/udp_header_cnt
+add wave -noupdate -group udp_rx_02 -radix unsigned /tb/top_top_i/top_receiver_i/udp_rx_i/by_frame_cnt
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number_reg
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number_correct
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_error
+add wave -noupdate -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/stm
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/clk
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/reset
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/oaddr
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/odata
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/wr
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/rd
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/idata
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/oaddrE
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/odataE
+add wave -noupdate -expand -group cpu -radix hexadecimal /tb/NOT_PLI_i/cpu_i/idataE
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {612225705 ps} 0}
+WaveRestoreCursors {{Cursor 1} {729500000 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 265
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -156,4 +167,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {1050 us}
+WaveRestoreZoom {0 ps} {2359959 ns}

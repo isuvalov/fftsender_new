@@ -133,7 +133,7 @@ void UdpRadar::read_sweeps()
     #else
     for (int i = 0; i < data.size(); i++)
         for (int j = 0; j < data[i].size(); j++)
-            data[i][j] = j * 10; //
+            data[i][j] = j * 128; //
 
     #endif
     mutex_lock();
