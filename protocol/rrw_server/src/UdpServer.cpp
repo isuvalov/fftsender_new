@@ -270,7 +270,7 @@ int UdpServer::create_data() {
     */
 
     vector<target_t> targets;
-    processor.get_targets(&targets, &data, timer.elapsed_ms());
+    processor.get_targets(&targets, &data, timer.elapsed_ms());//расчет целей
 
     for (int i = 0; i < data.size(); i++) {
 
@@ -278,13 +278,13 @@ int UdpServer::create_data() {
         meas_data_curr.data_sweeps.push_back(vect);
         for (int j = 0; j < data[i].size(); j++) {
             raw_pt_t pt;
-            double pw = dbm(data[i][j], j);
+            double pw = dbm(data[i][j], j);//перевод в Dbm
             pt.power = pw;
             //cout.precision(3);
             //cout.setf(std::ios::fixed, std::ios::floatfield);
             //cout <<  pw << " dbm\n";
             pt.status = j > 0 ? 0 : 3;
-            meas_data_curr.data_sweeps[i].push_back(pt);
+            meas_data_curr.data_sweeps[i].push_back(pt);//здесь сохраняем значение для текущей гармоники в формате, описанном в протоколе
         }
     }
 
