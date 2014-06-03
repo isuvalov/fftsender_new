@@ -88,11 +88,12 @@ int UdpRadar::collect_packets()
             return -1;
         }
 
+
         char pkt = *(&packet[0]);
-        j = (unsigned char) pkt >> 4;
+        j = (unsigned char) pkt >> 4;//Парсим номер пакета
 
         char cur_dir = (unsigned char) pkt & 0x0F;
-        i = cur_dir == DIR_RISE ? 0: (cur_dir == DIR_FALL ? 1: -1);
+        i = cur_dir == DIR_RISE ? 0: (cur_dir == DIR_FALL ? 1: -1);//Парсим номер свипа
 
         if (i < 0) {
             cout << "ERROR: Number of sweep is -1\n" << endl;
@@ -113,26 +114,26 @@ void UdpRadar::read_sweeps()
 
     //cout << "packets is collected\nStart write in DATA\n" << endl;
 
-    ch2ush_t ch2ush;
+    ch2ush_t ch2ush;//для перевода двух char в один short
     for (int i = 0; i < 2; i++) {
         int n = 0;
         for (int j = 0; j < pkt_params.count; j++) {
-            ch2ush.chars[0] = sweeps[i][j][0];
-            ch2ush.chars[1] = sweeps[i][j][1];
-            int exp_val = (ch2ush.value >> 8) - 243;
+            ch2ush.chars[0] = sweeps[i][j][0];//выделяем 1 char
+            ch2ush.chars[1] = sweeps[i][j][1];//выделяем 2 char; сейчас в ch2ush.value - лежит наш short
+            int exp_val = (ch2ush.value >> 8) - 243;//выделяем экспоненту
 
-            for (int k = 2; k < pkt_params.size; k += 2, n++) {
+            for (int k = 2; k < pkt_params.size; k += 2, n++) {//цикл для парсинга данных фурье
                 ch2ush.chars[0] = sweeps[i][j][k];
                 ch2ush.chars[1] = sweeps[i][j][k + 1];
 
-                data[i][ n] = (ch2ush.value << 5) >> exp_val;
+                data[i][ n] = (ch2ush.value << 5) >> exp_val;//сохраняем значение спектра, которое будет использоваться далее в расчетах
             }
         }
     }
     #else
     for (int i = 0; i < data.size(); i++)
         for (int j = 0; j < data[i].size(); j++)
-            data[i][j] = j;
+            data[i][j] = j * 10; //
 
     #endif
     mutex_lock();
