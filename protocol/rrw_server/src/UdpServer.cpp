@@ -206,7 +206,7 @@ void UdpServer::dispatch_request()
             #ifdef LOG
                 cout << "DATA" << endl;
             #endif // LOG
-            proto = &protocol_data;
+
             proto->create_response(&meas_data);
             status._unused = 1;
             break;
