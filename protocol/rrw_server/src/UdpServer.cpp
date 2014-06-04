@@ -70,9 +70,15 @@ void UdpServer::start()
 }
 
 void UdpServer::start_measure() {
+    int is_meas_status = status.meas_mode;
     while(is_working) {
         mutex_lock();
-        if (status.meas_mode) {
+        if (is_meas_status != status.meas_mode) {
+            cout << endl << "server mode is changed to " << (status.meas_mode? "doing measure":"don't measuring") << endl;
+            is_meas_status = status.meas_mode;
+        }
+
+        if (is_meas_status) {
 
             mutex_lock(false);
             //sleep_ms(50);
@@ -106,7 +112,7 @@ bool UdpServer::get_request() {
 
     cout << "Your request:";
     for (int i = 0; i < request.size(); i++)
-        cout << " " << hex << request[i];
+        cout << " " << hex << int(request[i]);
     cout << endl;
 
     if (request[0] != 0x5A) {
@@ -187,7 +193,9 @@ void UdpServer::dispatch_request()
     switch(func_ID) {
         case RRW_FN_STATUS:
             #ifdef LOG
-                cout << "STATUS" << endl;
+                cout << "STATUS? ...polling:" << endl;
+                cout << "status:" << (status.has_unread ? "has unreading data":"no data") << endl;
+                cout << "meas mode = " << (status.meas_mode? "doing measure":"don't measuring") << endl;
             #endif // LOG
             if(status._unused) {//неиспльзуемое поле применяется для определения момента снятия флага наличия данных
                 status.has_unread = 0;
@@ -198,13 +206,16 @@ void UdpServer::dispatch_request()
                 //meas_data.targets.clear();
             }
             proto->create_response(&status);
-            //cout << "status: has unread = " << (int)status.has_unread << endl;
-            //cout << "status: has meas mode = " << (int)status.meas_mode << endl;
+            #ifdef LOG
+                cout << "setting up new status...OK." << endl;
+                cout << "status:" << (status.has_unread ? "has unreading data":"no data") << endl;
+                cout << "meas mode = " << (status.meas_mode? "doing measure":"don't measuring") << endl;
+            #endif // LOG
             break;
 
         case RRW_FN_DATA_ALT:
             #ifdef LOG
-                cout << "DATA" << endl;
+                cout << "DATA?" << endl;
             #endif // LOG
 
             proto->create_response(&meas_data);
@@ -212,12 +223,13 @@ void UdpServer::dispatch_request()
             break;
 
         case RRW_FN_MEAS_CTL:
-            #ifdef LOG
-                cout << "MEAS CTL" << endl;
-            #endif // LOG
+
             //Парсим режим и длительность из запроса клиента
             duration_meas = proto->parse_req_duration();
             status.meas_mode = proto->parse_req_meas_mode();
+            #ifdef LOG
+                cout << "change MEAS mode to " << (status.meas_mode? "doing measure":"don't measuring") << endl;
+            #endif // LOG
             proto->create_response(&status, true);
             break;
 
@@ -246,7 +258,7 @@ int UdpServer::create_data() {
     Timer timer;
     timer.start();//fixing timestamp of meas start
 
-    #ifdef LOG1
+    #ifdef LOG
         cout << "capture data..." << endl;
     #endif // LOG
 
@@ -259,7 +271,7 @@ int UdpServer::create_data() {
 
     sleep_ms(1);
 
-    #ifdef LOG1
+    #ifdef LOG
         cout << "data has come (" << timer.elapsed_ms() << " ms)!" << endl;
     #endif // LOG endl;
 
