@@ -55,13 +55,13 @@ void UdpServer::start()
     status.has_unread = 0;
     status.last_unsucc = 0;
 
+    pthread_t th;
+    pthread_create(&th, NULL, th_start_dispatch, this);
+
     cout << "SYSTEM is RUN!" << endl << "----------" << endl;
     #ifdef LOG
        cout << "is waiting for client request...";
     #endif // LOG
-
-    pthread_t th;
-    pthread_create(&th, NULL, th_start_dispatch, this);
 
     bool res = 0;
     is_working = true;
@@ -70,11 +70,12 @@ void UdpServer::start()
 }
 
 void UdpServer::start_measure() {
+    cout << "servers function start_measure() is called." << endl;
     int is_meas_status = status.meas_mode;
     while(is_working) {
         mutex_lock();
         if (is_meas_status != status.meas_mode) {
-            cout << endl << "server mode is changed to " << (status.meas_mode? "doing measure":"don't measuring") << endl;
+            cout << endl << "servers mode is changed to " << (status.meas_mode? "doing measure":"don't measuring") << endl;
             is_meas_status = status.meas_mode;
         }
 
