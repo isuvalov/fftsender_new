@@ -133,10 +133,10 @@ signal big_sequense_array:Tbig_sequense_array;
 --signal sequence:T_sequence;
 
 
-type T_gap_pauses is array(0 to 11-1) of integer;
-type T_frame_lens is array(0 to 11-1) of integer;
-constant gap_pauses:T_gap_pauses:=(1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000);
-constant frame_lens:T_frame_lens:=(45,45,45,45,45,45,45,48,48,45,45);
+type T_gap_pauses is array(0 to 12-1) of integer;
+type T_frame_lens is array(0 to 12-1) of integer;
+constant gap_pauses:T_gap_pauses:=(1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000);
+constant frame_lens:T_frame_lens:=(45,45,45,45,45,45,45,48,48,45,45,45);
 --type T_gap_pauses is array(0 to 9-1) of integer;
 --type T_frame_lens is array(0 to 9-1) of integer;
 --constant gap_pauses:T_gap_pauses:=(1000,1000,1000,1000,1000,1000,1000,1000,1000);
@@ -272,8 +272,13 @@ begin
 
 				when 9=>
 					current_len<=frame_lens(current_frame)-CUT_FRAMES;
-					big_sequense_array<=copy_45(request_data01,frame_lens(current_frame));
+					big_sequense_array<=copy_45(request_status01,frame_lens(current_frame));
+
+
 				when 10=>
+					current_len<=frame_lens(current_frame)-CUT_FRAMES;
+					big_sequense_array<=copy_45(request_data01,frame_lens(current_frame));
+				when 11=>
 					current_len<=frame_lens(current_frame)-CUT_FRAMES;
 					big_sequense_array<=copy_45(request_data02,frame_lens(current_frame));
 
