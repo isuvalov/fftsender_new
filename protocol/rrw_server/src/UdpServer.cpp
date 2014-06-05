@@ -49,6 +49,8 @@ void UdpServer::start()
         return;
     }
 
+
+    is_working = true;
     status.meas_mode = 0;
     status.fault = 0;
     status.ready = 0;
@@ -58,20 +60,16 @@ void UdpServer::start()
     pthread_t th;
     pthread_create(&th, NULL, th_start_dispatch, this);
 
-    cout << "SYSTEM is RUN!" << endl << "----------" << endl;
-    #ifdef LOG
-       cout << "is waiting for client request...";
-    #endif // LOG
-
-    bool res = 0;
-    is_working = true;
-
     start_measure();
 }
 
 void UdpServer::start_measure() {
-    cout << "servers function start_measure() is called." << endl;
+    cout << endl << "START RADAR." << endl;
     int is_meas_status = status.meas_mode;
+
+    cout << endl << "SYSTEM is RUN!" << endl << "----------" << endl;
+
+
     while(is_working) {
         mutex_lock();
         if (is_meas_status != status.meas_mode) {
@@ -87,6 +85,8 @@ void UdpServer::start_measure() {
 
         } else
             mutex_lock(false);
+
+
     }
     sleep_ms(1);
 }
@@ -98,9 +98,26 @@ void UdpServer::stop() {
 }
 
 void* UdpServer::th_start_dispatch(void* arg) {
+    sleep_ms (300);
+    cout << endl << "START DISPATCHER." << endl;
+    #ifdef LOG
+       cout << "is waiting for client request...";
+    #endif // LOG
+
     UdpServer *server = (UdpServer*)arg;
-    while(server->is_working)
+    while(true) {
+        server->mutex_lock();
+        if (!server->is_working) {
+            cout << endl << "DISPATCHER IS STOPED." << endl;
+            server->mutex_lock(false);
+            break;
+        }
+        server->mutex_lock(false);
         server->dispatch_request();
+
+        cout << endl << "---- Press any key to get next request ----" << endl;
+        cin.get();
+    }
 }
 
 bool UdpServer::get_request() {
@@ -176,11 +193,13 @@ void UdpServer::send_resp(RrwProtocol* prot)
 void UdpServer::dispatch_request()
 {
     mutex_lock();
-
+    cout << "try get request...";
     if(!get_request()) {
+        cout << "no request." << endl;
         mutex_lock(false);
         return;
     }
+    cout << "request has come successfully." << endl;
     int func_ID = request[2];
 
     #ifdef LOG
@@ -208,8 +227,7 @@ void UdpServer::dispatch_request()
             }
             proto->create_response(&status);
             #ifdef LOG
-                cout << "setting up new status...OK." << endl;
-                cout << "status:" << (status.has_unread ? "has unreading data":"no data") << endl;
+                cout << "Read current status:" << endl << (status.has_unread ? "has unreading data":"no data") << endl;
                 cout << "meas mode = " << (status.meas_mode? "doing measure":"don't measuring") << endl;
             #endif // LOG
             break;
@@ -259,7 +277,7 @@ int UdpServer::create_data() {
     Timer timer;
     timer.start();//fixing timestamp of meas start
 
-    #ifdef LOG
+    #ifdef LOG1
         cout << "capture data..." << endl;
     #endif // LOG
 
@@ -272,7 +290,7 @@ int UdpServer::create_data() {
 
     sleep_ms(1);
 
-    #ifdef LOG
+    #ifdef LOG1
         cout << "data has come (" << timer.elapsed_ms() << " ms)!" << endl;
     #endif // LOG endl;
 
