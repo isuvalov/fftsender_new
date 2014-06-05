@@ -4,6 +4,11 @@
 #define RTL_SIMULATION 1
 
 #ifdef RTL_SIMULATION
+    #include <CfgClass.h>
+    #include<fstream>
+    #include<vector>
+    #include<iostream>
+    using namespace std;
 //	#include "..\rtl\connect.h"
 	#include "..\rtl\connect.c"
 	//#include "..\rtl\data_s.h"
@@ -17,7 +22,7 @@ static WSADATA wsa;
 
 int eudp_start() {
 #ifdef RTL_SIMULATION
-    ConnectInit (RegFileName);
+    //ConnectInit (RegFileName);
 #endif  /* RTL_SIMULATION  */
 #ifdef WIN32
     if(WSAStartup(MAKEWORD(2,2),&wsa)!=0)
@@ -401,7 +406,40 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	    return sendto(hnd->sock,buf,len,0,(struct sockaddr *)dest,sizeof(eudp_addr_t));
 	}
 #else
+
+    int curr_request_index = 0;
+    int eudp_recv_from_file(char *buf, int len) {
+        cout << endl << "read request file...";
+        Config req;
+        req.readFile("request.txt");
+
+        memset(buf,0,sizeof(char)*len);
+
+        const Setting& requests = req.lookup("requests");
+        int req_count = requests.getLength();
+        cout << "detected " << req_count << " requests in file." << endl;
+
+        if (curr_request_index == req_count) {
+            cout << "All requests was processed.";
+            if (cin.get() == '\n')
+                return -1;
+        }
+        cout << "request " << (curr_request_index+1);
+
+        int length = requests[curr_request_index].getLength();
+        cout << "(len = " << length << "): ";
+        for (int i = 0; i < length; i++) {
+            buf[i] = (int)requests[curr_request_index][i];
+            cout << hex << (int) buf[i] << " ";
+        }
+        curr_request_index++;
+        return length;
+    }
+
     int eudp_recvfrom(eudp_t *hnd, eudp_addr_t *from, char *buf, int len) {
+        return eudp_recv_from_file(buf, len);
+
+        /*
 		int val,cnt,addr,work;
 		if (hnd->rx_busy)
             return 0;
@@ -428,9 +466,11 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		len=cnt;
 		hnd->rx_busy = 0;
 		return 0;
+        */
 	}
 
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
+	    return 1;
 	    if (hnd->rx_busy)
             return 0;
 		hnd->rx_busy = 1;
@@ -461,6 +501,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 
 
 	int eudp_send(eudp_t *hnd, char *buf, int len) {
+
 		int i,addr,vall;
 		vall=0; addr=0;
 		printf("send!\n");
@@ -472,6 +513,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	}
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
+	    return 0;
 		int i;
 		if (hnd->rx_busy)
             return 0;

@@ -62,6 +62,13 @@ int eudp_t::rx_busy = 0;
 #endif // RTL_SIMULATION
 
 
+#ifdef RTL_SIMULATION
+  int eudp_recv_from_file(char *buf, int len);
+#endif // RTL_SIMULATION
+
+
+
+
 //Address utilities
 void eudp_get_addr_str(eudp_addr_t *addr, char *str);
 unsigned short eudp_get_port_num(eudp_addr_t *addr);
@@ -127,3 +134,5 @@ int eudp_open_bl(eudp_t *hnd,
 
 void eudp_set_rcv_timeout(eudp_t *hnd, int ms);
 void eudp_set_snd_timeout(eudp_t *hnd, int ms);
+
+
