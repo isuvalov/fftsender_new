@@ -420,9 +420,8 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
         cout << "detected " << req_count << " requests in file." << endl;
 
         if (curr_request_index == req_count) {
-            cout << "All requests was processed.";
-            if (cin.get() == '\n')
-                return -1;
+            cout << "All requests was processed." << endl;
+            return -2;
         }
         cout << "request " << (curr_request_index+1);
 
@@ -513,7 +512,30 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 	}
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
-	    return 0;
+
+        ofstream f("response.txt", (curr_request_index == 1? ios_base::trunc: ios_base::app));
+        if (!f) {
+
+            cout << "response.txt" << endl;
+            return -1;
+        }
+        cout << endl << "writing response in file:";
+        for (int i = 0; i < len; i++) {
+            f << (int) buf[i];
+            if (len < 30)
+                cout << (int) buf[i];
+            if (i < len - 1) {
+                f << " ";
+                if (len < 30)
+                    cout << " ";
+            }
+        }
+        f << endl;
+        cout << " ";
+        f.close();
+	    return 1;
+
+		/*
 		int i;
 		if (hnd->rx_busy)
             return 0;
@@ -525,6 +547,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		WrReg16(0,0);
 		hnd->rx_busy = 0;
 	    return 0;
+	    */
 	}
 
 

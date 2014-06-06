@@ -114,9 +114,6 @@ void* UdpServer::th_start_dispatch(void* arg) {
         }
         server->mutex_lock(false);
         server->dispatch_request();
-
-        cout << endl << "---- Press any key to get next request ----" << endl;
-        cin.get();
     }
 }
 
@@ -124,14 +121,26 @@ bool UdpServer::get_request() {
     request.clear();
     char req[REQ_BUF_SZ];
     int len = eudp_recvfrom(&udp, &from_addr, req, REQ_BUF_SZ);
+
+    #ifdef RTL_SIMULATION
+
+        if(len == -2) {
+            stop();
+            mutex_lock(false);
+            return false;
+        }
+
+    #endif // RTL_SIMULATION
+
+
     if (len <= 0)
         return false;
     request.assign(req, req + len);
 
-    cout << "Your request:";
-    for (int i = 0; i < request.size(); i++)
-        cout << " " << hex << int(request[i]);
-    cout << endl;
+    //cout << "Your request:";
+    //for (int i = 0; i < request.size(); i++)
+    //    cout << " " << hex << int(request[i]);
+    //cout << endl;
 
     if (request[0] != 0x5A) {
         request.clear();
@@ -180,6 +189,10 @@ void UdpServer::send_resp(RrwProtocol* prot)
         #ifdef LOG
                 cout << res << endl << "------------" << endl;
         #endif // LOG
+
+        #ifdef RTL_SIMULATION
+             sleep_ms(300);
+        #endif // RTL_SIMULATION
 
     }
     #ifdef LOG
