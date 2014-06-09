@@ -61,6 +61,7 @@ void UdpServer::start()
     pthread_create(&th, NULL, th_start_dispatch, this);
 
     start_measure();
+    cout << endl << "RADAR IS STOPED." << endl;
 }
 
 void UdpServer::start_measure() {
@@ -70,8 +71,12 @@ void UdpServer::start_measure() {
     cout << endl << "SYSTEM is RUN!" << endl << "----------" << endl;
 
 
-    while(is_working) {
+    while(true) {
         mutex_lock();
+        if (!is_working) {
+            mutex_lock(false);
+            break;
+        }
         if (is_meas_status != status.meas_mode) {
             cout << endl << "servers mode is changed to " << (status.meas_mode? "doing measure":"don't measuring") << endl;
             is_meas_status = status.meas_mode;
@@ -84,36 +89,48 @@ void UdpServer::start_measure() {
 
         } else
             mutex_lock(false);
-
-
     }
-    sleep_ms(10);
+
+    while (true) {
+        mutex_lock();
+        if (!is_dispatcher_work) {
+            mutex_lock(false);
+            cout << endl << "DISPATCHER IS STOPED." << endl;
+            sleep_ms(300);
+            break;
+        }
+        mutex_lock(false);
+        sleep_ms(100);
+    }
+
 }
 
 void UdpServer::stop() {
-    cout << endl <<"RADAR is stoping...";
+    //mutex_lock();
+    is_dispatcher_work = false;
     is_working = false;
-    sleep_ms(200);
+    //mutex_lock(false);
+    //sleep_ms(200);
 }
 
 void* UdpServer::th_start_dispatch(void* arg) {
-    sleep_ms (300);
-    cout << endl << "START DISPATCHER." << endl;
+   cout << endl << "START DISPATCHER." << endl;
     #ifdef LOG
        cout << "is waiting for client request...";
     #endif // LOG
 
     UdpServer *server = (UdpServer*)arg;
+    server->is_dispatcher_work = true;
     while(true) {
         server->mutex_lock();
-        if (!server->is_working) {
-            cout << endl << "DISPATCHER IS STOPED." << endl;
+        if (!server->is_dispatcher_work) {
             server->mutex_lock(false);
             break;
         }
         server->mutex_lock(false);
         server->dispatch_request();
     }
+
 }
 
 bool UdpServer::get_request() {
@@ -125,6 +142,7 @@ bool UdpServer::get_request() {
 
         if(len == -2) {
             stop();
+
             mutex_lock(false);
             return false;
         }
@@ -183,7 +201,7 @@ void UdpServer::send_resp(RrwProtocol* prot)
         #endif // LOG
         string res = "Error";
         if (eudp_sendto(&udp, &from_addr, (char*) resp->data(), resp->size()))
-            res = "OK!";
+            res = "send OK!";
 
         #ifdef LOG
                 cout << res << endl << "------------" << endl;

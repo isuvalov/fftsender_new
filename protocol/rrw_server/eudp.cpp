@@ -10,9 +10,9 @@
     #include<iostream>
     using namespace std;
 //	#include "..\rtl\connect.h"
-	#include "..\rtl\connect.c"
+	//#include "..\rtl\connect.c"
 	//#include "..\rtl\data_s.h"
-	TCHAR RegFileName[] =TEXT("Global\\cpu_8_reg");
+	//TCHAR RegFileName[] =TEXT("Global\\cpu_8_reg");
 #endif /* RTL_SIMULATION */
 
 
@@ -439,7 +439,8 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
         of << "------------------" << endl;
         of << "req # " << curr_request_index + 1 << ": ";
         for (int i = 0; i < length; i++) {
-            of << (int) buf[i];
+            unsigned char v = buf[i];
+            of << hex << (int)v;
             if (i < length - 1)
                 of << " ";
         }
@@ -486,6 +487,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 
 	int eudp_recv(eudp_t *hnd, char *buf, int len) {
 	    return 1;
+	    /*
 	    if (hnd->rx_busy)
             return 0;
 		hnd->rx_busy = 1;
@@ -512,11 +514,12 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		len=cnt;
 		hnd->rx_busy = 0;
 		return 0;
+		*/
 	}
 
 
 	int eudp_send(eudp_t *hnd, char *buf, int len) {
-
+        /*
 		int i,addr,vall;
 		vall=0; addr=0;
 		printf("send!\n");
@@ -524,6 +527,7 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 		for (i=0;i<len;i++)
 			WrReg16(addr,(buf[i]&0xFF)|(1<<8));
 		WrReg16(addr,vall);
+		*/
 	    return 0;
 	}
 
@@ -535,12 +539,18 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
             cout << "response.txt" << endl;
             return -1;
         }
+
         cout << endl << "writing response in file:";
         f << "resp: ";
         for (int i = 0; i < len; i++) {
-            f << (int) buf[i];
+            unsigned char v = buf[i];
+            if (i == 0)
+                f << hex;
+            else
+                f << dec;
+            f << (int)v;
             if (len < 30)
-                cout << (int) buf[i];
+                cout << (int)v;
             if (i < len - 1) {
                 f << " ";
                 if (len < 30)
