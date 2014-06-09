@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 
-entity cpu_correct_requset is
+entity cpp_response2vhdl is
 	 port(
 		 reset: in std_logic;
 		 ce : in std_logic;
@@ -13,10 +13,10 @@ entity cpu_correct_requset is
 		 dv_o: out std_logic;
 		 data_o: out std_logic_vector(7 downto 0)
 	     );
-end cpu_correct_requset;
+end cpp_response2vhdl;
 
 
-architecture cpu_correct_requset of cpu_correct_requset is
+architecture cpp_response2vhdl of cpp_response2vhdl is
 
 signal delay_cnt:std_logic_vector(3 downto 0):=(others=>'1');
 signal cnt:integer:=0;
@@ -43,7 +43,7 @@ x"A5", x"07", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"0
 
 constant RESP_NUM:natural:=5;
 type Tsizes is array(0 to 5-1) of integer;
-constant sizes:Tsizes:=(16, 5, 10248, 5, 16);
+constant sizes:Tsizes:=(58, 47, 10290, 47, 58);
 type Tstm is (FINISH,TX_STATE0, TX_STATE1, TX_STATE2, TX_STATE3, TX_STATE4,WAIT_RESPONSE0, WAIT_RESPONSE1, WAIT_RESPONSE2, WAIT_RESPONSE3, WAIT_RESPONSE4,START_DELAY0, START_DELAY1, START_DELAY2, START_DELAY3, START_DELAY4);
 signal stm:Tstm;
 
@@ -56,7 +56,7 @@ begin
 			stm<=WAIT_RESPONSE0;
 			delay_cnt<=(others=>'1');
 			dv_o<='0';
-		else    --# reset
+		elsif ce='1' then    --# reset
 			case stm is
 			when WAIT_RESPONSE0=>
 				if can_go='1' then
@@ -177,4 +177,4 @@ begin
 	end if;
 end process;
 
-end cpu_correct_requset;
+end cpp_response2vhdl;

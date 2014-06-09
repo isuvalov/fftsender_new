@@ -121,6 +121,11 @@ signal data_send8_rtl,data_send8,data_send8_cpu:std_logic_vector(7 downto 0);
 signal data_send4:std_logic_vector(3 downto 0);
 signal ce_send8_rtl,dv_send8,dv_send4,send_ask_radar_status,mac_clk_div2:std_logic:='0';
 
+signal ce_send8_rtl_1w,can_ack:std_logic;
+
+signal req_dv,have_send:std_logic:='0';
+signal req_data: std_logic_vector(7 downto 0);
+
 
 begin
 
@@ -222,53 +227,41 @@ begin
 end process;
 
 
-NOT_PLI_i: if NOT_PLI=0 generate
-	cpu_i: entity work.cpu_wrapper
-    	port map(clk =>clk125,
-		  reset =>reset,
-		  oaddr=>open,
-		  odata =>datafromcpu,
-		  wr =>cpu_wr,
-		  rd =>cpu_rd,
-		  idata =>datatocpu
-		);
-end generate;
+--NOT_PLI_i: if NOT_PLI=0 generate
+--	cpu_i: entity work.cpu_wrapper
+--  	port map(clk =>clk125,
+--		  reset =>reset,
+--		  oaddr=>open,                        
+--		  odata =>datafromcpu,
+--		  wr =>cpu_wr,
+--		  rd =>cpu_rd,
+--		  idata =>datatocpu
+--		);
+--end generate;
 
-
-datatocpu<="0000000"&dv_send8_cpu&data_send8_cpu;
-
-
-client_stimulus_cpu_i: entity work.client_stimulus_cpu
-	generic map(
-		CUT_FRAMES=>42
-	)
+cpu_correct_requset_i: entity work.cpp_response2vhdl
 	 port map(
 		 reset=>reset,
-		 ce => cpu_rd_parse,
+		 ce =>mac_clk_div2,
 		 clk =>clk125,
-		 send_ask_radar_status=>send_ask_radar_status,
-		 send_ask_data=>'0',
+		 can_go=>can_ack, --# see falling edge of recieved dv
 
-		 dv_o=>dv_send8_cpu,
-		 data_o=>data_send8_cpu
+		 dv_o=>req_dv,
+		 data_o=>req_data
 	     );
 
 
-client_stimulus_i: entity work.client_stimulus_cpu
-	generic map(
-		CUT_FRAMES=>0
-	)
+
+cpp_req2vhdl_i:entity work.cpp_req2vhdl
 	 port map(
-		 reset=>reset,
-		 ce => mac_clk_div2,
+		 reset =>reset,
+		 ce =>mac_clk_div2,
 		 clk =>clk125,
-		 send_ask_radar_status=>send_ask_radar_status,
-		 send_ask_data=>'0',
+		 can_go=>'1', --# see falling edge of recieved dv
 
 		 dv_o=>ce_send8_rtl,   --# Надо подконектить к top_top через конвертор 8в4
 		 data_o=>data_send8_rtl  --# Надо подконектить к top_top через конвертор 8в4
 	     );
-
 
 top_top_i: entity work.top_top
 	generic map(
@@ -356,9 +349,33 @@ ethernet2hexfile_i: entity work.ethernet2hexfile
 
 cpu_rd_parse<='1' when cpu_rd='1' and cpu_rd_1w='0' else '0';
 
+
+
+
 process (clk125) is
 begin
  if rising_edge(clk125) then
+
+	ce_send8_rtl_1w<=ce_send8_rtl;
+
+	if req_dv='0' then
+		if ce_send8_rtl_1w='1' and ce_send8_rtl='0' then
+			have_send<='1';
+		end if;
+	else
+		if have_send='1' then
+			can_ack<='1';
+			have_send<='0';
+		else
+			if ce_send8_rtl_1w='1' and ce_send8_rtl='0' then
+				can_ack<='1';
+				have_send<='0';
+			else
+				can_ack<='0';
+			end if;
+		end if;
+	end if;
+
 
 
     cpu_rd_1w<=cpu_rd;

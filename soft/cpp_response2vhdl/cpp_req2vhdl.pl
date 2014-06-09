@@ -8,7 +8,7 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 
-entity cpp_response2vhdl is
+entity cpp_req2vhdl is
 	 port(
 		 reset: in std_logic;
 		 ce : in std_logic;
@@ -18,10 +18,10 @@ entity cpp_response2vhdl is
 		 dv_o: out std_logic;
 		 data_o: out std_logic_vector(7 downto 0)
 	     );
-end cpp_response2vhdl;
+end cpp_req2vhdl;
 
 
-architecture cpp_response2vhdl of cpp_response2vhdl is
+architecture cpp_req2vhdl of cpp_req2vhdl is
 
 signal delay_cnt:std_logic_vector(3 downto 0):=(others=>'1');
 signal cnt:integer:=0;
@@ -33,10 +33,10 @@ $zz=0;
 @sizes=();
 foreach $txt (@lines)
 {
-  if ($txt =~ /resp:/)
+  if ($txt =~ /req #/)
   {
 	@resp=split(' ',$txt);	
-    $resp_len=(scalar @resp)-1;
+    $resp_len=(scalar @resp)-3;
 	push(@sizes,$resp_len);
 	print "type Tseq_array$zz is array (0 to 42+$resp_len-1) of std_logic_vector(7 downto 0);\n";
 	print "constant seq_array$zz:Tseq_array$zz:=(";
@@ -139,7 +139,7 @@ print <<HTMLPRINT;
 	end if;
 end process;
 
-end cpp_response2vhdl;
+end cpp_req2vhdl;
 HTMLPRINT
 
 
@@ -155,7 +155,7 @@ sub resp_print
   my $resp_len=(scalar @resp)-1;
   foreach $str (@val)
   {
-    if ($z>0) 
+    if ($z>2) 
 	{
 		$a=dec2hex($str&0xFF);
 		if ($z<$resp_len)
