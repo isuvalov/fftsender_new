@@ -2,13 +2,10 @@
 UdpServer server;
 void close(void) {
   server.stop();
-  cout << "OK" << endl << "---------" << endl <<"Programm exit.";
+  cout << endl << "---------" << endl <<"Programm exit.";
 }
 
 int main(int argc, char *argv[]) {
-    //char buf[512];
-    //while (eudp_recv_from_file(buf, 512) == 0);
-    //return 0;
     atexit(close);
     server.start();
     return 0;

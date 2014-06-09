@@ -22,6 +22,7 @@ class UdpServer : public UdpConnection
         unsigned short unlim_meas_duration;
         Timer timer_unlim_meas;
         Timer timer_1;
+        bool is_dispatcher_work;
         RrwProtocol protocol;
         RrwProtocol protocol_data;
 
@@ -35,6 +36,8 @@ class UdpServer : public UdpConnection
         bool is_busy;
         pthread_mutex_t mtx;
         bool data_was_null;
+
+
 
         unsigned short duration_meas;
 
