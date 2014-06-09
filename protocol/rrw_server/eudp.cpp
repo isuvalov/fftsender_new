@@ -431,6 +431,22 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
             buf[i] = (int)requests[curr_request_index][i];
             cout << hex << (int) buf[i] << " ";
         }
+
+        //***********
+        ofstream of("response.txt", (curr_request_index == 0? ios_base::trunc: ios_base::app));
+        if (!of)
+            return -1;
+        of << "------------------" << endl;
+        of << "req # " << curr_request_index + 1 << ": ";
+        for (int i = 0; i < length; i++) {
+            of << (int) buf[i];
+            if (i < length - 1)
+                of << " ";
+        }
+        of << endl;
+        of.close();
+	    //*************
+
         curr_request_index++;
         return length;
     }
@@ -513,13 +529,14 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
 
 	int eudp_sendto(eudp_t *hnd, eudp_addr_t *dest, char *buf, int len) {
 
-        ofstream f("response.txt", (curr_request_index == 1? ios_base::trunc: ios_base::app));
+        ofstream f("response.txt",ios_base::app);
         if (!f) {
 
             cout << "response.txt" << endl;
             return -1;
         }
         cout << endl << "writing response in file:";
+        f << "resp: ";
         for (int i = 0; i < len; i++) {
             f << (int) buf[i];
             if (len < 30)

@@ -78,7 +78,6 @@ void UdpServer::start_measure() {
         }
 
         if (is_meas_status) {
-
             mutex_lock(false);
             //sleep_ms(50);
             create_data();
@@ -88,7 +87,7 @@ void UdpServer::start_measure() {
 
 
     }
-    sleep_ms(1);
+    sleep_ms(10);
 }
 
 void UdpServer::stop() {
@@ -189,11 +188,6 @@ void UdpServer::send_resp(RrwProtocol* prot)
         #ifdef LOG
                 cout << res << endl << "------------" << endl;
         #endif // LOG
-
-        #ifdef RTL_SIMULATION
-             sleep_ms(300);
-        #endif // RTL_SIMULATION
-
     }
     #ifdef LOG
         if (status.meas_mode)
@@ -284,6 +278,10 @@ void UdpServer::dispatch_request()
     if (proto)
         send_resp(proto);
     mutex_lock(false);
+    #ifdef RTL_SIMULATION
+        cout << endl << "PAUSE" << endl;
+        sleep_ms(100);
+    #endif // RTL_SIMULATION
 }
 
 int UdpServer::create_data() {
@@ -295,7 +293,6 @@ int UdpServer::create_data() {
     #endif // LOG
 
     capture_data_t data;
-    meas_data_t meas_data_curr;
     if (!radar.wait_for_data(&data)) {
         cout << "SERVER: NO Data." << endl;
         return 0;
@@ -303,15 +300,17 @@ int UdpServer::create_data() {
 
     sleep_ms(1);
 
-    #ifdef LOG1
+    #ifdef LOG
         cout << "data has come (" << timer.elapsed_ms() << " ms)!" << endl;
     #endif // LOG endl;
 
-    /*
+    /**/
+    mutex_lock();
+
     meas_data.data_sweeps.clear();
     meas_data.elapsed = 0;
     meas_data.targets.clear();
-    */
+
 
     vector<target_t> targets;
     processor.get_targets(&targets, &data, timer.elapsed_ms());//расчет целей
@@ -319,33 +318,41 @@ int UdpServer::create_data() {
     for (int i = 0; i < data.size(); i++) {
 
         vector<raw_pt_t> vect;
-        meas_data_curr.data_sweeps.push_back(vect);
+        meas_data.data_sweeps.push_back(vect);
         for (int j = 0; j < data[i].size(); j++) {
             raw_pt_t pt;
-            double pw = dbm(data[i][j], j);//перевод в Dbm
+            double pw = data[i][j];//dbm(data[i][j], j);//перевод в Dbm
             pt.power = pw;
             //cout.precision(3);
             //cout.setf(std::ios::fixed, std::ios::floatfield);
-            //cout <<  pw << " dbm\n";
+            //cout <<  pw << " ";
             pt.status = j > 0 ? 0 : 3;
-            meas_data_curr.data_sweeps[i].push_back(pt);//здесь сохраняем значение для текущей гармоники в формате, описанном в протоколе
+            meas_data.data_sweeps[i].push_back(pt);//здесь сохраняем значение для текущей гармоники в формате, описанном в протоколе
         }
     }
 
-    meas_data_curr.meas_index ++;
+    meas_data.meas_index ++;
     unsigned short elapsed = timer.elapsed_ms();
     unsigned short elapsed_add = elapsed >= 90? 0: 90 - elapsed;
     if (elapsed_add > 0)
         sleep_ms(elapsed_add);//досыпаем до 100 мс
-    meas_data_curr.elapsed = timer.elapsed_ms();
+    meas_data.elapsed = timer.elapsed_ms();
 
     #ifdef LOG1
-        cout << "OK (" << meas_data_curr.elapsed << "  " << elapsed_add << " ms)!" << endl;
+        cout << "OK (" << meas_data.elapsed << "  " << elapsed_add << " ms)!" << endl;
     #endif // LOG
-
-    mutex_lock();
-    meas_data = meas_data_curr;
     meas_data.targets = targets;
+
+    #ifdef RTL_SIMULATION
+        /*
+        for (int i = 0; i < meas_data.data_sweeps.size(); i++) {
+            cout << "sweep " << i+1 << endl;
+            for (int j = 0; j < meas_data.data_sweeps[i].size(); j++)
+                cout << meas_data.data_sweeps[i][j].power << " ";
+        }
+        cout << endl;
+        */
+    #endif // RTL_SIMULATION
 
     status.has_unread = 1;
     mutex_lock(false);
