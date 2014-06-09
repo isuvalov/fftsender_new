@@ -101,16 +101,16 @@ void RrwProtocol::create_response(meas_data_t *meas_data, unsigned char result_s
     ch2int_t ch2int;
     unsigned char *bf = 0;
     if (meas_data->data_sweeps.empty()) {
+        cout << endl << "DATA SWEEPS is empty" << endl;
         for (int i = 0; i < 1024 * 2 * sizeof(raw_pt_t); i++)
             resp.push_back(0);
     } else {
-        cout << "data for response: ";
+        //cout << "data for response: ";
         for (int i = 0; i < meas_data->data_sweeps.size(); i++) {
-            cout << endl << "sweep #" << (i + 1) << ": ";
+            //cout << endl << "sweep #" << (i + 1) << ": ";
             for (int j = 0; j < meas_data->data_sweeps[i].size(); j++) {
                 ch2int.value = meas_data->data_sweeps[i][j].power;
-                cout << ch2int.value;
-                //cout << power << "\n";
+                //cout << ch2int.value;
                 add_buf2resp(&ch2int.chars[0], sizeof(ch2int.chars));
                 add_buf2resp(&meas_data->data_sweeps[i][j].status);
             }
