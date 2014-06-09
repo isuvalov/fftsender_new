@@ -1,4 +1,4 @@
-open(F,"../protocol/rrw_server/bin/Debug/response.txt");
+open(F,"../../protocol/rrw_server/bin/Debug/response.txt");
 @lines=<F>;
 
 
