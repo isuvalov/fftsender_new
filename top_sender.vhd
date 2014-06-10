@@ -264,6 +264,18 @@ send_protocol_udp_i: entity work.send_protocol_udp
 		 clk_mac=>clk_mac,
 		 
 		 radar_status=>x"00", --# send by request N_0
+		 temperature1=>x"00",
+		 temperature2=>x"00",
+		 temperature3=>x"00",
+		 power1=>x"00",
+		 power2=>x"00",
+		 power3=>x"00",
+
+		 voltage1=>x"00",
+		 voltage2=>x"00",
+		 voltage3=>x"00",
+		 voltage4=>x"00",
+
 		 to_tx_module=>to_tx_module,
 
 		 data_out=>protocol_data_out,

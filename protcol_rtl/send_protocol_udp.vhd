@@ -16,6 +16,19 @@ entity send_protocol_udp is
 		 clk_mac: in std_logic;
 		 
 		 radar_status: in std_logic_vector(7 downto 0); --# send by request N_0
+		 temperature1: in std_logic_vector(7 downto 0);
+		 temperature2: in std_logic_vector(7 downto 0);
+		 temperature3: in std_logic_vector(7 downto 0);
+		 power1: in std_logic_vector(7 downto 0);
+		 power2: in std_logic_vector(7 downto 0);
+		 power3: in std_logic_vector(7 downto 0);
+
+		 voltage1: in std_logic_vector(7 downto 0);
+		 voltage2: in std_logic_vector(7 downto 0);
+		 voltage3: in std_logic_vector(7 downto 0);
+		 voltage4: in std_logic_vector(7 downto 0);
+
+
 		 to_tx_module: in Trx2tx_wires;
 
 		 data_out: out std_logic_vector(3 downto 0);
@@ -114,6 +127,11 @@ end function;
 type Tstm_read is (STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
 DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8,
 SEND_REQ_NUM01,SEND_REQ_NUM02,MAKE_RADAR_STATE01,MAKE_RADAR_STATE02,MAKE_RADAR_STATE03,
+SEND_ERROR_CODE01,SEND_ERROR_CODE02,
+SEND_REQ_TYPE01,SEND_REQ_TYPE02,
+MAKE_MEASURE_01,MAKE_MEASURE_02,MAKE_MEASURE_03,MAKE_MEASURE_04,MAKE_MEASURE_05,MAKE_MEASURE_06,MAKE_MEASURE_07,MAKE_MEASURE_08,MAKE_MEASURE_09,MAKE_MEASURE_10,
+MAKE_MEASURE_11,MAKE_MEASURE_12,MAKE_MEASURE_13,MAKE_MEASURE_14,MAKE_MEASURE_15,MAKE_MEASURE_16,MAKE_MEASURE_17,MAKE_MEASURE_18,MAKE_MEASURE_19,MAKE_MEASURE_20,
+MAKE_MEASURE_21,MAKE_MEASURE_22,
 MAKE_GET_TH01,MAKE_GET_TH02,MAKE_GET_TH03,MAKE_GET_TH04
 );
 signal stm_read:Tstm_read;
@@ -132,6 +150,11 @@ signal delay_cnt:std_logic_vector(4 downto 0);
 signal request_type_reg,number_of_req_reg:std_logic_vector(7 downto 0);
 signal to_tx_module_1w: Trx2tx_wires;
 
+signal	infinity_measure_reg:std_logic:='0';
+signal	measure_time_reg:std_logic_vector(15 downto 0):=x"0000";  --# in seconds
+signal  temperature_reg1,temperature_reg2,temperature_reg3,power_reg1,power_reg2,power_reg3:std_logic_vector(7 downto 0);
+signal  voltage_reg1,voltage_reg2,voltage_reg3,voltage_reg4:std_logic_vector(7 downto 0);
+
 begin
 
 C_calc <= not (crc32(28)& crc32(29)& crc32(30)& crc32(31)& crc32(24)& crc32(25)& crc32(26)& crc32(27)&
@@ -144,6 +167,17 @@ C_calc <= not (crc32(28)& crc32(29)& crc32(30)& crc32(31)& crc32(24)& crc32(25)&
 process (clk_mac) is
 begin
  if rising_edge(clk_mac) then
+
+	temperature_reg1<=temperature1;
+	temperature_reg2<=temperature2;
+	temperature_reg3<=temperature3;
+	power_reg1<=power1;
+	power_reg2<=power2;
+	power_reg3<=power3;
+	voltage_reg1<=voltage1;
+	voltage_reg2<=voltage2;
+	voltage_reg3<=voltage3;
+	voltage_reg4<=voltage4;
 
 --	signal_direct_reg<=i_direct;
 --	exp_fifosE<=i_data_exp;
@@ -205,16 +239,40 @@ begin
 			 	  
 		 when SEND_REQ_NUM01=>
 			s_dv<='1';
-			s_data_out<=number_of_req_reg(3 downto 0);
-			crc32<=nextCRC32_D4(fliplr(number_of_req_reg(3 downto 0)),crc32);
+			s_data_out<=number_of_req_reg(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(number_of_req_reg(7 downto 4)),crc32);
 			stm_read<=SEND_REQ_NUM02;
 		 when SEND_REQ_NUM02=>
 			s_dv<='1';
-			s_data_out<=number_of_req_reg(7 downto 4);
-			crc32<=nextCRC32_D4(fliplr(number_of_req_reg(7 downto 4)),crc32);
-			stm_read<=MAKE_RADAR_STATE01;
+			s_data_out<=number_of_req_reg(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(number_of_req_reg(3 downto 0)),crc32);
+			stm_read<=SEND_REQ_TYPE01;
+
+		 when SEND_REQ_TYPE01=>
+			s_dv<='1';
+			s_data_out<=request_type_reg(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(request_type_reg(7 downto 4)),crc32);
+			stm_read<=SEND_REQ_TYPE02;
+		 when SEND_REQ_TYPE02=>
+			s_dv<='1';
+			s_data_out<=request_type_reg(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(request_type_reg(3 downto 0)),crc32);
+			stm_read<=SEND_ERROR_CODE01;
+
+
+		 when SEND_ERROR_CODE01=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+			stm_read<=SEND_ERROR_CODE02;
+		 when SEND_ERROR_CODE02=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+
 			case request_type_reg is
 			when x"00" =>  stm_read<=MAKE_RADAR_STATE01;
+			when x"02" =>  stm_read<=MAKE_MEASURE_01;
 			when x"03" =>  stm_read<=MAKE_GET_TH01; --# form_getth_resp() шлем 0x0300
 			when others=>  stm_read<=WAITING;
 			end case;
@@ -223,35 +281,162 @@ begin
 
 		 when MAKE_RADAR_STATE01=>
 			s_dv<='1';
-			s_data_out<=radar_status(3 downto 0);
-			crc32<=nextCRC32_D4(fliplr(radar_status(3 downto 0)),crc32);
+			s_data_out<=radar_status(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(radar_status(7 downto 4)),crc32);
 			stm_read<=MAKE_RADAR_STATE02;
 		 when MAKE_RADAR_STATE02=>
 			s_dv<='1';
-			s_data_out<=radar_status(7 downto 4);
-			crc32<=nextCRC32_D4(fliplr(radar_status(7 downto 4)),crc32);
+			s_data_out<=radar_status(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(radar_status(3 downto 0)),crc32);
 			stm_read<=MAKE_RADAR_STATE03;
             cnt_mac<=x"00";
 		 when MAKE_RADAR_STATE03=>
 			s_dv<='1';
 			s_data_out<=x"0";
 			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
-			if unsigned(cnt_mac)<2*14-1 then
+			if unsigned(cnt_mac)<2*12-1 then
 				cnt_mac<=cnt_mac+1;
 			else
 				stm_read<=PUSHCRC8;
 			end if;
 
 
-		 when MAKE_GET_TH01=>
+		 when MAKE_MEASURE_01=>
+			infinity_measure_reg<=to_tx_module_1w.infinity_measure;
+			measure_time_reg<=to_tx_module_1w.measure_time;
 			s_dv<='1';
-			s_data_out<=x"0";
-			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
-			stm_read<=MAKE_GET_TH02;
-		 when MAKE_GET_TH02=>
+			s_data_out<=radar_status(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(radar_status(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_02;
+		 when MAKE_MEASURE_02=>
+			s_dv<='1';
+			s_data_out<=radar_status(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(radar_status(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_03;
+
+
+
+		when MAKE_MEASURE_03=>  --# send temperature
+			s_dv<='1';
+			s_data_out<=temperature_reg1(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(temperature_reg1(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_04;
+		when MAKE_MEASURE_04=>
+			s_dv<='1';
+			s_data_out<=temperature_reg1(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(temperature_reg1(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_05;
+		when MAKE_MEASURE_05=>
+			s_dv<='1';
+			s_data_out<=temperature_reg2(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(temperature_reg2(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_06;
+		when MAKE_MEASURE_06=>
+			s_dv<='1';
+			s_data_out<=temperature_reg2(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(temperature_reg2(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_07;
+		when MAKE_MEASURE_07=>
+			s_dv<='1';
+			s_data_out<=temperature_reg3(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(temperature_reg3(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_08;
+		when MAKE_MEASURE_08=>
+			s_dv<='1';
+			s_data_out<=temperature_reg3(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(temperature_reg3(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_09;
+
+
+		when MAKE_MEASURE_09=>   --# send power I=mA
+			s_dv<='1';
+			s_data_out<=power_reg1(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(power_reg1(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_10;
+		when MAKE_MEASURE_10=>
+			s_dv<='1';
+			s_data_out<=power_reg1(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(power_reg1(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_11;						
+		when MAKE_MEASURE_11=>
+			s_dv<='1';
+			s_data_out<=power_reg2(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(power_reg2(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_12;
+		when MAKE_MEASURE_12=>
+			s_dv<='1';
+			s_data_out<=power_reg2(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(power_reg2(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_13;
+		when MAKE_MEASURE_13=>
+			s_dv<='1';
+			s_data_out<=power_reg3(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(power_reg3(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_14;
+		when MAKE_MEASURE_14=>
+			s_dv<='1';
+			s_data_out<=power_reg3(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(power_reg3(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_15;
+
+
+
+
+		when MAKE_MEASURE_15=>
+			s_dv<='1';
+			s_data_out<=voltage_reg1(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg1(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_16;
+		when MAKE_MEASURE_16=>
+			s_dv<='1';
+			s_data_out<=voltage_reg1(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg1(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_17;
+
+
+		when MAKE_MEASURE_17=>
+			s_dv<='1';
+			s_data_out<=voltage_reg2(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg2(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_18;
+		when MAKE_MEASURE_18=>
+			s_dv<='1';
+			s_data_out<=voltage_reg2(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg2(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_19;
+		when MAKE_MEASURE_19=>
+			s_dv<='1';
+			s_data_out<=voltage_reg3(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg3(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_20;
+		when MAKE_MEASURE_20=>
+			s_dv<='1';
+			s_data_out<=voltage_reg3(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg3(3 downto 0)),crc32);
+			stm_read<=MAKE_MEASURE_21;
+		when MAKE_MEASURE_21=>
+			s_dv<='1';
+			s_data_out<=voltage_reg4(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg4(7 downto 4)),crc32);
+			stm_read<=MAKE_MEASURE_22;
+		when MAKE_MEASURE_22=>
+			s_dv<='1';
+			s_data_out<=voltage_reg4(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(voltage_reg4(3 downto 0)),crc32);
+			stm_read<=PUSHCRC8;
+
+
+
+
+		 when MAKE_GET_TH01=>
 			s_dv<='1';
 			s_data_out<=x"3";
 			crc32<=nextCRC32_D4(fliplr(x"3"),crc32);
+			stm_read<=MAKE_GET_TH02;
+		 when MAKE_GET_TH02=>
+			s_dv<='1';
+			s_data_out<=x"0";
+			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
 			stm_read<=MAKE_GET_TH03;
 		 when MAKE_GET_TH03=>
 			s_dv<='1';

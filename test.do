@@ -94,6 +94,11 @@ vcom protcol_rtl/regs_pack.vhd
 vcom protcol_rtl/udp_rx.vhd 
 vcom protcol_rtl/client_stimulus.vhd
 vcom protcol_rtl/client_stimulus_cpu.vhd
+vcom protcol_rtl/send_protocol_udp.vhd 
+
+vcom soft/cpp_response2vhdl/cpp_response2vhdl.vhd
+vcom soft/cpp_response2vhdl/cpp_req2vhdl.vhd 
+
 
 vcom make_abs.vhd
 vcom make_adc.vhd
@@ -111,8 +116,6 @@ vcom top_top.vhd
 #vlog protcol_rtl/vpi_cpu/cpu.v
 #vcom protcol_rtl/vpi_cpu/cpu_wrapper.vhd 
 
-vcom soft/cpp_response2vhdl/cpp_response2vhdl.vhd
-vcom soft/cpp_response2vhdl/cpp_req2vhdl.vhd 
 
 vcom tb.vhd
 

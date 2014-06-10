@@ -9,6 +9,8 @@ type Trx2tx_wires is record
 	new_request_received: std_logic;
 	number_of_req:std_logic_vector(7 downto 0);
 	request_type:std_logic_vector(7 downto 0);
+	infinity_measure:std_logic;
+	measure_time:std_logic_vector(15 downto 0);  --# in seconds
 end record Trx2tx_wires;
 							  
 

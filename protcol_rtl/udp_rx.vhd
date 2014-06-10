@@ -23,7 +23,7 @@ end udp_rx;
 architecture udp_rx of udp_rx is
 
 constant PRMBLE_LEN		:integer:=8;  		--# Number of addition constant data in preamble
-constant UDPHEADER_LEN		:integer:=42-12;  	--# Number of addition constant data in MAC frame
+constant UDPHEADER_LEN		:integer:=42-12-1;  	--# Number of addition constant data in MAC frame
 type Prmble_mem is array (0 to PRMBLE_LEN-1) of std_logic_vector(7 downto 0);
 constant pre_mem:Prmble_mem:=  (x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5");
 
@@ -58,7 +58,7 @@ signal port_number_correct,port_error:std_logic;
 
 
 type Tstm is (WAITING,GET_PREAMBULE,GETING_MAC1,GETING_MAC2,GETING_ETHER1,GETING_ETHER2,GETING_UDPHEADER,
-	GET_REQ_PROPERTY,GET_REQNUM	);
+	GET_REQ_PROPERTY,GET_REQNUM,BYTE_02,BYTE_03,BYTE_04);
 
 signal stm:Tstm:=WAITING;
 signal s_rx2tx:Trx2tx_wires;
@@ -198,8 +198,32 @@ begin
 					stm<=GET_REQ_PROPERTY;
 				when GET_REQ_PROPERTY=>
 					s_rx2tx.request_type<=i_data;
-					s_rx2tx.new_request_received<='1';
-					stm<=WAITING;
+					stm<=BYTE_02;
+				when BYTE_02=>
+					if i_dv='1' then
+						s_rx2tx.infinity_measure<=i_data(0);  --# for request_type=0x02
+						stm<=BYTE_03;
+					else
+						stm<=WAITING;
+						s_rx2tx.new_request_received<='1';
+					end if;
+				when BYTE_03=>
+					if i_dv='1' then
+						s_rx2tx.measure_time(15 downto 8)<=i_data;  --# for request_type=0x02
+						stm<=BYTE_04;
+					else
+						stm<=WAITING;
+						s_rx2tx.new_request_received<='1';
+					end if;
+				when BYTE_04=>
+					if i_dv='1' then
+						s_rx2tx.measure_time(7 downto 0)<=i_data;  --# for request_type=0x02
+						stm<=BYTE_04;
+					else
+						stm<=WAITING;
+						s_rx2tx.new_request_received<='1';
+					end if;
+					
 				when others=>
 				end case;
 			end if; --# ce
