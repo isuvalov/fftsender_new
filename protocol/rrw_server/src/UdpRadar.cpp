@@ -47,7 +47,7 @@ void* UdpRadar::th_fnc_main(void* arg)
     //cout << "START READ\n" << endl;
     Timer timer;
 
-    while (true)
+    while (radar->is_working)
         radar->read_sweeps();
 
 }

@@ -2,7 +2,6 @@
 
 UdpServer::UdpServer(string cfg_root):UdpConnection(cfg_root)
 {
-    //radar = 0;
     if (!isInit())
         return;
     init_status = false;
@@ -96,12 +95,15 @@ void UdpServer::start_measure() {
         if (!is_dispatcher_work) {
             mutex_lock(false);
             cout << endl << "DISPATCHER IS STOPED." << endl;
-            sleep_ms(300);
+            sleep_ms(100);
             break;
         }
         mutex_lock(false);
         sleep_ms(100);
     }
+
+    radar.is_working = false;
+    sleep_ms(500);
 
 }
 
@@ -143,7 +145,7 @@ bool UdpServer::get_request() {
         if(len == -2) {
             stop();
 
-            mutex_lock(false);
+            //mutex_lock(false);
             return false;
         }
 
