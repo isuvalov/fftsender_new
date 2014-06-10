@@ -38,8 +38,9 @@ foreach $txt (@lines)
 	@resp=split(' ',$txt);	
     $resp_len=(scalar @resp)-3;
 	push(@sizes,$resp_len);
-	print "type Tseq_array$zz is array (0 to 42+$resp_len-1) of std_logic_vector(7 downto 0);\n";
+	print "type Tseq_array$zz is array (0 to 8+42+$resp_len-1) of std_logic_vector(7 downto 0);\n";
 	print "constant seq_array$zz:Tseq_array$zz:=(";
+	print 'x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5",'; print "\n";
 	print 'x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"57", x"ac", x"00", x"00", x"80", x"11", x"21", x"74", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e2", x"ce", x"ec", x"be", x"00", x"0b", x"14", x"9c",';
 	print "\n";
 	resp_print(@resp);
@@ -59,7 +60,7 @@ $z=0;
 @delay_states=();
 foreach $val (@sizes)
 {
- $val=$val+42;
+ $val=$val+42+8;
  if ($z<$sizes_len-1)
  {
 	 print "$val, ";
@@ -107,6 +108,7 @@ print"					stm<=START_DELAY$z;\n";
 print"				end if;\n";
 print"				delay_cnt<=(others=>'1');\n";
 print"				dv_o<='0';\n";
+print"				data_o<=x\"00\";\n";
 print"			when START_DELAY$z=>	\n";
 print"				if unsigned(delay_cnt)>0 then\n";
 print"					delay_cnt<=delay_cnt-1;\n";
@@ -115,6 +117,7 @@ print"					stm<=TX_STATE$z;\n";
 print"				end if;\n";
 print"				cnt<=0;\n";
 print"				dv_o<='0';\n";
+print"				data_o<=x\"00\";\n";
 print"			when TX_STATE$z=>\n";
 print"				dv_o<='1';\n";
 print"				data_o<=seq_array$z(cnt);\n";

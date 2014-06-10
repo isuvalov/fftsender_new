@@ -125,6 +125,7 @@ signal ce_send8_rtl_1w,can_ack:std_logic;
 
 signal req_dv,have_send:std_logic:='0';
 signal req_data: std_logic_vector(7 downto 0);
+signal ack_cnt:std_logic_vector(9 downto 0):=(others=>'0');
 
 
 begin
@@ -257,7 +258,7 @@ cpp_req2vhdl_i:entity work.cpp_req2vhdl
 		 reset =>reset,
 		 ce =>mac_clk_div2,
 		 clk =>clk125,
-		 can_go=>'1', --# see falling edge of recieved dv
+		 can_go=>can_ack, --# see falling edge of recieved dv
 
 		 dv_o=>ce_send8_rtl,   --# Надо подконектить к top_top через конвертор 8в4
 		 data_o=>data_send8_rtl  --# Надо подконектить к top_top через конвертор 8в4
@@ -358,21 +359,15 @@ begin
 
 	ce_send8_rtl_1w<=ce_send8_rtl;
 
-	if req_dv='0' then
-		if ce_send8_rtl_1w='1' and ce_send8_rtl='0' then
-			have_send<='1';
-		end if;
-	else
-		if have_send='1' then
+	if reset='1' then
+		ack_cnt<=(others=>'0');
+		can_ack<='0';
+	elsif mac_clk_div2='1' then
+		ack_cnt<=ack_cnt+1;
+		if ack_cnt=0 then
 			can_ack<='1';
-			have_send<='0';
 		else
-			if ce_send8_rtl_1w='1' and ce_send8_rtl='0' then
-				can_ack<='1';
-				have_send<='0';
-			else
-				can_ack<='0';
-			end if;
+			can_ack<='0';
 		end if;
 	end if;
 
