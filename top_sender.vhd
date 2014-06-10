@@ -72,6 +72,8 @@ signal rls_dv:std_logic;
 signal rls_data_out:std_logic_vector(3 downto 0);
 
 signal rls_mux,rls_finish,data_req_event:std_logic;
+signal protocol_data_out:std_logic_vector(3 downto 0);
+signal protocol_dv:std_logic;
 
 begin
 
@@ -254,6 +256,22 @@ send_udp_i: entity work.send_udp
 		 data_out =>rls_data_out,
 		 dv =>rls_dv
 	     );
+
+
+send_protocol_udp_i: entity work.send_protocol_udp
+	 port map(
+		 reset=>reset,
+		 clk_mac=>clk_mac,
+		 
+		 radar_status=>x"00", --# send by request N_0
+		 to_tx_module=>to_tx_module,
+
+		 data_out=>protocol_data_out,
+		 dv =>protocol_dv
+	     );
+
+data_out<=protocol_data_out;
+dv<=protocol_dv;
 
 process(clk_mac) is
 begin

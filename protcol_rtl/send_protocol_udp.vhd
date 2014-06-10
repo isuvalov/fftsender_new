@@ -3,6 +3,7 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 library work;
+use work.regs_pack.all;
 use work.assert_pack.all;
 
 entity send_protocol_udp is
@@ -20,10 +21,10 @@ entity send_protocol_udp is
 		 data_out: out std_logic_vector(3 downto 0);
 		 dv : out std_logic
 	     );
-end send_udp;
+end send_protocol_udp;
 
 
-architecture send_udp of send_udp is
+architecture send_protocol_udp of send_protocol_udp is
 
 constant PRMBLE_LEN		:integer:=8;  		--# Number of addition constant data in preamble
 constant HEADER_LEN		:integer:=51;  	--# Number of addition constant data in MAC frame
@@ -112,11 +113,12 @@ end function;
 
 type Tstm_read is (STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
 DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8,
-SEND_REQ_NUM01,SEND_REQ_NUM02,MAKE_RADAR_STATE01,MAKE_RADAR_STATE02
+SEND_REQ_NUM01,SEND_REQ_NUM02,MAKE_RADAR_STATE01,MAKE_RADAR_STATE02,MAKE_RADAR_STATE03,
+MAKE_GET_TH01,MAKE_GET_TH02,MAKE_GET_TH03,MAKE_GET_TH04
 );
 signal stm_read:Tstm_read;
 
-signal fifo_empty_1w, exp_first_read, signal_direct_reg:std_logic;
+signal exp_first_read, signal_direct_reg:std_logic;
 
 signal cnt_mac:std_logic_vector(7 downto 0);
 signal crc32:std_logic_vector(31 downto 0);
@@ -143,62 +145,48 @@ process (clk_mac) is
 begin
  if rising_edge(clk_mac) then
 
-	fifo_empty_1w<=fifo_empty;
-	signal_direct_reg<=i_direct;
-	exp_fifosE<=i_data_exp;
+--	signal_direct_reg<=i_direct;
+--	exp_fifosE<=i_data_exp;
 	to_tx_module_1w<=to_tx_module;
 
 	if reset='1' then
 		stm_read<=WAITING;
-		rd_data<='0';
 		s_dv<='0';
 		frame_num<=(others=>'0');
-		rd_exp<='0';
 		exp_first_read<='0';
-		sequense_finish<='0';
 	else --# reset
 		case stm_read is
 		when WAITING =>
-		    if to_tx_module_1w.to_tx_module='1' then
+		    if to_tx_module_1w.new_request_received='1' then
 				request_type_reg<=to_tx_module_1w.request_type;
 				number_of_req_reg<=to_tx_module_1w.number_of_req;
 				stm_read<=PREAMBLE1;
 			end if;
 			
-			rd_direct<='0';
-			rd_data<='0';
 			s_dv<='0';
 			s_data_out<=(others=>'0');	
 			read_cnt<=(others=>'0');
 			cnt_mac<=(others=>'0');
 			crc32<=(others=>'1');
-			rd_exp<='0';
 
 		when PREAMBLE1 =>
 			 --cnt_mac<=cnt_mac;
 			 stm_read<=PREAMBLE2;
 			 s_dv<='1';
 			 s_data_out<=pre_mem(conv_integer(cnt_mac))(3 downto 0);
-			 rd_data<='0';
-			 rd_exp<='0';
-             rd_direct<='0';
 		when PREAMBLE2 =>
 			 if unsigned(cnt_mac)<((PRMBLE_LEN)-1) then
 			 	cnt_mac<=cnt_mac+1;
 				stm_read<=PREAMBLE1;
-				rd_direct<='0';
 			 else
 				cnt_mac<=(others=>'0');
 				stm_read<=DESCR_MAC1;
-				rd_direct<='0';
 			 end if;
 			 s_dv<='1';
 			 s_data_out<=pre_mem(conv_integer(cnt_mac))(7 downto 4);
-			 rd_data<='0';
 
 		when DESCR_MAC1 =>
 			 stm_read<=DESCR_MAC2;
-			 rd_direct<='0';
 			 s_dv<='1';
           	 s_data_out<=mac_mem(conv_integer(cnt_mac))(3 downto 0);
           	 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(3 downto 0)),crc32);
@@ -209,16 +197,10 @@ begin
 				stm_read<=DESCR_MAC1;
 			 else
 				cnt_mac<=(others=>'0');
---				stm_read<=DESCR_POS1;
-                stm<=SEND_REQ_NUM01;
---number_of_req_reg
-
-
-
-				rd_data<='1';
+                stm_read<=SEND_REQ_NUM01;
 			 end if;
 			 s_dv<='1';
-          s_data_out<=mac_mem(conv_integer(cnt_mac))(7 downto 4);
+          	 s_data_out<=mac_mem(conv_integer(cnt_mac))(7 downto 4);
 			 crc32<=nextCRC32_D4(fliplr(mac_mem(conv_integer(cnt_mac))(7 downto 4)),crc32);
 			 	  
 		 when SEND_REQ_NUM01=>
@@ -261,7 +243,6 @@ begin
 			end if;
 
 
-
 		 when MAKE_GET_TH01=>
 			s_dv<='1';
 			s_data_out<=x"0";
@@ -282,63 +263,7 @@ begin
 			s_data_out<=x"0";
 			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
 			stm_read<=PUSHCRC8;
-			
 
-	      when DESCR_POS1 =>
-			s_dv<='1';
-			s_data_out<=sig_dir;
-			crc32<=nextCRC32_D4(fliplr(sig_dir),crc32);
-			stm_read<=DESCR_POS2;
-			rd_data<='0';
-			rd_exp<='0';
-			
-		when DESCR_POS2 =>
-			rd_exp<='0';
-			s_dv<='1';
-			s_data_out<=frame_num;
-			crc32<=nextCRC32_D4(fliplr(frame_num),crc32);
-			stm_read<=DESCR_POS3;
-			rd_data<='0';
-			
-		when DESCR_POS3 =>
-			s_dv<='1';
-			s_data_out<=exp_fifosE(3 downto 0);
-			crc32<=nextCRC32_D4(fliplr(exp_fifosE(3 downto 0)),crc32);
-			stm_read<=DESCR_POS4;
-			rd_data<='0';	
-			frame_num<=frame_num+1;
-   
-		when DESCR_POS4 =>
-			s_dv<='1';
-			s_data_out<=exp_fifosE(7 downto 4);
-			crc32<=nextCRC32_D4(fliplr(exp_fifosE(7 downto 4)),crc32);
-			stm_read<=READ_DATA;
-			rd_data<='1';
-            if DEBUG=1 then
-			  print("< Read EXP "&to_string(exp_fifosE));
-			end if;
-
-		when READ_DATA => 
-			read_cnt<=read_cnt+1;
-			if PayloadIsZERO='1' then								
-				s_data_out<=x"0";				
-				crc32<=nextCRC32_D4(x"0",crc32);					
-			else																
-				s_data_out<=i_data;
-				crc32<=nextCRC32_D4(fliplr(i_data),crc32);
-			end if;															
-
-			if read_cnt<(DATAFRAME_LEN)*2-2 then
-				rd_data<='1';
-			else															
-				rd_data<='0';
-			end if;															
-			
-			if unsigned(read_cnt)<(DATAFRAME_LEN)*2-1 then
-				stm_read<=READ_DATA; 
-			else
-				stm_read<=PUSHCRC8;
-			end if;
 			
 		when PUSHCRC1 =>
 			s_dv<='1';
@@ -389,7 +314,6 @@ begin
 			stm_read<=PUSHCRC6;
 
 		when PUSHCRC8 =>
-			rd_data<='0';
 			s_dv<='1';
 			s_data_out<=C_calc(31 downto 28);  				--#Petrov  x"6"
 			stm_read<=PUSHCRC7;           
@@ -397,9 +321,7 @@ begin
 		when DELAYING=>
 			if unsigned(delay_cnt)>0 then
 				delay_cnt<=delay_cnt-1;	
-				sequense_finish<='0';
 			else
-				sequense_finish<='1';
 				stm_read<=WAITING;
 			end if;
 		    s_dv<='0';
@@ -420,5 +342,5 @@ begin
 	  end if;
 end process;
 
-end send_udp;
+end send_protocol_udp;
 
