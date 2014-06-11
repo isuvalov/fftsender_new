@@ -127,7 +127,7 @@ void UdpRadar::read_sweeps()
         for (int j = 0; j < pkt_params.count; j++) {
             ch2ush.chars[0] = sweeps[i][j][0];//выделяем 1 char
             ch2ush.chars[1] = sweeps[i][j][1];//выделяем 2 char; сейчас в ch2ush.value - лежит наш short
-            int exp_val = (ch2ush.value >> 8) - 243;//выделяем экспоненту: -243 - это так надо!!!!
+            int exp_val = ch2ush.chars[1] - 243;//выделяем экспоненту: -243 - это так надо!!!!
 
             for (int k = 2; k < pkt_params.size; k += 2, n++) {//цикл для парсинга данных фурье
                 ch2ush.chars[0] = sweeps[i][j][k];
