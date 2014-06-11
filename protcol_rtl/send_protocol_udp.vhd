@@ -153,7 +153,7 @@ signal to_tx_module_1w: Trx2tx_wires;
 signal	infinity_measure_reg:std_logic:='0';
 signal	measure_time_reg:std_logic_vector(15 downto 0):=x"0000";  --# in seconds
 signal  temperature_reg1,temperature_reg2,temperature_reg3,power_reg1,power_reg2,power_reg3:std_logic_vector(7 downto 0);
-signal  voltage_reg1,voltage_reg2,voltage_reg3,voltage_reg4:std_logic_vector(7 downto 0);
+signal  voltage_reg1,voltage_reg2,voltage_reg3,voltage_reg4,radar_status_inner:std_logic_vector(7 downto 0):=(others=>'0');
 
 begin
 
@@ -184,6 +184,7 @@ begin
 	to_tx_module_1w<=to_tx_module;
 
 	if reset='1' then
+		radar_status_inner<=(others=>'0');
 		stm_read<=WAITING;
 		s_dv<='0';
 		frame_num<=(others=>'0');
@@ -260,7 +261,7 @@ begin
 			stm_read<=SEND_ERROR_CODE01;
 
 
-		 when SEND_ERROR_CODE01=>
+		 when SEND_ERROR_CODE01=>  --# конец стандартного ответа
 			s_dv<='1';
 			s_data_out<=x"0";
 			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
@@ -269,6 +270,7 @@ begin
 			s_dv<='1';
 			s_data_out<=x"0";
 			crc32<=nextCRC32_D4(fliplr(x"0"),crc32);
+			radar_status_inner<=radar_status(7 downto 3)&radar_status_inner(2)&radar_status(1 downto 0);
 
 			case request_type_reg is
 			when x"00" =>  stm_read<=MAKE_RADAR_STATE01;
@@ -281,13 +283,13 @@ begin
 
 		 when MAKE_RADAR_STATE01=>
 			s_dv<='1';
-			s_data_out<=radar_status(7 downto 4);
-			crc32<=nextCRC32_D4(fliplr(radar_status(7 downto 4)),crc32);
+			s_data_out<=radar_status_inner(7 downto 4);
+			crc32<=nextCRC32_D4(fliplr(radar_status_inner(7 downto 4)),crc32);
 			stm_read<=MAKE_RADAR_STATE02;
 		 when MAKE_RADAR_STATE02=>
 			s_dv<='1';
-			s_data_out<=radar_status(3 downto 0);
-			crc32<=nextCRC32_D4(fliplr(radar_status(3 downto 0)),crc32);
+			s_data_out<=radar_status_inner(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(radar_status_inner(3 downto 0)),crc32);
 			stm_read<=MAKE_RADAR_STATE03;
             cnt_mac<=x"00";
 		 when MAKE_RADAR_STATE03=>
@@ -308,11 +310,12 @@ begin
 			s_data_out<=radar_status(7 downto 4);
 			crc32<=nextCRC32_D4(fliplr(radar_status(7 downto 4)),crc32);
 			stm_read<=MAKE_MEASURE_02;
+			radar_status_inner<=radar_status(7 downto 3)&to_tx_module_1w.infinity_measure&radar_status(1 downto 0);
 		 when MAKE_MEASURE_02=>
 			s_dv<='1';
-			s_data_out<=radar_status(3 downto 0);
-			crc32<=nextCRC32_D4(fliplr(radar_status(3 downto 0)),crc32);
-			stm_read<=MAKE_MEASURE_03;
+			s_data_out<=radar_status_inner(3 downto 0);
+			crc32<=nextCRC32_D4(fliplr(radar_status_inner(3 downto 0)),crc32);
+			stm_read<=PUSHCRC8;
 
 
 

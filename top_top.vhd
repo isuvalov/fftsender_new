@@ -24,7 +24,7 @@ entity top_top is
 		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
 		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
 
-		 pre_shift: in std_logic_vector(5 downto 0);
+		 pre_shift: in std_logic_vector(5 downto 0);  --# must be 0 for previus versions. This convert 24bit abs(i+q) to 32 sqrt
 		 i_direction : in std_logic;
 
 		 signal_ce : in std_logic;
