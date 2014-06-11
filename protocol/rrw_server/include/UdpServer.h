@@ -29,6 +29,7 @@ class UdpServer : public UdpConnection
         UdpServer(string cfg_root = "server");
         ~UdpServer();
         void start();
+
         void stop();
         void send_resp(RrwProtocol* prot);
 

@@ -6,7 +6,6 @@ void close(void) {
 }
 
 int main(int argc, char *argv[]) {
-
     atexit(close);
     server.start();
     return 0;
