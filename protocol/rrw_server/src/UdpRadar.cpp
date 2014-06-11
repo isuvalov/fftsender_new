@@ -120,7 +120,7 @@ void UdpRadar::read_sweeps()
         return;
 
     //cout << "packets is collected\nStart write in DATA\n" << endl;
-
+    int buf;
     ch2ush_t ch2ush;//для перевода двух char в один short
     for (int i = 0; i < 2; i++) {
         int n = 0;
@@ -132,8 +132,8 @@ void UdpRadar::read_sweeps()
             for (int k = 2; k < pkt_params.size; k += 2, n++) {//цикл для парсинга данных фурье
                 ch2ush.chars[0] = sweeps[i][j][k];
                 ch2ush.chars[1] = sweeps[i][j][k + 1];
-
-                data[i][ n] = ch2ush.value >> exp_val;//сохраняем значение спектра, которое будет использоваться далее в расчетах
+                buf = ch2ush.value;
+                data[i][ n] = (buf << 5) >> exp_val;//сохраняем значение спектра, которое будет использоваться далее в расчетах
             }
         }
     }
