@@ -40,6 +40,13 @@ void UdpRadar::start()
     pthread_create(&main_th, NULL, th_fnc_main, this);
 }
 
+void UdpRadar::stop()
+{
+    is_working = false;
+    cout << endl << "RADAR IS STOPED." << endl;
+    sleep_ms(500);
+}
+
 void* UdpRadar::th_fnc_main(void* arg)
 {
     UdpRadar *radar = (UdpRadar*) arg;
@@ -47,7 +54,7 @@ void* UdpRadar::th_fnc_main(void* arg)
     //cout << "START READ\n" << endl;
     Timer timer;
 
-    while (true)
+    while (radar->is_working)
         radar->read_sweeps();
 
 }
@@ -113,20 +120,20 @@ void UdpRadar::read_sweeps()
         return;
 
     //cout << "packets is collected\nStart write in DATA\n" << endl;
-
+    int buf;
     ch2ush_t ch2ush;//для перевода двух char в один short
     for (int i = 0; i < 2; i++) {
         int n = 0;
         for (int j = 0; j < pkt_params.count; j++) {
             ch2ush.chars[0] = sweeps[i][j][0];//выделяем 1 char
             ch2ush.chars[1] = sweeps[i][j][1];//выделяем 2 char; сейчас в ch2ush.value - лежит наш short
-            int exp_val = (ch2ush.value >> 8) - 243;//выделяем экспоненту
+            int exp_val = ch2ush.chars[1] - 243;//выделяем экспоненту: -243 - это так надо!!!!
 
             for (int k = 2; k < pkt_params.size; k += 2, n++) {//цикл для парсинга данных фурье
                 ch2ush.chars[0] = sweeps[i][j][k];
                 ch2ush.chars[1] = sweeps[i][j][k + 1];
-
-                data[i][ n] = (ch2ush.value << 5) >> exp_val;//сохраняем значение спектра, которое будет использоваться далее в расчетах
+                buf = ch2ush.value;
+                data[i][ n] = (buf << 5) >> exp_val;//сохраняем значение спектра, которое будет использоваться далее в расчетах
             }
         }
     }

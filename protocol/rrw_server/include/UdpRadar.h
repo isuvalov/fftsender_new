@@ -15,6 +15,7 @@ class UdpRadar : public UdpConnection
         UdpRadar(string cfg_root = "radar");
         ~UdpRadar();
         void start();
+        void stop();
         void read_sweeps();
         bool is_data_captured();
 

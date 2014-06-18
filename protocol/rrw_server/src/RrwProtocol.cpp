@@ -72,7 +72,7 @@ void RrwProtocol::create_response(status_t* srv_status, bool for_meas_ctl)
 
     if (!for_meas_ctl) {
         for (int i = 0; i < 11; i++)
-            resp.push_back(0);
+            resp.push_back(7);
     }
 }
 

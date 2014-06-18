@@ -544,11 +544,8 @@ int eudp_open_bl_subnet(eudp_t *hnd, char *src_addr, int src_port,
         f << "resp: ";
         for (int i = 0; i < len; i++) {
             unsigned char v = buf[i];
-            if (i == 0)
-                f << hex;
-            else
-                f << dec;
-            f << (int)v;
+
+            f << hex << (int)v;
             if (len < 30)
                 cout << (int)v;
             if (i < len - 1) {

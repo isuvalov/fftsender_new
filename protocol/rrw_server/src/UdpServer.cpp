@@ -2,7 +2,6 @@
 
 UdpServer::UdpServer(string cfg_root):UdpConnection(cfg_root)
 {
-    //radar = 0;
     if (!isInit())
         return;
     init_status = false;
@@ -49,19 +48,18 @@ void UdpServer::start()
         return;
     }
 
-
     is_working = true;
-    status.meas_mode = 0;
-    status.fault = 0;
-    status.ready = 0;
-    status.has_unread = 0;
+    status.meas_mode =
+    status.fault =
+    status.ready =
+    status.has_unread =
     status.last_unsucc = 0;
 
     pthread_t th;
     pthread_create(&th, NULL, th_start_dispatch, this);
 
     start_measure();
-    cout << endl << "RADAR IS STOPED." << endl;
+    radar.stop();
 }
 
 void UdpServer::start_measure() {
@@ -69,7 +67,6 @@ void UdpServer::start_measure() {
     int is_meas_status = status.meas_mode;
 
     cout << endl << "SYSTEM is RUN!" << endl << "----------" << endl;
-
 
     while(true) {
         mutex_lock();
@@ -90,19 +87,19 @@ void UdpServer::start_measure() {
         } else
             mutex_lock(false);
     }
-
+/*
     while (true) {
         mutex_lock();
         if (!is_dispatcher_work) {
             mutex_lock(false);
             cout << endl << "DISPATCHER IS STOPED." << endl;
-            sleep_ms(300);
+            sleep_ms(100);
             break;
         }
         mutex_lock(false);
         sleep_ms(100);
     }
-
+*/
 }
 
 void UdpServer::stop() {
@@ -114,11 +111,10 @@ void UdpServer::stop() {
 }
 
 void* UdpServer::th_start_dispatch(void* arg) {
-   cout << endl << "START DISPATCHER." << endl;
     #ifdef LOG
        cout << "is waiting for client request...";
     #endif // LOG
-
+    cout << endl << "START DISPATCHER." << endl;
     UdpServer *server = (UdpServer*)arg;
     server->is_dispatcher_work = true;
     while(true) {
@@ -130,7 +126,7 @@ void* UdpServer::th_start_dispatch(void* arg) {
         server->mutex_lock(false);
         server->dispatch_request();
     }
-
+    cout << endl << "DISPATCHER IS STOPED." << endl;
 }
 
 bool UdpServer::get_request() {
@@ -143,7 +139,7 @@ bool UdpServer::get_request() {
         if(len == -2) {
             stop();
 
-            mutex_lock(false);
+            //mutex_lock(false);
             return false;
         }
 
