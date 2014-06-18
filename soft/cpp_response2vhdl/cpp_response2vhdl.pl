@@ -160,6 +160,7 @@ sub resp_print
   {
     if ($z>0) 
 	{
+		$str=hex2dec($str);
 		$a=dec2hex($str&0xFF);
 		if ($z<$resp_len)
 		{

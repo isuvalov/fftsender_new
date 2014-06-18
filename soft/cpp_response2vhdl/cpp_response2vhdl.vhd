@@ -24,7 +24,7 @@ signal cnt:integer:=0;
 type Tseq_array0 is array (0 to 8+42+16-1) of std_logic_vector(7 downto 0);
 constant seq_array0:Tseq_array0:=(x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5",
 x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"57", x"ac", x"00", x"00", x"80", x"11", x"21", x"74", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e2", x"ce", x"ec", x"be", x"00", x"0b", x"14", x"9c",
-x"A5", x"01", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00");
+x"A5", x"01", x"00", x"00", x"00", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07");
 
 type Tseq_array1 is array (0 to 8+42+5-1) of std_logic_vector(7 downto 0);
 constant seq_array1:Tseq_array1:=(x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5",
@@ -44,7 +44,7 @@ x"A5", x"04", x"02", x"00", x"30");
 type Tseq_array4 is array (0 to 8+42+16-1) of std_logic_vector(7 downto 0);
 constant seq_array4:Tseq_array4:=(x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5",
 x"ff", x"ff", x"ff", x"ff", x"ff", x"ff", x"00", x"16", x"ea", x"ca", x"09", x"3a", x"08", x"00", x"45", x"00", x"00", x"1f", x"57", x"ac", x"00", x"00", x"80", x"11", x"21", x"74", x"c0", x"a8", x"01", x"06", x"ff", x"ff", x"ff", x"ff", x"e2", x"ce", x"ec", x"be", x"00", x"0b", x"14", x"9c",
-x"A5", x"07", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00", x"00");
+x"A5", x"07", x"00", x"00", x"00", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07", x"07");
 
 constant RESP_NUM:natural:=5;
 type Tsizes is array(0 to 5-1) of integer;
