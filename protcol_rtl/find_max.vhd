@@ -25,6 +25,7 @@ architecture find_max of find_max is
 
 constant DIV_THR:std_logic_vector(15 downto 0):=conv_std_logic_vector(65536/3,16);  --# for divider 1/3
 constant AREA_SIZE:integer:=11;
+constant STEP:integer:=1;
 
 constant MUL_LATENCY:integer:=1;
 constant TRACE_LEN:integer:=AREA_SIZE+MUL_LATENCY;
@@ -59,7 +60,7 @@ begin
 			--# We try to think that trace(5) is maximum
 			--# Test it by thresholds it!
 			mul_thr<=unsigned(trace(5))*unsigned(DIV_THR);
-			if not(unsigned(trace(0+MUL_LATENCY))>unsigned(mul_thr) and unsigned(trace(AREA_SIZE+MUL_LATENCY-1))>unsigned(mul_thr)) then
+			if not(unsigned(trace(5-STEP+MUL_LATENCY))>unsigned(mul_thr) and unsigned(trace(5+STEP+MUL_LATENCY))>unsigned(mul_thr)) then
 				maximum_ce<='1';
 				maximum<=trace(5+MUL_LATENCY);
 				maximum_m1<=trace(5-1+MUL_LATENCY);
