@@ -45,6 +45,37 @@ architecture top_sender of top_sender is
 constant CUT_LEN:integer:=1024; 	--# How many samples transfer to MAC
 constant DEBUG:integer:=1;
 
+FUNCTION log2roundup (data_value : integer)
+		RETURN integer IS
+		
+		VARIABLE width       : integer := 0;
+		VARIABLE cnt         : integer := 1;
+		CONSTANT lower_limit : integer := 1;
+		CONSTANT upper_limit : integer := 8;
+		
+	BEGIN
+		IF (data_value <= 1) THEN
+			width   := 0;
+		ELSE
+			WHILE (cnt < data_value) LOOP
+				width := width + 1;
+				cnt   := cnt *2;
+			END LOOP;
+		END IF;
+		
+		RETURN width;
+	END log2roundup;
+
+
+constant MAX_TARGET_NUM:integer:=32;
+type Ttargets is array(MAX_TARGET_NUM-1 downto 0) of std_logic_vector(15 downto 0);
+signal targets_m1,targets_p1,targets,targets_harm:Ttargets;
+
+signal targets_cnt:std_logic_vector(log2roundup(MAX_TARGET_NUM)-1 downto 0);
+signal harm_cnt:std_logic_vector(15 downto 0);
+
+signal sample16l_ce_1w,sample16l_ce_2w:std_logic;
+
 signal fft_dataout_re: std_logic_vector(11 downto 0);
 signal fft_dataout_im: std_logic_vector(11 downto 0);
 signal fft_dataout_ce: std_logic;
@@ -74,6 +105,15 @@ signal rls_data_out:std_logic_vector(3 downto 0);
 signal rls_mux,rls_finish,data_req_event:std_logic;
 signal protocol_data_out:std_logic_vector(3 downto 0);
 signal protocol_dv:std_logic;
+
+signal sample16l: std_logic_vector(15 downto 0);
+signal sample16l_ce:std_logic;
+
+signal maximum_m1: std_logic_vector(15 downto 0);    --# value left of maximum
+signal maximum: std_logic_vector(15 downto 0);
+signal maximum_p1: std_logic_vector(15 downto 0);    --# value right of maximum
+signal maximum_ce: std_logic;                         --# latency 2 clock from i_sample and i_ce
+
 
 begin
 
@@ -138,6 +178,64 @@ make_adc_i: entity work.make_adc
 		 o_data_exp_ce =>adc_data_exp_ce
 	     );
 
+
+conv2_16bit_i: entity work.conv2_16bit	 
+	 port map(
+		 clk =>clk_core,
+
+		 i_ce =>adc_data_ce,
+		 i_sample =>adc_data, --# unsigned
+		 i_exp =>adc_data_exp,
+		 i_exp_ce =>adc_data_exp_ce,
+
+		 o_sample =>sample16l, --# unsigned
+		 o_ce =>sample16l_ce
+	     );
+
+
+
+find_max_i: entity work.find_max
+	 port map(
+		 reset=>reset,
+		 clk =>clk_core,
+  
+		 i_ce =>sample16l_ce,
+		 i_sample =>sample16l, --# unsigned
+
+		 maximum_m1=>maximum_m1,    --# value left of maximum
+		 maximum=>maximum,
+		 maximum_p1=>maximum_p1,    --# value right of maximum
+		 maximum_ce=>maximum_ce                         --# latency 2 clock from i_sample and i_ce
+	     );
+
+--signal targets_m1,targets_p1,targets:Ttargets;
+--signal targets_cnt:std_logic_vector(log2roundup(MAX_TARGET_NUM)-1 downto 0);
+
+
+process(clk_core) is
+begin
+	if rising_edge(clk_core) then
+		sample16l_ce_1w<=sample16l_ce;
+		sample16l_ce_2w<=sample16l_ce_1w;
+		if adc_data_exp_ce='1' then
+			targets_cnt<=(others=>'0');
+			harm_cnt<=(others=>'0');
+		else --# adc_data_exp_ce
+			if sample16l_ce_2w='1' then
+				harm_cnt<=harm_cnt+1;
+			end if;
+
+
+			if maximum_ce='1' then
+				targets_m1(conv_integer(targets_cnt))<=maximum_m1;
+				targets(conv_integer(targets_cnt))<=maximum;
+				targets_p1(conv_integer(targets_cnt))<=maximum_p1;
+				targets_harm(conv_integer(targets_cnt))<=harm_cnt;
+				targets_cnt<=targets_cnt+1;
+			end if; --# maximum_ce
+		end if; --# adc_data_exp_ce
+	end if;
+end process;
 
 
 process(clk_signal) is
