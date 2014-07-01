@@ -69,7 +69,10 @@ FUNCTION log2roundup (data_value : integer)
 
 constant MAX_TARGET_NUM:integer:=32;
 type Ttargets is array(MAX_TARGET_NUM-1 downto 0) of std_logic_vector(15 downto 0);
-signal targets_m1,targets_p1,targets,targets_harm:Ttargets;
+signal one_targets_m1,one_targets_p1,one_targets,one_targets_harm:Ttargets;
+signal zero_targets_m1,zero_targets_p1,zero_targets,zero_targets_harm:Ttargets;
+
+signal one_rd_ptr,zero_rd_ptr:std_logic_vector(9 downto 0);
 
 signal targets_cnt:std_logic_vector(log2roundup(MAX_TARGET_NUM)-1 downto 0);
 signal harm_cnt:std_logic_vector(15 downto 0);
@@ -113,6 +116,10 @@ signal maximum_m1: std_logic_vector(15 downto 0);    --# value left of maximum
 signal maximum: std_logic_vector(15 downto 0);
 signal maximum_p1: std_logic_vector(15 downto 0);    --# value right of maximum
 signal maximum_ce: std_logic;                         --# latency 2 clock from i_sample and i_ce
+
+signal find_equal_harms_1p_1w,find_equal_harms_1p,find_equal_harms:std_logic:='0';
+type Tfstm is (STARTING_PASS,NEXT_PASS,STOPING);
+signal fstm:Tfstm;
 
 
 begin
@@ -159,34 +166,14 @@ make_abs_i: entity work.make_abs
 		 o_data_exp_ce =>abs_data_exp_ce
 	     );
 
-
-make_adc_i: entity work.make_adc
-	 port map(
-		 reset=>reset,
-		 clk_core=>clk_core, --# must be quickly than clk_signal
-		 pre_shift=>pre_shift,
-
-		 i_data_re =>signal_real,
-		 i_data_im =>signal_imag,
-		 i_data_ce =>signal_ce,
-		 i_data_exp =>(others=>'0'),
-		 i_data_exp_ce =>'0',
-
-		 o_dataout =>adc_data,
-		 o_dataout_ce =>adc_data_ce,
-		 o_data_exp =>adc_data_exp,
-		 o_data_exp_ce =>adc_data_exp_ce
-	     );
-
-
 conv2_16bit_i: entity work.conv2_16bit	 
 	 port map(
 		 clk =>clk_core,
 
-		 i_ce =>adc_data_ce,
-		 i_sample =>adc_data, --# unsigned
-		 i_exp =>adc_data_exp,
-		 i_exp_ce =>adc_data_exp_ce,
+		 i_ce =>abs_data_ce,
+		 i_sample =>abs_data, --# unsigned
+		 i_exp =>abs_data_exp,
+		 i_exp_ce =>abs_data_exp_ce,
 
 		 o_sample =>sample16l, --# unsigned
 		 o_ce =>sample16l_ce
@@ -208,8 +195,25 @@ find_max_i: entity work.find_max
 		 maximum_ce=>maximum_ce                         --# latency 2 clock from i_sample and i_ce
 	     );
 
---signal targets_m1,targets_p1,targets:Ttargets;
---signal targets_cnt:std_logic_vector(log2roundup(MAX_TARGET_NUM)-1 downto 0);
+
+make_adc_i: entity work.make_adc
+	 port map(
+		 reset=>reset,
+		 clk_core=>clk_core, --# must be quickly than clk_signal
+		 pre_shift=>pre_shift,
+
+		 i_data_re =>signal_real,
+		 i_data_im =>signal_imag,
+		 i_data_ce =>signal_ce,
+		 i_data_exp =>(others=>'0'),
+		 i_data_exp_ce =>'0',
+
+		 o_dataout =>adc_data,
+		 o_dataout_ce =>adc_data_ce,
+		 o_data_exp =>adc_data_exp,
+		 o_data_exp_ce =>adc_data_exp_ce
+	     );
+
 
 
 process(clk_core) is
@@ -217,7 +221,7 @@ begin
 	if rising_edge(clk_core) then
 		sample16l_ce_1w<=sample16l_ce;
 		sample16l_ce_2w<=sample16l_ce_1w;
-		if adc_data_exp_ce='1' then
+		if abs_data_exp_ce='1' then
 			targets_cnt<=(others=>'0');
 			harm_cnt<=(others=>'0');
 		else --# adc_data_exp_ce
@@ -225,17 +229,66 @@ begin
 				harm_cnt<=harm_cnt+1;
 			end if;
 
-
 			if maximum_ce='1' then
-				targets_m1(conv_integer(targets_cnt))<=maximum_m1;
-				targets(conv_integer(targets_cnt))<=maximum;
-				targets_p1(conv_integer(targets_cnt))<=maximum_p1;
-				targets_harm(conv_integer(targets_cnt))<=harm_cnt;
 				targets_cnt<=targets_cnt+1;
+			end if;
+
+			if maximum_ce='1' and sig_direct='1' then
+				one_targets_m1(conv_integer(targets_cnt))<=maximum_m1; --# I must save only one value!!! after SweepRadar::estimate_harm
+				one_targets(conv_integer(targets_cnt))<=maximum;
+				one_targets_p1(conv_integer(targets_cnt))<=maximum_p1;
+				one_targets_harm(conv_integer(targets_cnt))<=harm_cnt-6;				
+			end if; --# maximum_ce
+
+			if maximum_ce='1' and sig_direct='0' then
+				zero_targets_m1(conv_integer(targets_cnt))<=maximum_m1;
+				zero_targets(conv_integer(targets_cnt))<=maximum;
+				zero_targets_p1(conv_integer(targets_cnt))<=maximum_p1;
+				zero_targets_harm(conv_integer(targets_cnt))<=harm_cnt-6;
 			end if; --# maximum_ce
 		end if; --# adc_data_exp_ce
+
+		if harm_cnt=1023 then
+			find_equal_harms_1p<='1';
+		else
+			find_equal_harms_1p<='0';
+		end if;
+		find_equal_harms_1p_1w<=find_equal_harms_1p;
+		if find_equal_harms_1p_1w='1' and find_equal_harms_1p='0' then
+			find_equal_harms<='1';
+		else
+			find_equal_harms<='0';
+		end if;
+
 	end if;
 end process;
+
+
+process(clk_core) is
+begin
+	if rising_edge(clk_core) then
+	end if;
+end process;
+
+
+process(clk_core) is
+begin
+	if rising_edge(clk_core) then
+		if find_equal_harms='1' then
+			fstm<=STARTING_PASS;
+			one_rd_ptr<=(others=>'0');
+			zero_rd_ptr<=(others=>'0');
+		else
+			case fstm is
+			when STARTING_PASS=>
+				
+			when NEXT_PASS=>
+			when STOPING=>
+			end case;
+		end if;
+	end if;
+end process;
+
 
 
 process(clk_signal) is

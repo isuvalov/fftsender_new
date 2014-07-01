@@ -71,7 +71,8 @@ begin
 			else
 				can_calc<='1';
 			end if;
-			if not(unsigned(trace(5-1+MUL_LATENCY))>unsigned(mul_thr(mul_thr'Length-1 downto mul_thr'Length-i_sample'Length)) or unsigned(trace(5+1+MUL_LATENCY))>unsigned(mul_thr)) and can_calc='1' then
+			if not(unsigned(trace(5-1+MUL_LATENCY))>unsigned(mul_thr(mul_thr'Length-1 downto mul_thr'Length-i_sample'Length)) or unsigned(trace(5+1+MUL_LATENCY))>unsigned(mul_thr)) and can_calc='1' and
+				unsigned(trace(5+MUL_LATENCY))>1 then
 				maximum_ce<='1';
 				maximum<=trace(5+MUL_LATENCY);
 				maximum_m1<=trace(5-1+MUL_LATENCY);
@@ -88,6 +89,8 @@ begin
 				end if;
 				maximum_ce<='0';	
 			end if;
+		else
+			maximum_ce<='0';	
 		end if;
 
 
