@@ -67,11 +67,16 @@ FUNCTION log2roundup (data_value : integer)
 	END log2roundup;
 
 
-constant MAX_TARGET_NUM:integer:=32;
+constant MAX_TARGET_NUM:integer:=128;
 type Ttargets is array(MAX_TARGET_NUM-1 downto 0) of std_logic_vector(15 downto 0);
-signal one_targets_m1,one_targets_p1,one_targets,one_targets_harm:Ttargets;
-signal zero_targets_m1,zero_targets_p1,zero_targets,zero_targets_harm:Ttargets;
+type Ttargets_nums is array(MAX_TARGET_NUM-1 downto 0) of std_logic_vector(15+FIXPOINT downto 0);
+signal one_targets:Ttargets;
+signal zero_targets:Ttargets;
+signal one_targets_harm:Ttargets_nums;
+signal zero_targets_harm:Ttargets_nums;
 
+signal one_targets_rd,zero_targets_rd,findvalue_one,findvalue_zero:std_logic_vector(15 downto 0);
+signal one_harm_rd,zero_harm_rd,findharm_zero,findharm_one:std_logic_vector(15+FIXPOINT downto 0);
 signal one_rd_ptr,zero_rd_ptr:std_logic_vector(9 downto 0);
 
 signal targets_cnt:std_logic_vector(log2roundup(MAX_TARGET_NUM)-1 downto 0);
@@ -114,12 +119,16 @@ signal sample16l_ce:std_logic;
 
 signal maximum_m1: std_logic_vector(15 downto 0);    --# value left of maximum
 signal maximum: std_logic_vector(15 downto 0);
+signal maximum_corr: std_logic_vector(15+FIXPOINT downto 0);
 signal maximum_p1: std_logic_vector(15 downto 0);    --# value right of maximum
 signal maximum_ce: std_logic;                         --# latency 2 clock from i_sample and i_ce
 
-signal find_equal_harms_1p_1w,find_equal_harms_1p,find_equal_harms:std_logic:='0';
-type Tfstm is (STARTING_PASS,NEXT_PASS,STOPING);
+signal estimate_harm_ce,find_equal_harms_1p_1w,find_equal_harms_1p,find_equal_harms:std_logic:='0';
+type Tfstm is (STARTING_PASS,NEXT_PASS,STOPING,DIFFIT,DIFFIT2,DIFFIT_TEST);
 signal fstm:Tfstm;
+
+signal findharm_ce:std_logic;
+signal harm_delta:std_logic_vector(15+FIXPOINT+1 downto 0);
 
 
 begin
@@ -229,26 +238,27 @@ begin
 				harm_cnt<=harm_cnt+1;
 			end if;
 
-			if maximum_ce='1' then
+			if estimate_harm_ce='1' then
 				targets_cnt<=targets_cnt+1;
 			end if;
 
-			if maximum_ce='1' and sig_direct='1' then
-				one_targets_m1(conv_integer(targets_cnt))<=maximum_m1; --# I must save only one value!!! after SweepRadar::estimate_harm
+			if maximum_ce='1' then
+--				maximum&"0"
+			end if;
+
+
+			if estimate_harm_ce='1' and sig_direct='1' then
 				one_targets(conv_integer(targets_cnt))<=maximum;
-				one_targets_p1(conv_integer(targets_cnt))<=maximum_p1;
-				one_targets_harm(conv_integer(targets_cnt))<=harm_cnt-6;				
+				one_targets_harm(conv_integer(targets_cnt))<=((harm_cnt-6)&EXT("0",FIXPOINT))+maximum_corr;
 			end if; --# maximum_ce
 
-			if maximum_ce='1' and sig_direct='0' then
-				zero_targets_m1(conv_integer(targets_cnt))<=maximum_m1;
+			if estimate_harm_ce='1' and sig_direct='0' then
 				zero_targets(conv_integer(targets_cnt))<=maximum;
-				zero_targets_p1(conv_integer(targets_cnt))<=maximum_p1;
-				zero_targets_harm(conv_integer(targets_cnt))<=harm_cnt-6;
+				zero_targets_harm(conv_integer(targets_cnt))<=((harm_cnt-6)&EXT("0",FIXPOINT))+maximum_corr;
 			end if; --# maximum_ce
 		end if; --# adc_data_exp_ce
 
-		if harm_cnt=1023 then
+		if harm_cnt=CUT_LEN-1 then
 			find_equal_harms_1p<='1';
 		else
 			find_equal_harms_1p<='0';
@@ -264,24 +274,76 @@ begin
 end process;
 
 
+estimate_harm_i: entity work.estimate_harm
+	 port map(
+		 clk =>clk_core,
+		 reset =>reset,
+
+		 i_ce =>maximum_ce,
+		 i_sample_1m =>maximum_m1,
+		 i_sample =>maximum,
+		 i_sample_1p =>maximum_p1,
+
+		 o_sample =>maximum_corr,
+		 o_ce =>estimate_harm_ce
+	     );
+
+
 process(clk_core) is
 begin
 	if rising_edge(clk_core) then
+		one_harm_rd<=one_targets_harm(conv_integer(one_rd_ptr));
+		zero_harm_rd<=zero_targets_harm(conv_integer(zero_rd_ptr));
+		one_targets_rd<=one_targets(conv_integer(one_rd_ptr));
+		zero_targets_rd<=zero_targets(conv_integer(zero_rd_ptr));
 	end if;
 end process;
+
+
 
 
 process(clk_core) is
 begin
 	if rising_edge(clk_core) then
 		if find_equal_harms='1' then
-			fstm<=STARTING_PASS;
+			fstm<=DIFFIT;
 			one_rd_ptr<=(others=>'0');
 			zero_rd_ptr<=(others=>'0');
 		else
 			case fstm is
+			when DIFFIT=>
+				fstm<=DIFFIT2;
+			when DIFFIT2=>
+				harm_delta<=("0"&one_harm_rd)-("0"&zero_harm_rd);
+				fstm<=DIFFIT_TEST;
+			when DIFFIT_TEST=>
+				if (signed(harm_delta)>=0 and signed(harm_delta)<10) or (signed(harm_delta)<0 and signed(harm_delta)>-10) then
+					findharm_one<=one_harm_rd;
+					findharm_zero<=zero_harm_rd;
+					findvalue_one<=one_targets_rd;
+					findvalue_zero<=zero_targets_rd;
+
+
+					findharm_ce<='1';
+				else
+					findharm_ce<='0';
+				end if;
+				fstm<=STARTING_PASS;
+
 			when STARTING_PASS=>
-				
+				if unsigned(one_rd_ptr)<MAX_TARGET_NUM-1 then
+					one_rd_ptr<=one_rd_ptr+1;
+					fstm<=DIFFIT;
+				else
+					one_rd_ptr<=(others=>'0');
+					if unsigned(zero_rd_ptr)<MAX_TARGET_NUM-1 then
+						zero_rd_ptr<=zero_rd_ptr+1;
+						fstm<=DIFFIT;
+					else
+						fstm<=NEXT_PASS;
+					end if;
+				end if;				
+
 			when NEXT_PASS=>
 			when STOPING=>
 			end case;

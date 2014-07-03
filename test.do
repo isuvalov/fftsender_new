@@ -97,6 +97,8 @@ vcom protcol_rtl/client_stimulus_cpu.vhd
 vcom protcol_rtl/conv2_16bit.vhd 
 vcom protcol_rtl/find_max.vhd
 vcom protcol_rtl/send_protocol_udp.vhd 
+vcom protcol_rtl/serial_divide_uu.vhd
+vcom protcol_rtl/estimate_harm.vhd
 
 vcom soft/cpp_response2vhdl/cpp_response2vhdl.vhd
 vcom soft/cpp_response2vhdl/cpp_req2vhdl.vhd 

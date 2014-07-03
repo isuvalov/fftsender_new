@@ -5,6 +5,8 @@ use ieee.std_logic_unsigned.all;
 
 package regs_pack is	
 
+constant FIXPOINT:natural:=5;
+
 type Trx2tx_wires is record
 	new_request_received: std_logic;
 	number_of_req:std_logic_vector(7 downto 0);
