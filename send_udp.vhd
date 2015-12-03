@@ -17,6 +17,9 @@ entity send_udp is
 
 		 PayloadIsZERO: in std_logic; --# if it '1' make zero all data in MAC frame
 
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP IP addr
+		 udp_port_number : in std_logic_vector(15 downto 0);  --# UDP port number
+
 		 rd_data: out std_logic;
 		 fifo_empty: in std_logic;
 		 read_count: in std_logic_vector(10 downto 0);

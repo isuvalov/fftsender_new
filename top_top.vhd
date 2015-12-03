@@ -21,7 +21,7 @@ entity top_top is
 		 PayloadIsZERO: in std_logic;
 		 send_adc_data: in std_logic;
 
-		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP IP addr - now not use
 		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
 
 		 pre_shift: in std_logic_vector(5 downto 0);  --# must be 0 for previus versions. This convert 24bit abs(i+q) to 32 sqrt
@@ -78,7 +78,7 @@ top_sender_i: entity work.top_sender
 		 PayloadIsZERO=>PayloadIsZERO,
 		 send_adc_data=>send_adc_data,
 
-		 udp_IPaddr=>udp_IPaddr,  --# UDP port number
+		 udp_IPaddr=>udp_IPaddr,  --# UDP IP addr
 		 udp_port_number=>udp_port_number,  --# UDP port number
 
 		 pre_shift=>pre_shift,

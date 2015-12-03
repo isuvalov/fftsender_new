@@ -9,6 +9,7 @@ entity udp_rx is
 	 port(
 		 reset: in std_logic;
 		 clk : in std_logic;
+		 udp_IPaddr: in std_logic_vector(31 downto 0);
 		 port_number: in std_logic_vector(15 downto 0);
 		 i_dv : in std_logic; --# must be with i_ce 
 		 i_ce : in std_logic;

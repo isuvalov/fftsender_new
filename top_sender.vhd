@@ -20,6 +20,9 @@ entity top_sender is
 		 PayloadIsZERO: in std_logic;
 		 send_adc_data: in std_logic;
 
+		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP IP addr
+		 udp_port_number : in std_logic_vector(15 downto 0);  --# UDP port number
+
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -227,6 +230,9 @@ send_udp_i: entity work.send_udp
 		 clk_mac=>clk_mac,
 
 		 PayloadIsZERO=>PayloadIsZERO, --# if it '1' make zero all data in MAC frame
+
+		 udp_IPaddr=>udp_IPaddr,  --# UDP IP addr
+		 udp_port_number =>udp_port_number,  --# UDP port number
 
 		 rd_data =>rd_data,
 		 fifo_empty =>fifo_empty,
