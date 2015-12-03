@@ -7,6 +7,7 @@ package regs_pack is
 
 type Trx2tx_wires is record
 	new_request_received: std_logic;
+	request_number:std_logic_vector(7 downto 0);
 	request_type:std_logic_vector(7 downto 0);
 end record Trx2tx_wires;
 							  

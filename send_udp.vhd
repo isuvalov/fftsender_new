@@ -4,6 +4,7 @@ use IEEE.STD_LOGIC_UNSIGNED.all;
 use IEEE.std_logic_arith.all;
 library work;
 use work.assert_pack.all;
+use work.regs_pack.all;
 
 entity send_udp is
 	generic(
@@ -29,6 +30,8 @@ entity send_udp is
 		 rd_exp: out std_logic;
 		 i_data_exp: in std_logic_vector(7 downto 0);
 		 i_data_exp_ce: in std_logic;
+
+		 rx2tx: in Trx2tx_wires;
 
 		 data_out: out std_logic_vector(3 downto 0);
 		 dv : out std_logic
@@ -122,9 +125,20 @@ begin
 end function;
 
 
-type Tstm_read is (STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
+type Tstm_read is (  WAITING_REQUEST, SEND_RADAR_STATE0, SEND_RADAR_STATE1, SEND_RADAR_PREAMBLE0,SEND_RADAR_PREAMBLE1, SEND_RADAR_STATE_NUM0, SEND_RADAR_STATE_NUM1,  
+SEND_RADAR_STATE_ZEROS,
+STARTING,DELAYING,WAITING,PREAMBLE1,PREAMBLE2,DESCR_MAC1,DESCR_MAC2,
 DESCR_POS1,DESCR_POS2,DESCR_POS3,DESCR_POS4,READ_DATA,PUSHCRC1,PUSHCRC2,PUSHCRC3,PUSHCRC4,PUSHCRC5,PUSHCRC6,PUSHCRC7,PUSHCRC8);
 signal stm_read:Tstm_read;
+
+constant RADAR_STATUS_LEN:integer:=43;
+type Tradar_status is array (0 to 42) of std_logic_vector(7 downto 0);
+
+constant radar_status:Tradar_status:=(x"54", x"04", x"a6", x"c3", x"98", x"77", x"3c", x"97", x"0e", x"91", x"a7", x"93", x"08", x"00", x"45", x"00",
+x"00", x"2c", x"67", x"dd", x"00", x"00", x"80", x"11", x"3d", x"7e", x"c0", x"a8", x"0a", x"0a", x"c0", x"a8",
+x"0a", x"0b", x"ec", x"bf", x"d2", x"95", x"00", x"18", x"05", x"10", x"a5");
+
+signal outrd_cnt:std_logic_vector(7 downto 0);
 
 signal fifo_empty_1w, exp_first_read, signal_direct_reg:std_logic;
 
@@ -137,6 +151,8 @@ signal read_cnt: std_logic_vector(15 downto 0);
 signal sig_dir:std_logic_vector(3 downto 0);
 signal exp_fifosE:std_logic_vector(7 downto 0);
 signal delay_cnt:std_logic_vector(4 downto 0);
+
+signal rx2tx_reg: Trx2tx_wires;
 
 begin
 
@@ -156,7 +172,7 @@ begin
 	exp_fifosE<=i_data_exp;
 
 	if reset='1' then
-		stm_read<=STARTING;--WAITING;
+		stm_read<=WAITING_REQUEST;--STARTING;--WAITING;
 		rd_data<='0';
 		s_dv<='0';
 		frame_num<=(others=>'0');
@@ -164,6 +180,80 @@ begin
 		exp_first_read<='0';
 	else --# reset
 		case stm_read is
+
+		when WAITING_REQUEST=>
+			if rx2tx.new_request_received='1' then
+				rx2tx_reg<=rx2tx;
+				case rx2tx.request_type is
+				when x"00" => stm_read<=SEND_RADAR_PREAMBLE0;
+				when x"01" => stm_read<=STARTING;
+				when others=>
+				end case;
+			end if;
+			outrd_cnt<=(others=>'0');
+			cnt_mac<=(others=>'0');
+            rd_data<='0';
+		 	rd_exp<='0';
+			rd_direct<='0';
+			s_dv<='0';
+--------------------------------------------------------------------------------
+----------------------------Отсылка состояния радара--------------------------
+--------------------------------------------------------------------------------
+		when SEND_RADAR_PREAMBLE0=>
+			 stm_read<=SEND_RADAR_PREAMBLE1;
+			 s_dv<='1';
+			 s_data_out<=pre_mem(conv_integer(cnt_mac))(3 downto 0);
+		when SEND_RADAR_PREAMBLE1=>
+			 if unsigned(cnt_mac)<((PRMBLE_LEN)-1) then
+			 	cnt_mac<=cnt_mac+1;
+				stm_read<=SEND_RADAR_PREAMBLE0;
+			 else
+				cnt_mac<=(others=>'0');
+				stm_read<=SEND_RADAR_STATE0;
+			 end if;
+			 s_dv<='1';
+			 s_data_out<=pre_mem(conv_integer(cnt_mac))(7 downto 4);
+
+		when SEND_RADAR_STATE0=>
+			 stm_read<=SEND_RADAR_STATE1;
+			 s_dv<='1';
+			 s_data_out<=radar_status(conv_integer(outrd_cnt))(3 downto 0);
+
+		when SEND_RADAR_STATE1=>
+			 s_dv<='1';
+			 s_data_out<=radar_status(conv_integer(outrd_cnt))(7 downto 4);
+			 if unsigned(outrd_cnt)<((1+RADAR_STATUS_LEN-1)-1) then
+			 	outrd_cnt<=outrd_cnt+1;
+				stm_read<=SEND_RADAR_STATE0;
+			 else
+				outrd_cnt<=(others=>'0');
+				stm_read<=SEND_RADAR_STATE_NUM0;
+			 end if;
+
+		when SEND_RADAR_STATE_NUM0=>
+			 s_dv<='1';
+		     s_data_out<=rx2tx_reg.request_number(3 downto 0);
+             stm_read<=SEND_RADAR_STATE_NUM1;
+
+		when SEND_RADAR_STATE_NUM1=>
+			 s_dv<='1';
+		     s_data_out<=rx2tx_reg.request_number(7 downto 4);
+             stm_read<=SEND_RADAR_STATE_ZEROS;
+
+		when SEND_RADAR_STATE_ZEROS=>
+			s_dv<='1';
+            s_data_out<=x"0";
+			if unsigned(outrd_cnt)<((16*2)-1) then
+				outrd_cnt<=outrd_cnt+1;
+			else
+				outrd_cnt<=(others=>'0');
+				stm_read<=WAITING_REQUEST;			
+			end if;
+
+
+--------------------------------------------------------------------------------
+----------------------------Данные измерения------------------------------------
+--------------------------------------------------------------------------------
 		when STARTING=>		
 			if (unsigned(read_count)>=(DATAFRAME_LEN*2) and fifo_empty_1w='0') then			
 				stm_read<=PREAMBLE1;

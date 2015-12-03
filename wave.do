@@ -6,7 +6,7 @@ add wave -noupdate -group top /tb/top_top_i/clk_signal
 add wave -noupdate -group top /tb/top_top_i/clk_core
 add wave -noupdate -group top /tb/top_top_i/clk_mac
 add wave -noupdate -group top /tb/top_top_i/payload_is_counter
-add wave -noupdate -group top /tb/top_top_i/payloadiszero
+add wave -noupdate -group top /tb/top_top_i/PayloadIsZERO
 add wave -noupdate -group top /tb/top_top_i/send_adc_data
 add wave -noupdate -group top /tb/top_top_i/pre_shift
 add wave -noupdate -group top /tb/top_top_i/i_direction
@@ -28,7 +28,7 @@ add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_signal
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_core
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/clk_mac
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/payload_is_counter
-add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/payloadiszero
+add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/PayloadIsZERO
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/send_adc_data
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/pre_shift
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/i_direction
@@ -80,18 +80,17 @@ add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data_exp_ce
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/fifo_data_exp
 add wave -noupdate -group top_sender /tb/top_top_i/top_sender_i/tp_fifo
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/reset
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/clk_core
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/clk_mac
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/to_tx_module
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/data_i
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/dv_i
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/tp
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/cnt_conv
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/data8
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/dv8
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/ce8
-add wave -noupdate -group top_receiver /tb/top_top_i/top_receiver_i/regs_from_host
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/reset
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/clk_core
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/clk_mac
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/to_tx_module
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/data_i
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/dv_i
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/tp
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/cnt_conv
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/data8
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/dv8
+add wave -noupdate -expand -group top_receiver /tb/top_top_i/top_receiver_i/ce8
 add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/clk
 add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/data_i
 add wave -noupdate -group {conv 8 to 4} /tb/macbits_conv8to4_i/ce_i
@@ -132,9 +131,9 @@ add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_dv
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_ce
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/i_data
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
-add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/o_regs
+add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal -childformat {{/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received -radix hexadecimal} {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_number -radix hexadecimal} {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type -radix hexadecimal}} -expand -subitemconfig {/tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.new_request_received {-height 15 -radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_number {-height 15 -radix hexadecimal} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx.request_type {-height 15 -radix hexadecimal}} /tb/top_top_i/top_receiver_i/udp_rx_i/rx2tx
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_prmb_cnt
+add wave -noupdate -expand -group udp_rx_02 /tb/top_top_i/top_receiver_i/udp_rx_i/s_rx2tx
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/correct_mac_cnt
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/udp_header_cnt
 add wave -noupdate -expand -group udp_rx_02 -radix unsigned /tb/top_top_i/top_receiver_i/udp_rx_i/by_frame_cnt
@@ -142,8 +141,11 @@ add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_number_correct
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/port_error
 add wave -noupdate -expand -group udp_rx_02 -radix hexadecimal /tb/top_top_i/top_receiver_i/udp_rx_i/stm
+add wave -noupdate /tb/ce_send8_rtl
+add wave -noupdate /tb/data_send8_rtl
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {468075708 ps} 0}
+WaveRestoreCursors {{Cursor 1} {45180000 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 265
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -158,4 +160,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {467603493 ps} {468425147 ps}
+WaveRestoreZoom {44885167 ps} {45584491 ps}

@@ -241,7 +241,8 @@ send_udp_i: entity work.send_udp
 		 rd_exp =>rd_exp,
 		 i_data_exp =>fifo_data_exp,
 		 i_data_exp_ce =>fifo_data_exp_ce,
-
+		 rx2tx =>to_tx_module,
+		  
 		 data_out =>data_out,
 		 dv =>dv
 	     );

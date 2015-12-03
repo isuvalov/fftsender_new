@@ -108,13 +108,14 @@ vcom top_receiver.vhd
 vcom top_sender.vhd
 vcom top_top.vhd
 
-vlog protcol_rtl/vpi_cpu/cpu.v
-vcom protcol_rtl/vpi_cpu/cpu_wrapper.vhd 
+#vlog protcol_rtl/vpi_cpu/cpu.v
+#vcom protcol_rtl/vpi_cpu/cpu_wrapper.vhd 
 
 vcom tb.vhd
 
-do modelsim_my.tcl
+#do modelsim_my.tcl
 
-vsim -novopt -t ps work.tb -pli dll.dll -gNOT_PLI=0
+#vsim -novopt -t ps work.tb -pli dll.dll -gNOT_PLI=0
+vsim -novopt -t ps work.tb
 do wave.do
 
