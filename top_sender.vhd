@@ -20,9 +20,6 @@ entity top_sender is
 		 PayloadIsZERO: in std_logic;
 		 send_adc_data: in std_logic;
 
-		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
-		 udp_port_number: in std_logic_vector(15 downto 0);  --# UDP port number
-
 		 pre_shift: in std_logic_vector(5 downto 0);
 		 i_direction : in std_logic;
 
@@ -44,45 +41,6 @@ architecture top_sender of top_sender is
 
 constant CUT_LEN:integer:=1024; 	--# How many samples transfer to MAC
 constant DEBUG:integer:=1;
-
-FUNCTION log2roundup (data_value : integer)
-		RETURN integer IS
-		
-		VARIABLE width       : integer := 0;
-		VARIABLE cnt         : integer := 1;
-		CONSTANT lower_limit : integer := 1;
-		CONSTANT upper_limit : integer := 8;
-		
-	BEGIN
-		IF (data_value <= 1) THEN
-			width   := 0;
-		ELSE
-			WHILE (cnt < data_value) LOOP
-				width := width + 1;
-				cnt   := cnt *2;
-			END LOOP;
-		END IF;
-		
-		RETURN width;
-	END log2roundup;
-
-
-constant MAX_TARGET_NUM:integer:=128;
-type Ttargets is array(MAX_TARGET_NUM-1 downto 0) of std_logic_vector(15 downto 0);
-type Ttargets_nums is array(MAX_TARGET_NUM-1 downto 0) of std_logic_vector(15+FIXPOINT downto 0);
-signal one_targets:Ttargets;
-signal zero_targets:Ttargets;
-signal one_targets_harm:Ttargets_nums;
-signal zero_targets_harm:Ttargets_nums;
-
-signal one_targets_rd,zero_targets_rd,findvalue_one,findvalue_zero:std_logic_vector(15 downto 0);
-signal one_harm_rd,zero_harm_rd,findharm_zero,findharm_one:std_logic_vector(15+FIXPOINT downto 0);
-signal one_rd_ptr,zero_rd_ptr:std_logic_vector(9 downto 0);
-
-signal targets_cnt:std_logic_vector(log2roundup(MAX_TARGET_NUM)-1 downto 0);
-signal harm_cnt:std_logic_vector(15 downto 0);
-
-signal sample16l_ce_1w,sample16l_ce_2w:std_logic;
 
 signal fft_dataout_re: std_logic_vector(11 downto 0);
 signal fft_dataout_im: std_logic_vector(11 downto 0);
@@ -106,30 +64,6 @@ signal rd_exp,rd_data,rd_direct,direct,fifo_data_ce,fifo_data_exp_ce:std_logic;
 signal fifo_data : std_logic_vector(3 downto 0);
 signal fifo_data_exp : std_logic_vector(7 downto 0);
 signal tp_fifo : std_logic_vector(2 downto 0);
-
-signal rls_dv:std_logic;
-signal rls_data_out:std_logic_vector(3 downto 0);
-
-signal rls_mux,rls_finish,data_req_event:std_logic;
-signal protocol_data_out:std_logic_vector(3 downto 0);
-signal protocol_dv:std_logic;
-
-signal sample16l: std_logic_vector(15 downto 0);
-signal sample16l_ce:std_logic;
-
-signal maximum_m1: std_logic_vector(15 downto 0);    --# value left of maximum
-signal maximum: std_logic_vector(15 downto 0);
-signal maximum_corr: std_logic_vector(15+FIXPOINT downto 0);
-signal maximum_p1: std_logic_vector(15 downto 0);    --# value right of maximum
-signal maximum_ce: std_logic;                         --# latency 2 clock from i_sample and i_ce
-
-signal estimate_harm_ce,find_equal_harms_1p_1w,find_equal_harms_1p,find_equal_harms:std_logic:='0';
-type Tfstm is (STARTING_PASS,NEXT_PASS,STOPING,DIFFIT,DIFFIT2,DIFFIT_TEST);
-signal fstm:Tfstm;
-
-signal findharm_ce:std_logic;
-signal harm_delta:std_logic_vector(15+FIXPOINT+1 downto 0);
-
 
 begin
 
@@ -175,35 +109,6 @@ make_abs_i: entity work.make_abs
 		 o_data_exp_ce =>abs_data_exp_ce
 	     );
 
-conv2_16bit_i: entity work.conv2_16bit	 
-	 port map(
-		 clk =>clk_core,
-
-		 i_ce =>abs_data_ce,
-		 i_sample =>abs_data, --# unsigned
-		 i_exp =>abs_data_exp,
-		 i_exp_ce =>abs_data_exp_ce,
-
-		 o_sample =>sample16l, --# unsigned
-		 o_ce =>sample16l_ce
-	     );
-
-
-
-find_max_i: entity work.find_max
-	 port map(
-		 reset=>reset,
-		 clk =>clk_core,
-  
-		 i_ce =>sample16l_ce,
-		 i_sample =>sample16l, --# unsigned
-
-		 maximum_m1=>maximum_m1,    --# value left of maximum
-		 maximum=>maximum,
-		 maximum_p1=>maximum_p1,    --# value right of maximum
-		 maximum_ce=>maximum_ce                         --# latency 2 clock from i_sample and i_ce
-	     );
-
 
 make_adc_i: entity work.make_adc
 	 port map(
@@ -222,134 +127,6 @@ make_adc_i: entity work.make_adc
 		 o_data_exp =>adc_data_exp,
 		 o_data_exp_ce =>adc_data_exp_ce
 	     );
-
-
-
-process(clk_core) is
-begin
-	if rising_edge(clk_core) then
-		sample16l_ce_1w<=sample16l_ce;
-		sample16l_ce_2w<=sample16l_ce_1w;
-		if abs_data_exp_ce='1' then
-			targets_cnt<=(others=>'0');
-			harm_cnt<=(others=>'0');
-		else --# adc_data_exp_ce
-			if sample16l_ce_2w='1' then
-				harm_cnt<=harm_cnt+1;
-			end if;
-
-			if estimate_harm_ce='1' then
-				targets_cnt<=targets_cnt+1;
-			end if;
-
-			if maximum_ce='1' then
---				maximum&"0"
-			end if;
-
-
-			if estimate_harm_ce='1' and sig_direct='1' then
-				one_targets(conv_integer(targets_cnt))<=maximum;
-				one_targets_harm(conv_integer(targets_cnt))<=((harm_cnt-6)&EXT("0",FIXPOINT))+maximum_corr;
-			end if; --# maximum_ce
-
-			if estimate_harm_ce='1' and sig_direct='0' then
-				zero_targets(conv_integer(targets_cnt))<=maximum;
-				zero_targets_harm(conv_integer(targets_cnt))<=((harm_cnt-6)&EXT("0",FIXPOINT))+maximum_corr;
-			end if; --# maximum_ce
-		end if; --# adc_data_exp_ce
-
-		if harm_cnt=CUT_LEN-1 then
-			find_equal_harms_1p<='1';
-		else
-			find_equal_harms_1p<='0';
-		end if;
-		find_equal_harms_1p_1w<=find_equal_harms_1p;
-		if find_equal_harms_1p_1w='1' and find_equal_harms_1p='0' then
-			find_equal_harms<='1';
-		else
-			find_equal_harms<='0';
-		end if;
-
-	end if;
-end process;
-
-
-estimate_harm_i: entity work.estimate_harm
-	 port map(
-		 clk =>clk_core,
-		 reset =>reset,
-
-		 i_ce =>maximum_ce,
-		 i_sample_1m =>maximum_m1,
-		 i_sample =>maximum,
-		 i_sample_1p =>maximum_p1,
-
-		 o_sample =>maximum_corr,
-		 o_ce =>estimate_harm_ce
-	     );
-
-
-process(clk_core) is
-begin
-	if rising_edge(clk_core) then
-		one_harm_rd<=one_targets_harm(conv_integer(one_rd_ptr));
-		zero_harm_rd<=zero_targets_harm(conv_integer(zero_rd_ptr));
-		one_targets_rd<=one_targets(conv_integer(one_rd_ptr));
-		zero_targets_rd<=zero_targets(conv_integer(zero_rd_ptr));
-	end if;
-end process;
-
-
-
-
-process(clk_core) is
-begin
-	if rising_edge(clk_core) then
-		if find_equal_harms='1' then
-			fstm<=DIFFIT;
-			one_rd_ptr<=(others=>'0');
-			zero_rd_ptr<=(others=>'0');
-		else
-			case fstm is
-			when DIFFIT=>
-				fstm<=DIFFIT2;
-			when DIFFIT2=>
-				harm_delta<=("0"&one_harm_rd)-("0"&zero_harm_rd);
-				fstm<=DIFFIT_TEST;
-			when DIFFIT_TEST=>
-				if (signed(harm_delta)>=0 and signed(harm_delta)<10) or (signed(harm_delta)<0 and signed(harm_delta)>-10) then
-					findharm_one<=one_harm_rd;
-					findharm_zero<=zero_harm_rd;
-					findvalue_one<=one_targets_rd;
-					findvalue_zero<=zero_targets_rd;
-
-
-					findharm_ce<='1';
-				else
-					findharm_ce<='0';
-				end if;
-				fstm<=STARTING_PASS;
-
-			when STARTING_PASS=>
-				if unsigned(one_rd_ptr)<MAX_TARGET_NUM-1 then
-					one_rd_ptr<=one_rd_ptr+1;
-					fstm<=DIFFIT;
-				else
-					one_rd_ptr<=(others=>'0');
-					if unsigned(zero_rd_ptr)<MAX_TARGET_NUM-1 then
-						zero_rd_ptr<=zero_rd_ptr+1;
-						fstm<=DIFFIT;
-					else
-						fstm<=NEXT_PASS;
-					end if;
-				end if;				
-
-			when NEXT_PASS=>
-			when STOPING=>
-			end case;
-		end if;
-	end if;
-end process;
 
 
 
@@ -464,67 +241,11 @@ send_udp_i: entity work.send_udp
 		 rd_exp =>rd_exp,
 		 i_data_exp =>fifo_data_exp,
 		 i_data_exp_ce =>fifo_data_exp_ce,
-
-		 sequense_finish=>rls_finish,
-		 data_out =>rls_data_out,
-		 dv =>rls_dv
+		 rx2tx =>to_tx_module,
+		  
+		 data_out =>data_out,
+		 dv =>dv
 	     );
-
-
-send_protocol_udp_i: entity work.send_protocol_udp
-	 port map(
-		 reset=>reset,
-		 clk_mac=>clk_mac,
-		 
-		 radar_status=>x"00", --# send by request N_0
-		 temperature1=>x"00",
-		 temperature2=>x"00",
-		 temperature3=>x"00",
-		 power1=>x"00",
-		 power2=>x"00",
-		 power3=>x"00",
-
-		 voltage1=>x"00",
-		 voltage2=>x"00",
-		 voltage3=>x"00",
-		 voltage4=>x"00",
-
-		 to_tx_module=>to_tx_module,
-
-		 data_out=>protocol_data_out,
-		 dv =>protocol_dv
-	     );
-
-data_out<=protocol_data_out;
-dv<=protocol_dv;
-
-process(clk_mac) is
-begin
-	if rising_edge(clk_mac) then
-		if to_tx_module.new_request_received='1' then
-			case to_tx_module.request_type is
-			when x"01" =>
-				data_req_event<='1';
-			when others =>
-				data_req_event<='0';
-			end case;
-		else
-			data_req_event<='0';
-		end if;
-
-
-		if data_req_event='1' then
-			rls_mux<='1';
-		else
-			if rls_finish='1' then
-				rls_mux<='0';
-			end if;
-		end if;
-
-	end if;
-end process;
-
-
 
 
 end top_sender;

@@ -121,12 +121,6 @@ signal data_send8_rtl,data_send8,data_send8_cpu:std_logic_vector(7 downto 0);
 signal data_send4:std_logic_vector(3 downto 0);
 signal ce_send8_rtl,dv_send8,dv_send4,send_ask_radar_status,mac_clk_div2:std_logic:='0';
 
-signal ce_send8_rtl_1w,can_ack:std_logic;
-
-signal req_dv,have_send:std_logic:='0';
-signal req_data: std_logic_vector(7 downto 0);
-signal ack_cnt:std_logic_vector(9 downto 0):=(others=>'0');
-
 
 begin
 
@@ -230,9 +224,9 @@ end process;
 
 --NOT_PLI_i: if NOT_PLI=0 generate
 --	cpu_i: entity work.cpu_wrapper
---  	port map(clk =>clk125,
+--    	port map(clk =>clk125,
 --		  reset =>reset,
---		  oaddr=>open,                        
+--		  oaddr=>open,
 --		  odata =>datafromcpu,
 --		  wr =>cpu_wr,
 --		  rd =>cpu_rd,
@@ -240,29 +234,41 @@ end process;
 --		);
 --end generate;
 
-cpu_correct_requset_i: entity work.cpp_response2vhdl
+
+datatocpu<="0000000"&dv_send8_cpu&data_send8_cpu;
+
+
+--client_stimulus_cpu_i: entity work.client_stimulus_cpu
+--	generic map(
+--		CUT_FRAMES=>42
+--	)
+--	 port map(
+--		 reset=>reset,
+--		 ce => cpu_rd_parse,
+--		 clk =>clk125,
+--		 send_ask_radar_status=>send_ask_radar_status,
+--		 send_ask_data=>'0',
+--  
+--		 dv_o=>dv_send8_cpu,
+--		 data_o=>data_send8_cpu
+--	     );
+
+
+client_stimulus_i: entity work.client_stimulus_cpu
+	generic map(
+		CUT_FRAMES=>0
+	)
 	 port map(
 		 reset=>reset,
-		 ce =>mac_clk_div2,
+		 ce => mac_clk_div2,
 		 clk =>clk125,
-		 can_go=>can_ack, --# see falling edge of recieved dv
-
-		 dv_o=>req_dv,
-		 data_o=>req_data
-	     );
-
-
-
-cpp_req2vhdl_i:entity work.cpp_req2vhdl
-	 port map(
-		 reset =>reset,
-		 ce =>mac_clk_div2,
-		 clk =>clk125,
-		 can_go=>can_ack, --# see falling edge of recieved dv
+		 send_ask_radar_status=>send_ask_radar_status,
+		 send_ask_data=>'0',
 
 		 dv_o=>ce_send8_rtl,   --# Надо подконектить к top_top через конвертор 8в4
 		 data_o=>data_send8_rtl  --# Надо подконектить к top_top через конвертор 8в4
 	     );
+
 
 top_top_i: entity work.top_top
 	generic map(
@@ -279,8 +285,8 @@ top_top_i: entity work.top_top
 		 PayloadIsZERO =>'0',
 		 send_adc_data =>'0',
 
-		 udp_IPaddr=>x"C0A80001",  --# UDP port number
-		 udp_port_number=>conv_std_logic_vector(60606,16),  --# UDP port number
+--		 port_number=>conv_std_logic_vector(60606,16),
+		 port_number=>conv_std_logic_vector(58062,16),
 
 
 		 pre_shift =>"000000",
@@ -350,27 +356,9 @@ ethernet2hexfile_i: entity work.ethernet2hexfile
 
 cpu_rd_parse<='1' when cpu_rd='1' and cpu_rd_1w='0' else '0';
 
-
-
-
 process (clk125) is
 begin
  if rising_edge(clk125) then
-
-	ce_send8_rtl_1w<=ce_send8_rtl;
-
-	if reset='1' then
-		ack_cnt<=(others=>'0');
-		can_ack<='0';
-	elsif mac_clk_div2='1' then
-		ack_cnt<=ack_cnt+1;
-		if ack_cnt=0 then
-			can_ack<='1';
-		else
-			can_ack<='0';
-		end if;
-	end if;
-
 
 
     cpu_rd_1w<=cpu_rd;

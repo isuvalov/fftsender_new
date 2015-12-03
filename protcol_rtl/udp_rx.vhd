@@ -9,7 +9,6 @@ entity udp_rx is
 	 port(
 		 reset: in std_logic;
 		 clk : in std_logic;
-		 udp_IPaddr: in std_logic_vector(31 downto 0);  --# UDP port number
 		 port_number: in std_logic_vector(15 downto 0);
 		 i_dv : in std_logic; --# must be with i_ce 
 		 i_ce : in std_logic;
@@ -23,7 +22,7 @@ end udp_rx;
 architecture udp_rx of udp_rx is
 
 constant PRMBLE_LEN		:integer:=8;  		--# Number of addition constant data in preamble
-constant UDPHEADER_LEN		:integer:=42-12-1;  	--# Number of addition constant data in MAC frame
+constant UDPHEADER_LEN		:integer:=42-12;  	--# Number of addition constant data in MAC frame
 type Prmble_mem is array (0 to PRMBLE_LEN-1) of std_logic_vector(7 downto 0);
 constant pre_mem:Prmble_mem:=  (x"55",x"55",x"55",x"55",x"55",x"55",x"55",x"D5");
 
@@ -51,15 +50,15 @@ FUNCTION log2roundup (data_value : integer)
 
 signal correct_prmb_cnt:std_logic_vector(log2roundup(PRMBLE_LEN)-1 downto 0);
 signal correct_mac_cnt:std_logic_vector(2 downto 0);
-signal udp_header_cnt:std_logic_vector(log2roundup(UDPHEADER_LEN)-1 downto 0);
+signal udp_header_cnt:std_logic_vector(log2roundup(PRMBLE_LEN+UDPHEADER_LEN)-1 downto 0);
 signal by_frame_cnt:std_logic_vector(15 downto 0);
 signal port_number_reg:std_logic_vector(15 downto 0);
-signal port_number_correct,port_error:std_logic;
+signal port_number_correct,port_error,not_request:std_logic;
 
 
 type Tstm is (WAITING,GET_PREAMBULE,GETING_MAC1,GETING_MAC2,GETING_ETHER1,GETING_ETHER2,GETING_UDPHEADER,
-	GET_REQ_PROPERTY,GET_REQNUM,BYTE_02,BYTE_03,BYTE_04);
-
+	GET_REQ_PROPERTY,GET_REQ_NUMBER,GET_REG_TYPE
+	);
 signal stm:Tstm:=WAITING;
 signal s_rx2tx:Trx2tx_wires;
 
@@ -130,6 +129,7 @@ begin
 					port_number_correct<='0';
 					port_error<='0';
 					s_rx2tx.new_request_received<='0';					
+					not_request<='0';
 				when GET_PREAMBULE=>
 					if i_data=pre_mem(conv_integer(correct_prmb_cnt)) then
 						if correct_prmb_cnt<PRMBLE_LEN-1 then
@@ -167,63 +167,52 @@ begin
 						stm<=WAITING;
 					end if; 
 				when GETING_UDPHEADER=>
-					if by_frame_cnt=37+PRMBLE_LEN then
+--					if by_frame_cnt=37+PRMBLE_LEN then
+					if by_frame_cnt=42 then
 						if port_number_reg(15 downto 8)=i_data then
 							port_number_correct<='1';
 						else
 							port_number_correct<='0';
 						end if;
 					end if;
-					if by_frame_cnt=37+1+PRMBLE_LEN then
+					if by_frame_cnt=43 then
 						if port_number_reg(7 downto 0)=i_data and port_number_correct='1' then
-							port_error<='1';
-						else
 							port_error<='0';
+						else
+							port_error<='1';
 						end if;
 					end if;
 
 					if port_error='1' then
 						stm<=WAITING;
 					else
-						if unsigned(udp_header_cnt)<UDPHEADER_LEN-1 then
-							udp_header_cnt<=udp_header_cnt+1;
-						else
-							stm<=GET_REQNUM;
+						if by_frame_cnt=49 then
+							stm<=GET_REQ_PROPERTY;
 						end if;
+--						if unsigned(udp_header_cnt)<PRMBLE_LEN+UDPHEADER_LEN-1 then
+--						if unsigned(udp_header_cnt)<49 then
+--							udp_header_cnt<=udp_header_cnt+1;
+--						else
+--							stm<=GET_REQ_PROPERTY;
+--						end if;
 					end if;
 					s_rx2tx.new_request_received<='0';
-				when GET_REQNUM=>
-					s_rx2tx.number_of_req<=i_data;
-					s_rx2tx.new_request_received<='0';
-					stm<=GET_REQ_PROPERTY;
 				when GET_REQ_PROPERTY=>
+					if i_data=x"5A" then
+						stm<=GET_REQ_NUMBER;
+					else
+						stm<=WAITING;
+						not_request<='1';
+					end if;
+
+				when GET_REQ_NUMBER=>
+					s_rx2tx.request_number<=i_data;
+					stm<=GET_REG_TYPE;
+				
+				when GET_REG_TYPE=>
 					s_rx2tx.request_type<=i_data;
-					stm<=BYTE_02;
-				when BYTE_02=>
-					if i_dv='1' then
-						s_rx2tx.infinity_measure<=i_data(0);  --# for request_type=0x02
-						stm<=BYTE_03;
-					else
-						stm<=WAITING;
-						s_rx2tx.new_request_received<='1';
-					end if;
-				when BYTE_03=>
-					if i_dv='1' then
-						s_rx2tx.measure_time(15 downto 8)<=i_data;  --# for request_type=0x02
-						stm<=BYTE_04;
-					else
-						stm<=WAITING;
-						s_rx2tx.new_request_received<='1';
-					end if;
-				when BYTE_04=>
-					if i_dv='1' then
-						s_rx2tx.measure_time(7 downto 0)<=i_data;  --# for request_type=0x02
-						stm<=BYTE_04;
-					else
-						stm<=WAITING;
-						s_rx2tx.new_request_received<='1';
-					end if;
-					
+					s_rx2tx.new_request_received<='1';
+					stm<=WAITING;
 				when others=>
 				end case;
 			end if; --# ce
